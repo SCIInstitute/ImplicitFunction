@@ -4,7 +4,7 @@
 #include "ScatteredData.h"
 #include "RBF.h"
 #include "vec3.h"
-#include "horizon.h"
+#include "Surface.h"
 #include "fault.h"
 #include "tree.h"
 
@@ -22,10 +22,10 @@ class Structure
 {
 	
 	vector<Fault*> fault;
-	vector<Horizon*> horizon;
+	vector<Surface*> horizon;
 
 	public:
-	Structure(vector<Fault*> &myFault, vector<Horizon*> &myHorizon);
+	Structure(vector<Fault*> &myFault, vector<Surface*> &myHorizon);
 
 	StructureTree *tree;
 	vector<StructureTree*> nodes;

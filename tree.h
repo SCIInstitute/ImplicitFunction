@@ -4,7 +4,7 @@
 #include "ScatteredData.h"
 #include "RBF.h"
 #include "vec3.h"
-#include "horizon.h"
+#include "Surface.h"
 #include "fault.h"
 #include "tear.h"
 
@@ -18,7 +18,7 @@ class StructureTree
 	StructureTree *left, *right;
 	bool isFault;
 	Fault *fault;
-	Horizon *horizon;
+	Surface *horizon;
 	Tear *tear;
 	int material;
 	int index;

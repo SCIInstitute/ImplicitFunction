@@ -8,7 +8,7 @@
 #include "vec3.h"
 #include "SampleData.h"
 #include "RBF.h"
-#include "horizon.h"
+#include "Surface.h"
 
 using std::string; 
 
@@ -16,7 +16,7 @@ class API
 {
 	public:
 	ScatteredData *mySurfaceData;
-	Horizon *mySurface;
+	Surface *mySurface;
 	RBF *mySurfaceRBF;
 	Kernel myKernel;
 	vector<vector<vector<double> > > value;

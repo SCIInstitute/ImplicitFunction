@@ -4,8 +4,8 @@
 #include "ScatteredData.h"
 #include "RBF.h"
 #include "vec3.h"
-#include"horizon.h"
-#include"fault.h"
+#include "Surface.h"
+#include "fault.h"
 
 #include <vector>
 
@@ -14,11 +14,11 @@ using std::vector;
 class Tear
 {
 	public:
-	Horizon *primary, *secondary;
+	Surface *primary, *secondary;
 	Fault *clip, *fault;
 
 	Tear();
-	Tear(Horizon *myPrimary, Horizon *mySecondary, Fault *myClip);
+	Tear(Surface *myPrimary, Surface *mySecondary, Fault *myClip);
 	double computeSide(vec3 x);
 	double computeValue(vec3 x);
 	void move(vec3 x);

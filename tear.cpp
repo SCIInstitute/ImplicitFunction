@@ -1,7 +1,7 @@
 #include<cstdio>
 #include"vec3.h"
 #include<vector>
-#include"horizon.h"
+#include"Surface.h"
 #include"tear.h"
 #include"fault.h"
 
@@ -9,7 +9,7 @@ Tear::Tear()
 {
 }
 
-Tear::Tear(Horizon *myPrimary, Horizon *mySecondary, Fault *myClip)
+Tear::Tear(Surface *myPrimary, Surface *mySecondary, Fault *myClip)
 {
 	primary = myPrimary;
 	secondary = mySecondary;

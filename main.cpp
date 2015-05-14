@@ -13,7 +13,7 @@
 #include "LinearSolver.h"
 #include "RBF.h"
 #include "fault.h"
-#include "horizon.h"
+#include "Surface.h"
 #include "structure.h"
 #include "API.h"
 
@@ -65,7 +65,7 @@ void aSimpleCase()
 	mySurfaceData = new ScatteredData();
 
 	//readSurfaceDataFile("./segmentation/sample_points_DEMRI.txt", mySurfaceData);
-	vector<Horizon*> mySurface;
+	vector<Surface*> mySurface;
 
 	RBF *mySurfaceRBF;
 	Kernel myKernel = ThinPlate;
@@ -73,7 +73,7 @@ void aSimpleCase()
 	mySurfaceRBF = new RBF(mySurfaceData, myKernel);
 	mySurfaceRBF->setDataReduction(Random);
 
-	mySurface.push_back(new Horizon(mySurfaceData, mySurfaceRBF));
+	mySurface.push_back(new Surface(mySurfaceData, mySurfaceRBF));
 
 
 	//Construct RBFs
@@ -118,6 +118,8 @@ void getAPI()
 	API *myAPI;
 	myAPI = new API("./segmentation/sample_points_DEMRI.txt", "dummy");
 }
+
+
 int main()
 {
 	//constructRBFforSampleData();

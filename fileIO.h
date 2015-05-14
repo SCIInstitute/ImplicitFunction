@@ -170,6 +170,7 @@ void readSurfaceDataFile(string filename, ScatteredData *data)
 			data->x[i].pop_back();
 		data->fnc.pop_back();
 		std::cout<<"Done"<<std::endl;
+		data->computeOrdering();
 		std::cout<<"Augmenting data"<<std::endl;
 		augmentNormalData(data);
 		std::cout<<"Done"<<std::endl;

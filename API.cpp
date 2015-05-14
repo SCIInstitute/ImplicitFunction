@@ -7,7 +7,7 @@
 #include "vec3.h"
 #include "SampleData.h"
 #include "RBF.h"
-#include "horizon.h"
+#include "Surface.h"
 #include "fileIO.h"
 #include "API.h"
 
@@ -20,7 +20,7 @@ void API::CreateSurface(string filename, vec3 myOrigin, vec3 mySize, vec3 mySamp
 	mySurfaceRBF = new RBF(mySurfaceData, myKernel);
 	//mySurfaceRBF->setDataReduction(Random);
 	myKernel = ThinPlate;
-	mySurface = new Horizon(mySurfaceData, mySurfaceRBF);
+	mySurface = new Surface(mySurfaceData, mySurfaceRBF);
 
 	//Construct RBFs
 	mySurface->computeRBF();
@@ -96,7 +96,7 @@ vector<vector<vector<double> > >API::CreateSurface(vector<vec3> myData, vec3 myO
 	mySurfaceRBF = new RBF(mySurfaceData, myKernel);
 	//mySurfaceRBF->setDataReduction(Random);
 	myKernel = ThinPlate;
-	mySurface = new Horizon(mySurfaceData, mySurfaceRBF);
+	mySurface = new Surface(mySurfaceData, mySurfaceRBF);
 
 	//Construct RBFs
 	mySurface->computeRBF();

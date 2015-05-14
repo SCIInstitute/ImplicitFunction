@@ -1,7 +1,7 @@
 #include "ScatteredData.h"
 #include "RBF.h"
 #include "vec3.h"
-#include "horizon.h"
+#include "Surface.h"
 #include "structure.h"
 #include "tree.h"
 
@@ -18,7 +18,7 @@ using std::string;
 using std::cout;
 using std::endl;
 
-Structure::Structure(vector<Fault*> &myFault, vector<Horizon*> &myHorizon)
+Structure::Structure(vector<Fault*> &myFault, vector<Surface*> &myHorizon)
 {
 	for(int i=0; i<myFault.size(); i++)
 		fault.push_back(myFault[i]);
