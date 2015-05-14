@@ -9,14 +9,14 @@
 
 using std::vector;
 
-class Horizon
+class Surface
 {
 	public:
 	ScatteredData *data;
 	RBF *rbf;
 
-	Horizon();
-	Horizon(ScatteredData *myData, RBF *myRBF);
+	Surface();
+	Surface(ScatteredData *myData, RBF *myRBF);
 	double computeSide(vec3 x);
 	double computeValue(vec3 x);
 	void move(vec3 x);
