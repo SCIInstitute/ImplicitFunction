@@ -30,10 +30,10 @@
 #include <vector>
 #include <string>
 
-#include <rbf/Application/Tools/src/ScatteredData.h>
-#include <rbf/Application/Tools/src/vec3.h>
-#include <rbf/Application/Tools/src/RBF.h>
-#include <rbf/Application/Tools/src/Surface.h>
+#include "ScatteredData.h"
+#include "vec3.h"
+#include "RBF.h"
+#include "Surface.h"
 
 //using std::string; 
 typedef vector< vector< vector<double> > > DataStructure;
