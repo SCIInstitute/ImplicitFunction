@@ -1,0 +1,6 @@
+
+set(ImplicitFunction_INCLUDE "@ImplicitFunction_INCLUDE@")
+set(ImplicitFunction_LIBRARY "@ImplicitFunction_LIB_NAME@")
+set(ImplicitFunction_LIBRARY_DIR "@ImplicitFunction_LIBRARY_DIR@")
+
+set(ImplicitFunction_USE_FILE "@ImplicitFunction_USE_FILE@")

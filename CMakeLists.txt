@@ -1,4 +1,4 @@
-#  Permission is  hereby  granted, free  of charge, to any person
+# Permission is  hereby  granted, free  of charge, to any person
 # obtaining a copy of this software and associated documentation
 # files  ( the "Software" ),  to  deal in  the  Software without
 # restriction, including  without limitation the rights to  use,
@@ -19,6 +19,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+cmake_minimum_required(VERSION 2.8)
 
 project(ImplicitFunction)
 
@@ -45,11 +47,11 @@ set(ImplicitFunction_SRCS
   ScatteredData.h
   SparseMatrix.cpp
   SparseMatrix.h
+  Surface.cpp
+  Surface.h
   fault.cpp
   fault.h
   fileIO.h
-  horizon.cpp
-  horizon.h
   structure.cpp
   structure.h
   tear.cpp
@@ -65,3 +67,9 @@ set(ImplicitFunction_SRCS
 add_library(${ImplicitFunction_LIB_NAME}
   ${ImplicitFunction_SRCS}
 )
+
+set(ImplicitFunction_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR})
+set(ImplicitFunction_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
+set(ImplicitFunction_USE_FILE "${CMAKE_CURRENT_SOURCE_DIR}/UseImplicitFunction.cmake")
+
+configure_file(ImplicitFunctionConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/ImplicitFunctionConfig.cmake @ONLY)
