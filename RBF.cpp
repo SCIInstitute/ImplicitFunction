@@ -200,7 +200,7 @@ double RBF::computeRadialFunction(double r)
 	double c = 0.1;
 	switch(kernel)
 	{
-		case Guassian:
+		case Gaussian:
 			r = r*0.01;
 			return 1.0/sqrt(r*r + c*c);
 			break;

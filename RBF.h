@@ -12,7 +12,7 @@
 using std::vector;
 using std::pair;
 
-enum Kernel {Guassian, ThinPlate, MultiQuadratic};
+enum Kernel {Gaussian, ThinPlate, MultiQuadratic};
 enum Acceleration {None, FastMultipole};
 enum DataReduction {All, Random};
 class RBF
