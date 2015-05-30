@@ -25,7 +25,7 @@ void readFunctionData(ScatteredData *myData)
 
 void sphereData(ScatteredData *myData, vec3 center, double r, double theta1, double theta2, double phi1, double phi2, int number)
 {
-	vector<double> a,b,c,d;
+	std::vector<double> a,b,c,d;
 	
 	for(int i=0; i<3*number; i++)
 	{

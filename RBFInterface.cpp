@@ -25,6 +25,7 @@
 //-------------------------------------------------------------------
 
 #include "RBFInterface.h"
+
 #include <cmath>
 
 const double RBFInterface::EPSILON = 1.0e-3;
@@ -40,9 +41,9 @@ void RBFInterface::setOffset(double myOffset)
 	offset = myOffset;
 }
 
-void RBFInterface::CreateSurface(vector<vec3> myData, vec3 myOrigin, vec3 mySize, vec3 mySpacing, double myOffset)
+void RBFInterface::CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 mySize, vec3 mySpacing, double myOffset)
 {
-	vector<double> a,b,c,d;
+	std::vector<double> a,b,c,d;
 	for(int i=0; i<myData.size(); i++)
 	{
     std::cerr << "point : " << myData[i][0] << ", " << myData[i][1] << ", " << myData[i][2] << std::endl;

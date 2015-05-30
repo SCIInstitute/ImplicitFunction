@@ -28,15 +28,13 @@
 #define _RBFInterface_H_
 
 #include <vector>
-#include <string>
 
 #include "ScatteredData.h"
 #include "vec3.h"
 #include "RBF.h"
 #include "Surface.h"
 
-//using std::string; 
-typedef vector< vector< vector<double> > > DataStructure;
+typedef std::vector< std::vector< std::vector<double> > > DataStructure;
 
 class RBFInterface
 {
@@ -47,7 +45,7 @@ public:
 	Kernel myKernel;
 	DataStructure value;
 
-	void CreateSurface(vector<vec3> myData, vec3 myOrigin, vec3 mySize, vec3 mySpacing, double myOffset);
+	void CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 mySize, vec3 mySpacing, double myOffset);
 	RBFInterface(std::vector<vec3> myData, vec3 myOrigin, vec3 mySize, vec3 mySpacing, double myOffset);
 
 	double getThresholdValue() const { return thresholdValue; }
