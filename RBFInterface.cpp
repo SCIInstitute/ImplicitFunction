@@ -30,8 +30,11 @@
 
 const double RBFInterface::EPSILON = 1.0e-3;
 
-RBFInterface::RBFInterface(std::vector<vec3> myData, vec3 myOrigin, vec3 mySize, vec3 mySpacing, double myOffset) :
-  thresholdValue(0)
+RBFInterface::RBFInterface(std::vector<vec3> myData,
+                           vec3 myOrigin, vec3 mySize, vec3 mySpacing,
+                           double myOffset, Kernel kernel) :
+  thresholdValue(0),
+  myKernel(kernel)
 {
 	CreateSurface(myData, myOrigin, mySize, mySpacing, myOffset);
 }

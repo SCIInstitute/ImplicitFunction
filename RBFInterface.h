@@ -42,14 +42,17 @@ public:
 	ScatteredData *mySurfaceData;
 	Surface *mySurface;
 	RBF *mySurfaceRBF;
-	Kernel myKernel;
 	DataStructure value;
 
 	void CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 mySize, vec3 mySpacing, double myOffset);
-	RBFInterface(std::vector<vec3> myData, vec3 myOrigin, vec3 mySize, vec3 mySpacing, double myOffset);
+	RBFInterface(std::vector<vec3> myData,
+               vec3 myOrigin, vec3 mySize, vec3 mySpacing,
+               double myOffset, Kernel kernel=ThinPlate);
 
 	double getThresholdValue() const { return thresholdValue; }
 	void setOffset(double myOffset);
+  void setKernel(Kernel myKernel);
+  Kernel getKernel() { return myKernel; }
 
 private:
 	void augmentNormalData(ScatteredData *data, double myOffset);
@@ -57,6 +60,7 @@ private:
 
   double thresholdValue;
   double offset;
+	Kernel myKernel;
 
   static const double EPSILON;
 };
