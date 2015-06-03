@@ -26,6 +26,7 @@
 
 #include "RBFInterface.h"
 
+#include <algorithm>
 #include <cmath>
 
 const double RBFInterface::EPSILON = 1.0e-3;
