@@ -1,5 +1,7 @@
 #include "BoundingBox.h"
 
+#include <algorithm>
+
 namespace Cleaver
 {
 
