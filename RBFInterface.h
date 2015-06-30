@@ -57,6 +57,9 @@ public:
 private:
 	void augmentNormalData(ScatteredData *data, double myOffset);
 	vec3 findNormal(ScatteredData *data, int n);
+	vec3 findNormalAxis(ScatteredData *data, int n);
+	vec3 findSphericalNormal(ScatteredData *data, int n);
+        vec3 centroid;
 
   double thresholdValue;
   double offset;

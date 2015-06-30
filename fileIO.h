@@ -35,6 +35,8 @@
 
 #include "vec3.h"
 
+using std::vector;
+using std::string;
 
 void writeNrrdFile(string filename, vector<vector<vector<double> > > &myArray, vec3 myDim, vec3 mySpacing)
 {
@@ -164,7 +166,7 @@ void readDataFile(string filename, ScatteredData *data)
 			data->fnc.push_back(0);
 		}
 		std::cout<<"Done"<<std::endl;
-		std::cout<<"Augmenting data"<<std::endl;
+		std::cout<<"Augmenting data here"<<std::endl;
 		augmentData(data);
 		std::cout<<"Done"<<std::endl;
 	}
@@ -189,15 +191,29 @@ void readSurfaceDataFile(string filename, ScatteredData *data)
 			for(int i=0; i<3; i++)
 				data->x[i].push_back(myData[i]);
 			data->fnc.push_back(0);
+			data->axisInformation.push_back(2);
 		}
 		for(int i=0; i<3; i++)
 			data->x[i].pop_back();
 		data->fnc.pop_back();
 		std::cout<<"Done"<<std::endl;
 		data->computeOrdering();
-		std::cout<<"Augmenting data"<<std::endl;
-		augmentNormalData(data);
-		std::cout<<"Done"<<std::endl;
+		int n = data->origSize = data->x[0].size();
+		vec3 sum(0,0,0);
+		for(int i=0; i<n; i++)
+		{
+			for(int j=0; j<3; j++)
+			{
+				sum[j] = sum[j]+data->x[j][i];
+			}
+		}
+		for(int j=0; j<3; j++)
+		{
+			sum[j]/=n;
+		}
+		//std::cout<<"Augmenting data here B"<<std::endl;
+		//augmentNormalData(data);
+		//std::cout<<"Done"<<std::endl;
 	}
 	else
 	{

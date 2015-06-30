@@ -29,6 +29,8 @@
 
 #include <vector>
 #include <string>
+using std::vector;
+using std::string;
 
 #include "ScatteredData.h"
 #include "vec3.h"
@@ -55,6 +57,8 @@ class API
 
 	void augmentNormalData(ScatteredData *data);
 	vec3 findNormal(ScatteredData *data, int n);
+	vec3 findSphericalNormal(ScatteredData *data, int n);
+	vec3 findNormalAxis(ScatteredData *data, int n);
 };
 
 #endif //_API_H_ 

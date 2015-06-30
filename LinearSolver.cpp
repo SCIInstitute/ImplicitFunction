@@ -59,7 +59,7 @@ void LinearSolver::biCGStab(vector<double> &b, vector<double> &x)
     if(norm(r)<n*1e-10)
         return;
     //printf("norm(r)=%lf\n", norm(r)); fflush(stdout);
-    while(iter<9000)
+    while(iter<10*n)
     {
         //std::cout << "iter: " << iter << " norm(r)= " << norm(r) << std::endl;
         //printf("Iteration %d: Residual norm = %lf\n", iter, norm(r)); fflush(stdout);

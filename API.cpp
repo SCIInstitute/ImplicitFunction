@@ -17,12 +17,14 @@ void API::CreateSurface(string filename, vec3 myOrigin, vec3 mySize, vec3 mySamp
 {
 	mySurfaceData = new ScatteredData();
 	readSurfaceDataFile(filename, mySurfaceData);
+	augmentNormalData(mySurfaceData);
 	mySurfaceRBF = new RBF(mySurfaceData, myKernel);
-	//mySurfaceRBF->setDataReduction(Random);
+	mySurfaceRBF->setDataReduction(All);
 	myKernel = ThinPlate;
 	mySurface = new Surface(mySurfaceData, mySurfaceRBF);
 
 	//Construct RBFs
+	//printf("Compute RBF\n");
 	mySurface->computeRBF();
 
 	vec3 mySpacing(mySize[0]/mySampling[0], mySize[1]/mySampling[1], mySize[2]/mySampling[2]);
@@ -153,6 +155,13 @@ vector<vector<vector<double> > >API::CreateSurface(vector<vec3> myData, vec3 myO
 	return value;
 }
 
+vec3 API::findSphericalNormal(ScatteredData *data, int n)
+{
+	vec3 ret(0,0,0);
+	for(int j=0; j<3; j++)
+		ret[j] = (data->x[j][n] - data->centroid[j])/10;
+}
+
 vec3 API::findNormal(ScatteredData *data, int n)
 {
 	int tot = data->x[0].size();
@@ -181,10 +190,10 @@ vec3 API::findNormal(ScatteredData *data, int n)
 
 void API::augmentNormalData(ScatteredData *data)
 {
-	int n = data->x[0].size();
+	int n = data->origSize;
 	for(int i=0; i<n; i++)
 	{
-		vec3 myNormal = findNormal(data, i);
+		vec3 myNormal = findNormalAxis(data, i);
 		myNormal = normalize(myNormal);
 		for(int j=0; j<3; j++)
 		{
@@ -199,3 +208,49 @@ void API::augmentNormalData(ScatteredData *data)
 		data->fnc.push_back(-10);
 	}
 }
+
+vec3 API::findNormalAxis(ScatteredData *data, int n)
+{
+	//printf("here\n");
+	int tot = data->origSize;
+	int prev = (n-1)>=0?n-1:tot-1;
+	int next = (n+1)<tot?n+1:0;
+	int myAxis = data->axisInformation[n];
+
+	while(data->x[myAxis][prev]!=data->x[myAxis][n])
+	{
+		prev = (prev-1)>=0?prev-1:tot-1;
+	}
+
+	while(data->x[myAxis][next]!=data->x[myAxis][n])
+	{
+		next = (next+1)<tot?next+1:0;
+	}
+	//printf(" see: %d %d %d %d\n", prev,n,next,tot); fflush(stdout);
+
+	vec3 a(data->x[0][n], data->x[1][n], data->x[2][n]);
+	vec3 b(data->x[0][prev], data->x[1][prev], data->x[2][prev]);
+	vec3 c(data->x[0][next], data->x[1][next], data->x[2][next]);
+	
+	vec3 tangent = b-c;
+	double ret_x, ret_y, ret_z;
+	vec3 ret(tangent);
+        //rotate by 90 degrees on the x-y plane
+	switch(myAxis)
+	{
+		case 0:
+			ret[1] = ret_y = -tangent[2];
+			ret[2] = ret_z = tangent[1];
+			break;
+		case 1:
+			ret[2] = ret_z = -tangent[0];
+			ret[0] = ret_x = tangent[2];
+			break;
+		case 2:
+			ret[0] = ret_x = -tangent[1];
+			ret[1] = ret_y = tangent[0];
+			break;
+	}
+	return ret;
+}
+

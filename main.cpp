@@ -19,6 +19,7 @@
 
 
 using std::vector;
+using std::string;
 
 void constructRBFforSampleData()
 {
