@@ -45,7 +45,7 @@ void ScatteredData::computeOrdering()
 		{
 			//printf("%lf %lf %lf\n", myData[count][myAxis], myData[start][myAxis],fabs(myData[count][myAxis]-myData[start][myAxis]));
 			count++;
-			int sortingAxis = axisInformation[start];
+			axis_t sortingAxis = axisInformation[start];
 			if(axisInformation[count]!=axisInformation[start])
 				break;
 			if(fabs(myData[count][sortingAxis]-myData[start][sortingAxis]) > 1e-6)
@@ -53,7 +53,15 @@ void ScatteredData::computeOrdering()
 		}
 		int end = count-1;
 		//printf("Start: %d End %d\n", start, end);
-		ETSP reorder(myData, start, end, axisInformation[start]);
+		int myAxis;
+		switch(axisInformation[start])
+		{
+			case X: myAxis = 0; break;
+			case Y: myAxis = 1; break;
+			case Z: myAxis = 2; break;
+
+		}
+		ETSP reorder(myData, start, end, myAxis);
 		for(int i=start; i<=end; i++)
 		{
 			myData[i][0] = x[0][i]=reorder.data[reorder.order[i-start]][0];
@@ -86,39 +94,39 @@ void ScatteredData::SDmultisort()
 		vec3 a(x[0][i],x[1][i],x[2][i]);
 		switch(axisInformation[i])
 		{
-			case 0:
+			case X:
 				dataX.push_back(a);
 				break;
-			case 1:
+			case Y:
 				dataY.push_back(a);
 				break;
-			case 2:
+			case Z:
 				dataZ.push_back(a);
 				break;
 		}
 		
 	}
-	sortObject.axisToSort=0;
+	sortObject.axisToSort=X;
 	std::sort(dataX.begin(), dataX.end(), sortObject);
-	sortObject.axisToSort=1;
+	sortObject.axisToSort=Y;
 	std::sort(dataY.begin(), dataY.end(), sortObject);
-	sortObject.axisToSort=2;
+	sortObject.axisToSort=Z;
 	std::sort(dataZ.begin(), dataZ.end(), sortObject);
 	axisInformation.clear();
 	for(int i=0; i<dataX.size(); i++)
 	{
 		myData.push_back(dataX[i]);
-		axisInformation.push_back(0);
+		axisInformation.push_back(X);
 	}
 	for(int i=0; i<dataY.size(); i++)
 	{
 		myData.push_back(dataY[i]);
-		axisInformation.push_back(1);
+		axisInformation.push_back(Y);
 	}
 	for(int i=0; i<dataZ.size(); i++)
 	{
 		myData.push_back(dataZ[i]);
-		axisInformation.push_back(2);
+		axisInformation.push_back(Z);
 	}
 }
 

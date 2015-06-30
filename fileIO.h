@@ -191,7 +191,7 @@ void readSurfaceDataFile(string filename, ScatteredData *data)
 			for(int i=0; i<3; i++)
 				data->x[i].push_back(myData[i]);
 			data->fnc.push_back(0);
-			data->axisInformation.push_back(2);
+			data->axisInformation.push_back(Z);
 		}
 		for(int i=0; i<3; i++)
 			data->x[i].pop_back();

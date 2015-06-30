@@ -194,7 +194,7 @@ vec3 RBFInterface::findNormalAxis(ScatteredData *data, int n)
 	int tot = data->x[0].size();
 	int prev = (n-1)>=0?n-1:tot-1;
 	int next = (n+1)<tot?n+1:0;
-	int myAxis = data->axisInformation[n];
+	axis_t myAxis = data->axisInformation[n];
 
 	while(data->x[myAxis][prev]!=data->x[myAxis][n])
 	{

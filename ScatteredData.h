@@ -31,6 +31,8 @@
 #include <vector>
 #include "vec3.h"
 
+enum axis_t {X,Y,Z};
+
 class ScatteredData
 {
 	public:
@@ -39,7 +41,7 @@ class ScatteredData
 	void setData(std::vector<double> a, std::vector<double> b, std::vector<double> c, std::vector<double> d);
 	std::vector<double> x[3], fnc;
 	std::vector<vec3> myData;
-	std::vector<int> axisInformation;
+	std::vector<axis_t> axisInformation;
         void computeOrdering();
 	int origSize;
 	vec3 centroid;
@@ -51,10 +53,14 @@ class ScatteredData
 };
 
 struct vec3Sorter {
-  int axisToSort;
+  axis_t axisToSort;
+  int myAxis;
   bool operator() (vec3 a,vec3 b) 
   { 
-    return (a[axisToSort]<b[axisToSort]);
+    if (axisToSort == X) myAxis = 0;
+    if (axisToSort == Y) myAxis = 1;
+    if (axisToSort == Z) myAxis = 2;
+    return (a[myAxis]<b[myAxis]);
   }
 };
 
