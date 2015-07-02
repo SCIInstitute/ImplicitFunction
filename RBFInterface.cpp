@@ -170,6 +170,8 @@ vec3 RBFInterface::findSphericalNormal(ScatteredData *data, int n)
 	vec3 ret(0,0,0);
 	for(int j=0; j<3; j++)
 		ret[j] = (data->x[j][n] - data->centroid[j])/10;
+
+	return ret;
 }
 
 void RBFInterface::augmentNormalData(ScatteredData *data, double myOffset)
