@@ -26,6 +26,16 @@ void ScatteredData::setData(vector<double> a, vector<double> b, vector<double> c
 	//	printf("%d %d\n", x[0][i], a[i]); fflush(stdout);
 	//}
 	origSize = a.size();
+	vec3 temp(0,0,0);
+	for(int i=0; i<origSize; i++)
+	{
+		for(int j=0; j<3; j++)
+		{
+			temp[j]+=x[j][i];
+		}
+	}
+	for(int j=0; j<3; j++)
+		centroid[j]=temp[j]/origSize;
 }
 
 void ScatteredData::computeOrdering()

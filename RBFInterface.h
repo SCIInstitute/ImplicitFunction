@@ -44,10 +44,10 @@ public:
 	RBF *mySurfaceRBF;
 	DataStructure value;
 
-	void CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 mySize, vec3 mySpacing, double myOffset);
+	void CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 mySize, vec3 mySpacing, double myOffset, std::vector<axis_t> myAxis);
 	RBFInterface(std::vector<vec3> myData,
                vec3 myOrigin, vec3 mySize, vec3 mySpacing,
-               double myOffset, Kernel kernel=ThinPlate);
+               double myOffset, std::vector<axis_t> myAxis, Kernel kernel=ThinPlate);
 
 	double getThresholdValue() const { return thresholdValue; }
 	void setOffset(double myOffset);

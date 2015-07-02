@@ -34,11 +34,11 @@ const double RBFInterface::EPSILON = 1.0e-3;
 
 RBFInterface::RBFInterface(std::vector<vec3> myData,
                            vec3 myOrigin, vec3 mySize, vec3 mySpacing,
-                           double myOffset, Kernel kernel) :
+                           double myOffset, std::vector<axis_t> myAxis, Kernel kernel) :
   thresholdValue(0),
   myKernel(kernel)
 {
-	CreateSurface(myData, myOrigin, mySize, mySpacing, myOffset);
+	CreateSurface(myData, myOrigin, mySize, mySpacing, myOffset, myAxis);
 }
 
 void RBFInterface::setOffset(double myOffset)
@@ -46,7 +46,7 @@ void RBFInterface::setOffset(double myOffset)
 	offset = myOffset;
 }
 
-void RBFInterface::CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 mySize, vec3 mySpacing, double myOffset)
+void RBFInterface::CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 mySize, vec3 mySpacing, double myOffset, std::vector<axis_t> myAxis)
 {
 	std::vector<double> a,b,c,d;
 	for(int i=0; i<myData.size(); i++)
@@ -71,6 +71,9 @@ void RBFInterface::CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 m
   myMax = myMax + 0.05*mySize;
 
 	mySurfaceData = new ScatteredData(a,b,c,d);
+	mySurfaceData->axisInformation = myAxis;
+	mySurfaceData->origSize = a.size();
+
 	augmentNormalData(mySurfaceData, myOffset);
 	mySurfaceRBF = new RBF(mySurfaceData, myKernel);
 	mySurfaceRBF->setDataReduction(All);
@@ -134,7 +137,7 @@ void RBFInterface::CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 m
 
 vec3 RBFInterface::findNormal(ScatteredData *data, int n)
 {
-	int tot = data->x[0].size();
+	int tot = data->origSize;
 	int prev = (n-1)>=0?n-1:tot-1;
 	int next = (n+1)<tot?n+1:0;
 
@@ -164,12 +167,15 @@ vec3 RBFInterface::findNormal(ScatteredData *data, int n)
 
 vec3 RBFInterface::findSphericalNormal(ScatteredData *data, int n)
 {
+	vec3 ret(0,0,0);
+	for(int j=0; j<3; j++)
+		ret[j] = (data->x[j][n] - data->centroid[j])/10;
 }
 
 void RBFInterface::augmentNormalData(ScatteredData *data, double myOffset)
 {
 	printf("here\n");
-	int n = data->x[0].size();
+	int n = data->origSize;
 	for(int i=0; i<n; i++)
 	{
 		vec3 myNormal = findNormalAxis(data, i);
@@ -191,7 +197,8 @@ void RBFInterface::augmentNormalData(ScatteredData *data, double myOffset)
 
 vec3 RBFInterface::findNormalAxis(ScatteredData *data, int n)
 {
-	int tot = data->x[0].size();
+	//printf("here\n");
+	int tot = data->origSize;
 	int prev = (n-1)>=0?n-1:tot-1;
 	int next = (n+1)<tot?n+1:0;
 	axis_t myAxis = data->axisInformation[n];
@@ -205,7 +212,7 @@ vec3 RBFInterface::findNormalAxis(ScatteredData *data, int n)
 	{
 		next = (next+1)<tot?next+1:0;
 	}
-	//printf("%d %d %d %d\n", prev,n,next,tot); fflush(stdout);
+	//printf(" see: %d %d %d %d\n", prev,n,next,tot); fflush(stdout);
 
 	vec3 a(data->x[0][n], data->x[1][n], data->x[2][n]);
 	vec3 b(data->x[0][prev], data->x[1][prev], data->x[2][prev]);
@@ -232,4 +239,3 @@ vec3 RBFInterface::findNormalAxis(ScatteredData *data, int n)
 	}
 	return ret;
 }
-
