@@ -199,10 +199,11 @@ void RBFInterface::augmentNormalData(ScatteredData *data, double myOffset)
 
 vec3 RBFInterface::findNormalAxis(ScatteredData *data, int n)
 {
-	//printf("here\n");
+	//Find the previous and next point among the points given to you.
+        //The points are assumed to be on a plane
 	int tot = data->origSize;
-	int prev = (n-1)>=0?n-1:tot-1;
-	int next = (n+1)<tot?n+1:0;
+	int prev = (n-1)>=0?n-1:tot-1;                 //prev cannot be -1
+	int next = (n+1)<tot?n+1:0;                    //next cannot be >tot
 	axis_t myAxis = data->axisInformation[n];
 
 	while(data->x[myAxis][prev]!=data->x[myAxis][n])
@@ -241,3 +242,55 @@ vec3 RBFInterface::findNormalAxis(ScatteredData *data, int n)
 	}
 	return ret;
 }
+
+/*
+vec3 RBFInterface::augmentCylindricalNormal(ScatteredData *data)
+{
+}
+
+vec3 RBFInterface::findCylindricalAxis(ScatteredData *data, int n)
+{
+	//Find the previous and next point among the points given to you.
+        //The points are assumed to be on a plane
+	int tot = data->origSize;
+	int prev = (n-1)>=0?n-1:tot-1;                 //prev cannot be -1
+	int next = (n+1)<tot?n+1:0;                    //next cannot be >tot
+	axis_t myAxis = data->axisInformation[n];
+
+	while(data->x[myAxis][prev]!=data->x[myAxis][n])
+	{
+		prev = (prev-1)>=0?prev-1:tot-1;
+	}
+
+	while(data->x[myAxis][next]!=data->x[myAxis][n])
+	{
+		next = (next+1)<tot?next+1:0;
+	}
+	//printf(" see: %d %d %d %d\n", prev,n,next,tot); fflush(stdout);
+
+	vec3 a(data->x[0][n], data->x[1][n], data->x[2][n]);
+	vec3 b(data->x[0][prev], data->x[1][prev], data->x[2][prev]);
+	vec3 c(data->x[0][next], data->x[1][next], data->x[2][next]);
+	
+	vec3 tangent = b-c;
+	double ret_x, ret_y, ret_z;
+	vec3 ret(tangent);
+        //rotate by 90 degrees on the x-y plane
+	switch(myAxis)
+	{
+		case 0:
+			ret[1] = ret_y = -tangent[2];
+			ret[2] = ret_z = tangent[1];
+			break;
+		case 1:
+			ret[2] = ret_z = -tangent[0];
+			ret[0] = ret_x = tangent[2];
+			break;
+		case 2:
+			ret[0] = ret_x = -tangent[1];
+			ret[1] = ret_y = tangent[0];
+			break;
+	}
+	return ret;
+}
+*/

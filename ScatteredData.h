@@ -43,6 +43,7 @@ class ScatteredData
 	std::vector<vec3> myData;
 	std::vector<axis_t> axisInformation;
         void computeOrdering();
+	void compute2DHull();
 	int origSize;
 	vec3 centroid;
         //static int myAxis;

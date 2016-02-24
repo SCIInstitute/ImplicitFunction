@@ -4,6 +4,7 @@
 #include "ScatteredData.h"
 #include "vec3.h"
 #include "ETSP.h"
+#include "2DConvexHull.h"
 #include <cmath>
 
 using std::vector;
@@ -140,3 +141,75 @@ void ScatteredData::SDmultisort()
 	}
 }
 
+
+void ScatteredData::compute2DHull()
+{
+   
+        std::vector<int> reorderedData;
+	SDmultisort();
+	//printf("Sorted\n");
+	//for(int i=0; i<myData.size(); i++)
+	//	printf("%lf %lf %lf\n", myData[i][0], myData[i][0], myData[i][2]);
+
+	int count = 0;
+	//printf("%d %d\n", myData.size(), x[0].size()); fflush(stdout);
+	while(count != x[0].size())
+	{
+		int start = count;
+		//printf("%lf %d\n", myData[count][myAxis], x[0].size());
+		while(count != x[0].size())
+		{
+			//printf("%lf %lf %lf\n", myData[count][myAxis], myData[start][myAxis],fabs(myData[count][myAxis]-myData[start][myAxis]));
+			count++;
+			axis_t sortingAxis = axisInformation[start];
+			if(axisInformation[count]!=axisInformation[start])
+				break;
+			if(fabs(myData[count][sortingAxis]-myData[start][sortingAxis]) > 1e-6)
+				break;
+		}
+		int end = count-1;
+		//printf("Start: %d End %d\n", start, end);
+		int myAxis;
+		switch(axisInformation[start])
+		{
+			case X: myAxis = 0; break;
+			case Y: myAxis = 1; break;
+			case Z: myAxis = 2; break;
+
+		}
+                vector<vec3> inPoints;
+                inPoints.resize(count);
+                for(int i=start; i<=end; i++)
+                {
+                  inPoints[i-start][0] = myData[i][0];
+                  inPoints[i-start][1] = myData[i][1];
+                  inPoints[i-start][2] = myData[i][2];
+                }
+                
+		vector<int> reorder = getConvexHull(inPoints, myAxis);
+		for(int i=0; i<reorder.size(); i++)
+		{
+			reorderedData.push_back(reorder[i]+start);
+		}
+	}
+	//rewrite everything
+	std::vector<double> newx[3], newfnc;
+	std::vector<vec3> mynewData;
+	std::vector<axis_t> newAxisInformation;
+        for(int i=0; i<reorderedData.size(); i++)
+        {
+          int j = reorderedData[i];
+          newx[0].push_back(newx[0][j]);
+          newx[1].push_back(newx[1][j]);
+          newx[2].push_back(newx[2][j]);
+          newfnc.push_back(fnc[j]);
+          mynewData.push_back(myData[j]);
+          newAxisInformation.push_back(axisInformation[j]);
+        }
+        x[0] = newx[0];
+        x[1] = newx[1];
+        x[2] = newx[2];
+        fnc = newfnc;
+        mynewData=myData;
+        axisInformation = axisInformation;
+}
