@@ -71,6 +71,7 @@ void RBFInterface::CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 m
   myMax = myMax + 0.05*mySize;
 
 	mySurfaceData = new ScatteredData(a,b,c,d);
+  mySurfaceData->compute2DHull();
 	mySurfaceData->axisInformation = myAxis;
 	mySurfaceData->origSize = a.size();
 
