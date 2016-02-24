@@ -114,18 +114,18 @@ void RBFInterface::CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 m
   for(int i=0; i<mySize[0]; i++)
   {
     vec3 location = myOrigin + mySpacing[0]*i*vec3::unitX;
-    if (location[0]<myMin[0]||location[0]>myMax[0])
-      continue;
+    //if (location[0]<myMin[0]||location[0]>myMax[0])
+    //  continue;
     for(int j=0; j<mySize[1]; j++)
     {
       location = myOrigin + mySpacing[1]*j*vec3::unitY;
-      if (location[1]<myMin[1]||location[1]>myMax[1])
-        continue;
+      //if (location[1]<myMin[1]||location[1]>myMax[1])
+      //  continue;
       for(int k=0; k<mySize[2]; k++)
       {
         location = myOrigin + mySpacing[0]*i*vec3::unitX + mySpacing[1]*j*vec3::unitY + mySpacing[2]*k*vec3::unitZ;
-        if (location[2]<myMin[2]||location[2]>myMax[2])
-          continue;
+        //if (location[2]<myMin[2]||location[2]>myMax[2])
+        //  continue;
         //std::cout<<"Computing Val ... "<<std::endl;
         double myVal = mySurface->computeValue(location);
         //printf("Interpolant: %lf %lf %lf %lf\n", location[0], location[1], location[2], myVal); fflush(stdout);
