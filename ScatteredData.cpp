@@ -117,6 +117,7 @@ void ScatteredData::SDmultisort()
 		}
 		
 	}
+        myData.clear();
 	sortObject.axisToSort=X;
 	std::sort(dataX.begin(), dataX.end(), sortObject);
 	sortObject.axisToSort=Y;
@@ -178,30 +179,34 @@ void ScatteredData::compute2DHull()
 
 		}
                 vector<vec3> inPoints;
-                inPoints.resize(count);
+                inPoints.resize(end-start+1);
                 for(int i=start; i<=end; i++)
                 {
                   inPoints[i-start][0] = myData[i][0];
                   inPoints[i-start][1] = myData[i][1];
                   inPoints[i-start][2] = myData[i][2];
                 }
-                
+                //printf("inPoints written\n");
 		vector<int> reorder = getConvexHull(inPoints, myAxis);
+                printf("Convex Hull found\n");
 		for(int i=0; i<reorder.size(); i++)
 		{
+                        printf("%d ", i, reorder[i]+start);
 			reorderedData.push_back(reorder[i]+start);
 		}
+                printf("\n");
 	}
 	//rewrite everything
 	std::vector<double> newx[3], newfnc;
 	std::vector<vec3> mynewData;
 	std::vector<axis_t> newAxisInformation;
+        //printf("Rewriting everything\n");
         for(int i=0; i<reorderedData.size(); i++)
         {
           int j = reorderedData[i];
-          newx[0].push_back(newx[0][j]);
-          newx[1].push_back(newx[1][j]);
-          newx[2].push_back(newx[2][j]);
+          newx[0].push_back(x[0][j]);
+          newx[1].push_back(x[1][j]);
+          newx[2].push_back(x[2][j]);
           newfnc.push_back(fnc[j]);
           mynewData.push_back(myData[j]);
           newAxisInformation.push_back(axisInformation[j]);

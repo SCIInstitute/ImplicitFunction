@@ -17,6 +17,7 @@ void API::CreateSurface(string filename, vec3 myOrigin, vec3 mySize, vec3 mySamp
 {
 	mySurfaceData = new ScatteredData();
 	readSurfaceDataFile(filename, mySurfaceData);
+        mySurfaceData->compute2DHull();
 	augmentNormalData(mySurfaceData);
 	mySurfaceRBF = new RBF(mySurfaceData, myKernel);
 	mySurfaceRBF->setDataReduction(All);
