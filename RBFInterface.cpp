@@ -206,16 +206,16 @@ vec3 RBFInterface::findNormalAxis(ScatteredData *data, int n)
 	int next = (n+1)<tot?n+1:0;
 	axis_t myAxis = data->axisInformation[n];
 
-	while(data->x[myAxis][prev]!=data->x[myAxis][n])
+	while(fabs(data->x[myAxis][prev]-data->x[myAxis][n])>1e-6)
 	{
 		prev = (prev-1)>=0?prev-1:tot-1;
 	}
 
-	while(data->x[myAxis][next]!=data->x[myAxis][n])
+	while(fabs(data->x[myAxis][next]-data->x[myAxis][n])>1e-6)
 	{
 		next = (next+1)<tot?next+1:0;
 	}
-	//printf(" see: %d %d %d %d\n", prev,n,next,tot); fflush(stdout);
+	printf("Computing normals: %d %d %d %d\n", prev,n,next,tot); fflush(stdout);
 
 	vec3 a(data->x[0][n], data->x[1][n], data->x[2][n]);
 	vec3 b(data->x[0][prev], data->x[1][prev], data->x[2][prev]);

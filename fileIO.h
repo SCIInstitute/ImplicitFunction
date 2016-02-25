@@ -197,7 +197,7 @@ void readSurfaceDataFile(string filename, ScatteredData *data)
 			data->x[i].pop_back();
 		data->fnc.pop_back();
 		std::cout<<"Done"<<std::endl;
-		data->computeOrdering();
+		//data->computeOrdering();
 		int n = data->origSize = data->x[0].size();
 		vec3 sum(0,0,0);
 		for(int i=0; i<n; i++)

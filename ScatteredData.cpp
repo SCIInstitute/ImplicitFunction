@@ -44,7 +44,7 @@ void ScatteredData::computeOrdering()
 	SDmultisort();
 	//printf("Sorted\n");
 	//for(int i=0; i<myData.size(); i++)
-	//	printf("%lf %lf %lf\n", myData[i][0], myData[i][0], myData[i][2]);
+	//	printf("%d %lf %lf %lf\n", i, myData[i][0], myData[i][0], myData[i][2]);
 
 	int count = 0;
 	//printf("%d %d\n", myData.size(), x[0].size()); fflush(stdout);
@@ -63,7 +63,7 @@ void ScatteredData::computeOrdering()
 				break;
 		}
 		int end = count-1;
-		//printf("Start: %d End %d\n", start, end);
+		printf("BCD Start: %d End %d\n", start, end);
 		int myAxis;
 		switch(axisInformation[start])
 		{
@@ -147,10 +147,12 @@ void ScatteredData::compute2DHull()
 {
    
         std::vector<int> reorderedData;
+	for(int i=0; i<x[0].size(); i++)
+		printf("%d %lf %lf %lf\n", i, x[0][i], x[1][i], x[2][i]);
 	SDmultisort();
-	//printf("Sorted\n");
-	//for(int i=0; i<myData.size(); i++)
-	//	printf("%lf %lf %lf\n", myData[i][0], myData[i][0], myData[i][2]);
+	printf("Sorted\n");
+	for(int i=0; i<myData.size(); i++)
+		printf("%d %lf %lf %lf\n", i, myData[i][0], myData[i][1], myData[i][2]);
 
 	int count = 0;
 	//printf("%d %d\n", myData.size(), x[0].size()); fflush(stdout);
@@ -169,7 +171,7 @@ void ScatteredData::compute2DHull()
 				break;
 		}
 		int end = count-1;
-		//printf("Start: %d End %d\n", start, end);
+		printf("ABC Start: %d End %d\n", start, end);
 		int myAxis;
 		switch(axisInformation[start])
 		{
@@ -198,23 +200,35 @@ void ScatteredData::compute2DHull()
 	}
 	//rewrite everything
 	std::vector<double> newx[3], newfnc;
-	std::vector<vec3> mynewData;
+	std::vector<vec3> myNewData;
 	std::vector<axis_t> newAxisInformation;
         //printf("Rewriting everything\n");
         for(int i=0; i<reorderedData.size(); i++)
         {
           int j = reorderedData[i];
-          newx[0].push_back(x[0][j]);
-          newx[1].push_back(x[1][j]);
-          newx[2].push_back(x[2][j]);
+          newx[0].push_back(myData[j][0]);
+          newx[1].push_back(myData[j][1]);
+          newx[2].push_back(myData[j][2]);
           newfnc.push_back(fnc[j]);
-          mynewData.push_back(myData[j]);
+          myNewData.push_back(myData[j]);
           newAxisInformation.push_back(axisInformation[j]);
         }
+        x[0].clear();
+        x[1].clear();
+        x[2].clear();
         x[0] = newx[0];
         x[1] = newx[1];
         x[2] = newx[2];
+        fnc.clear();
         fnc = newfnc;
-        mynewData=myData;
-        axisInformation = axisInformation;
+        myData.clear();
+        myData=myNewData;
+        axisInformation.clear();
+        axisInformation = newAxisInformation;
+	//for(int i=0; i<x[0].size(); i++)
+	//	printf("%d %lf %lf %lf\n", i, x[0][i], x[1][i], x[2][i]);
+        printf("Convex hull points\n");
+	for(int i=0; i<myData.size(); i++)
+		printf("%d %lf %lf %lf\n", i, myData[i][0], myData[i][1], myData[i][2]);
+        origSize = myData.size();
 }
