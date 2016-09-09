@@ -31,8 +31,6 @@ set(ImplicitFunction_SRCS
   BBox.h
   BHNode.cpp
   BHNode.h
-  BoundingBox.cpp
-  BoundingBox.h
   ETSP.cpp
   ETSP.h
   FMM.cpp
