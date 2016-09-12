@@ -34,32 +34,33 @@ const double RBFInterface::EPSILON = 1.0e-3;
 
 RBFInterface::RBFInterface(std::vector<vec3> myData,
                            vec3 myOrigin, vec3 mySize, vec3 mySpacing,
-                           double myOffset, std::vector<axis_t> myAxis, Kernel kernel) :
-  thresholdValue(0),
-  myKernel(kernel)
+                           double myOffset, std::vector<axis_t> myAxis, bool use2DConvexHull, Kernel kernel) :
+thresholdValue_(0),
+use2DConvexHull_(use2DConvexHull),
+kernel_(kernel)
 {
-	CreateSurface(myData, myOrigin, mySize, mySpacing, myOffset, myAxis);
+  CreateSurface(myData, myOrigin, mySize, mySpacing, myOffset, myAxis);
 }
 
 void RBFInterface::setOffset(double myOffset)
 {
-	offset = myOffset;
+  offset_ = myOffset;
 }
 
 void RBFInterface::CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 mySize, vec3 mySpacing, double myOffset, std::vector<axis_t> myAxis)
 {
-	std::vector<double> a,b,c,d;
-	for(int i=0; i<myData.size(); i++)
-	{
+  std::vector<double> a,b,c,d;
+  for(int i=0; i<myData.size(); i++)
+  {
     std::cerr << "point : " << myData[i][0] << ", " << myData[i][1] << ", " << myData[i][2] << std::endl;
-		a.push_back(myData[i][0]);
-		b.push_back(myData[i][1]);
-		c.push_back(myData[i][2]);
-		d.push_back(thresholdValue);
-	}
-
+    a.push_back(myData[i][0]);
+    b.push_back(myData[i][1]);
+    c.push_back(myData[i][2]);
+    d.push_back(thresholdValue_);
+  }
+  
   // This code figures out the bounds for the data selected
-
+  
   std::vector<double>::iterator minx = std::min_element(a.begin(), a.end());
   std::vector<double>::iterator miny = std::min_element(b.begin(), b.end());
   std::vector<double>::iterator minz = std::min_element(c.begin(), c.end());
@@ -69,23 +70,23 @@ void RBFInterface::CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 m
   vec3 myMin(*minx, *miny, *minz), myMax(*maxx, *maxy, *maxz);
   myMin = myMin - 0.05*mySize;
   myMax = myMax + 0.05*mySize;
-
-	mySurfaceData = new ScatteredData(a,b,c,d);
-	mySurfaceData->axisInformation = myAxis;
-        mySurfaceData->compute2DHull();
-	mySurfaceData->origSize = mySurfaceData->x[0].size();
-
-	augmentNormalData(mySurfaceData, myOffset);
-	mySurfaceRBF = new RBF(mySurfaceData, myKernel);
-	mySurfaceRBF->setDataReduction(All);
-
+  
+  mySurfaceData = new ScatteredData(a,b,c,d);
+  mySurfaceData->axisInformation = myAxis;
+  mySurfaceData->compute2DHull();
+  mySurfaceData->origSize = mySurfaceData->x[0].size();
+  
+  augmentNormalData(mySurfaceData, myOffset);
+  mySurfaceRBF = new RBF(mySurfaceData, kernel_);
+  mySurfaceRBF->setDataReduction(All);
+  
   // TODO: let caller pick the kernel
-	myKernel = ThinPlate;
-	mySurface = new Surface(mySurfaceData, mySurfaceRBF);
-
-	// Construct RBFs
-	mySurface->computeRBF();
-
+  //kernel_ = ThinPlate;
+  mySurface = new Surface(mySurfaceData, mySurfaceRBF);
+  
+  // Construct RBFs
+  mySurface->computeRBF();
+  
   // sanity check
   for(int i=0; i<mySurfaceData->fnc.size(); i++)
   {
@@ -98,9 +99,9 @@ void RBFInterface::CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 m
       fflush(stdout);
     }
   }
-
+  
   // Fill the values into the vector. In the first loop, we initialize the matrix with all values set to -100 (or - inf). In the second loop, we change the values from -100 to the correct value if the point in the domain described above.
-
+  
   value.resize(static_cast<int>(mySize[0]));
   for(int i=0; i<mySize[0]; i++)
   {
@@ -110,7 +111,7 @@ void RBFInterface::CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 m
       value[i][j].resize(static_cast<int>(mySize[2]), -100);
     }
   }
-
+  
   for(int i=0; i<mySize[0]; i++)
   {
     vec3 location = myOrigin + mySpacing[0]*i*vec3::unitX;
@@ -138,107 +139,108 @@ void RBFInterface::CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 m
 
 vec3 RBFInterface::findNormal(ScatteredData *data, int n)
 {
-	int tot = data->origSize;
-	int prev = (n-1)>=0?n-1:tot-1;
-	int next = (n+1)<tot?n+1:0;
-
-	while(data->x[2][prev]!=data->x[2][n])
-	{
-		prev = (prev-1)>=0?prev-1:tot-1;
-	}
-
-	while(data->x[2][next]!=data->x[2][n])
-	{
-		next = (next+1)<tot?next+1:0;
-	}
-	printf("%d %d %d %d\n", prev,n,next,tot); fflush(stdout);
-
-	vec3 a(data->x[0][n], data->x[1][n], data->x[2][n]);
-	vec3 b(data->x[0][prev], data->x[1][prev], data->x[2][prev]);
-	vec3 c(data->x[0][next], data->x[1][next], data->x[2][next]);
-	
-	vec3 tangent = b-c;
-        //rotate by 90 degrees on the x-y plane
-        double ret_x = -tangent[1];
-        double ret_y = tangent[0];
-        vec3 ret(ret_x, ret_y, tangent[2]);
-
-	return ret;
+  int tot = data->origSize;
+  int prev = (n-1)>=0?n-1:tot-1;
+  int next = (n+1)<tot?n+1:0;
+  
+  while(data->x[2][prev]!=data->x[2][n])
+  {
+    prev = (prev-1)>=0?prev-1:tot-1;
+  }
+  
+  while(data->x[2][next]!=data->x[2][n])
+  {
+    next = (next+1)<tot?next+1:0;
+  }
+  printf("%d %d %d %d\n", prev,n,next,tot); fflush(stdout);
+  
+  vec3 a(data->x[0][n], data->x[1][n], data->x[2][n]);
+  vec3 b(data->x[0][prev], data->x[1][prev], data->x[2][prev]);
+  vec3 c(data->x[0][next], data->x[1][next], data->x[2][next]);
+  
+  vec3 tangent = b-c;
+  //rotate by 90 degrees on the x-y plane
+  double ret_x = -tangent[1];
+  double ret_y = tangent[0];
+  vec3 ret(ret_x, ret_y, tangent[2]);
+  
+  return ret;
 }
 
 vec3 RBFInterface::findSphericalNormal(ScatteredData *data, int n)
 {
-	vec3 ret(0,0,0);
-	for(int j=0; j<3; j++)
-		ret[j] = (data->x[j][n] - data->centroid[j])/10;
-
-	return ret;
+  vec3 ret(0,0,0);
+  for(int j=0; j<3; j++)
+    // TODO: hardcoded!!!
+    ret[j] = (data->x[j][n] - data->centroid[j])/10;
+  
+  return ret;
 }
 
 void RBFInterface::augmentNormalData(ScatteredData *data, double myOffset)
 {
-	printf("here\n");
-	int n = data->origSize;
-	for(int i=0; i<n; i++)
-	{
-		vec3 myNormal = findNormalAxis(data, i);
-		myNormal = normalize(myNormal);
-		for(int j=0; j<3; j++)
-		{
-			data->x[j].push_back(data->x[j][i] + myOffset*myNormal[j]);
-		}
-		data->fnc.push_back(10);
-
-		for(int j=0; j<3; j++)
-		{
-			data->x[j].push_back(data->x[j][i] - myOffset*myNormal[j]);
-		}
-		data->fnc.push_back(-10);
-	}
+  printf("here\n");
+  int n = data->origSize;
+  for(int i=0; i<n; i++)
+  {
+    vec3 myNormal = findNormalAxis(data, i);
+    myNormal = normalize(myNormal);
+    for(int j=0; j<3; j++)
+    {
+      data->x[j].push_back(data->x[j][i] + myOffset*myNormal[j]);
+    }
+    data->fnc.push_back(10);
+    
+    for(int j=0; j<3; j++)
+    {
+      data->x[j].push_back(data->x[j][i] - myOffset*myNormal[j]);
+    }
+    data->fnc.push_back(-10);
+  }
 }
 
 
 vec3 RBFInterface::findNormalAxis(ScatteredData *data, int n)
 {
-	//printf("here\n");
-	int tot = data->origSize;
-	int prev = (n-1)>=0?n-1:tot-1;
-	int next = (n+1)<tot?n+1:0;
-	axis_t myAxis = data->axisInformation[n];
-
-	while(fabs(data->x[myAxis][prev]-data->x[myAxis][n])>1e-6)
-	{
-		prev = (prev-1)>=0?prev-1:tot-1;
-	}
-
-	while(fabs(data->x[myAxis][next]-data->x[myAxis][n])>1e-6)
-	{
-		next = (next+1)<tot?next+1:0;
-	}
-	printf("Computing normals: %d %d %d %d\n", prev,n,next,tot); fflush(stdout);
-
-	vec3 a(data->x[0][n], data->x[1][n], data->x[2][n]);
-	vec3 b(data->x[0][prev], data->x[1][prev], data->x[2][prev]);
-	vec3 c(data->x[0][next], data->x[1][next], data->x[2][next]);
-	
-	vec3 tangent = b-c;
-	double ret_x, ret_y, ret_z;
-	vec3 ret(tangent);
-        //rotate by 90 degrees on the x-y plane
-	switch(myAxis)
-	{
-		case 0:
-			ret[1] = ret_y = -tangent[2];
-			ret[2] = ret_z = tangent[1];
-			break;
-		case 1:
-			ret[2] = ret_z = -tangent[0];
-			ret[0] = ret_x = tangent[2];
-			break;
-		case 2:
-			ret[0] = ret_x = -tangent[1];
-			ret[1] = ret_y = tangent[0];
-			break;
-	}
-	return ret;
+  //printf("here\n");
+  int tot = data->origSize;
+  int prev = (n-1)>=0?n-1:tot-1;
+  int next = (n+1)<tot?n+1:0;
+  axis_t myAxis = data->axisInformation[n];
+  
+  while(fabs(data->x[myAxis][prev]-data->x[myAxis][n])>1e-6)
+  {
+    prev = (prev-1)>=0?prev-1:tot-1;
+  }
+  
+  while(fabs(data->x[myAxis][next]-data->x[myAxis][n])>1e-6)
+  {
+    next = (next+1)<tot?next+1:0;
+  }
+  printf("Computing normals: %d %d %d %d\n", prev,n,next,tot); fflush(stdout);
+  
+  vec3 a(data->x[0][n], data->x[1][n], data->x[2][n]);
+  vec3 b(data->x[0][prev], data->x[1][prev], data->x[2][prev]);
+  vec3 c(data->x[0][next], data->x[1][next], data->x[2][next]);
+  
+  vec3 tangent = b-c;
+  double ret_x, ret_y, ret_z;
+  vec3 ret(tangent);
+  //rotate by 90 degrees on the x-y plane
+  switch(myAxis)
+  {
+    case 0:
+      ret[1] = ret_y = -tangent[2];
+      ret[2] = ret_z = tangent[1];
+      break;
+    case 1:
+      ret[2] = ret_z = -tangent[0];
+      ret[0] = ret_x = tangent[2];
+      break;
+    case 2:
+      ret[0] = ret_x = -tangent[1];
+      ret[1] = ret_y = tangent[0];
+      break;
+  }
+  return ret;
 }

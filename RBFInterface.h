@@ -47,23 +47,25 @@ public:
 	void CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 mySize, vec3 mySpacing, double myOffset, std::vector<axis_t> myAxis);
 	RBFInterface(std::vector<vec3> myData,
                vec3 myOrigin, vec3 mySize, vec3 mySpacing,
-               double myOffset, std::vector<axis_t> myAxis, Kernel kernel=ThinPlate);
+               double myOffset, std::vector<axis_t> myAxis, bool use2DConvexHull=false, Kernel kernel=ThinPlate);
 
-	double getThresholdValue() const { return thresholdValue; }
+	double getThresholdValue() const { return thresholdValue_; }
 	void setOffset(double myOffset);
   void setKernel(Kernel myKernel);
-  Kernel getKernel() { return myKernel; }
+  Kernel getKernel() { return kernel_; }
 
 private:
 	void augmentNormalData(ScatteredData *data, double myOffset);
 	vec3 findNormal(ScatteredData *data, int n);
 	vec3 findNormalAxis(ScatteredData *data, int n);
 	vec3 findSphericalNormal(ScatteredData *data, int n);
-        vec3 centroid;
 
-  double thresholdValue;
-  double offset;
-	Kernel myKernel;
+  //vec3 centroid_;
+
+  double thresholdValue_;
+  double offset_;
+	Kernel kernel_;
+  bool use2DConvexHull_;
 
   static const double EPSILON;
 };
