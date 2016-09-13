@@ -35,21 +35,21 @@ enum axis_t {X,Y,Z};
 
 class ScatteredData
 {
-	public:
+public:
 	ScatteredData();
 	ScatteredData(std::vector<double> a, std::vector<double> b, std::vector<double> c, std::vector<double> d);
 	void setData(std::vector<double> a, std::vector<double> b, std::vector<double> c, std::vector<double> d);
 	std::vector<double> x[3], fnc;
 	std::vector<vec3> myData;
 	std::vector<axis_t> axisInformation;
-        void computeOrdering();
+  void computeOrdering();
 	void compute2DHull();
 	int origSize;
 	vec3 centroid;
-        //static int myAxis;
+  //static int myAxis;
 
-	private:
-        void SDsort();
+private:
+  void SDsort();
 	void SDmultisort();
 };
 

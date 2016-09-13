@@ -41,8 +41,7 @@ enum Acceleration {None, FastMultipole};
 enum DataReduction {All, Random};
 class RBF
 {
-	public:
-	RBF();
+public:
 	RBF(ScatteredData *myData, Kernel myKernel);
 
 	void setKernel(Kernel myKernel);
@@ -52,14 +51,15 @@ class RBF
 
 	void computeFunction();
 	double computeValue(vec3 x);
-	private:
-	ScatteredData *data, *completeData;
-	Kernel kernel;
+
+private:
+	ScatteredData *data_, *completeData_;
+	Kernel kernel_;
 	std::vector<double> coeff;
 	Acceleration acceleration;
 	DataReduction dataReduction;
 
-	FMM *fmm;
+	FMM *fmm_;
 
 	void computeFunctionForData();
 	void computeErrorForData(std::vector<std::pair<double, int> > &error);

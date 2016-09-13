@@ -73,8 +73,15 @@ void RBFInterface::CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 m
   
   mySurfaceData = new ScatteredData(a,b,c,d);
   mySurfaceData->axisInformation = myAxis;
-  mySurfaceData->compute2DHull();
-  mySurfaceData->origSize = mySurfaceData->x[0].size();
+  if ( use2DConvexHull_ )
+  {
+    mySurfaceData->compute2DHull();
+    mySurfaceData->origSize = mySurfaceData->x[0].size();
+  }
+  else
+  {
+    mySurfaceData->origSize = a.size();
+  }
   
   augmentNormalData(mySurfaceData, myOffset);
   mySurfaceRBF = new RBF(mySurfaceData, kernel_);
@@ -179,7 +186,7 @@ vec3 RBFInterface::findSphericalNormal(ScatteredData *data, int n)
 
 void RBFInterface::augmentNormalData(ScatteredData *data, double myOffset)
 {
-  printf("here\n");
+  //printf("here\n");
   int n = data->origSize;
   for(int i=0; i<n; i++)
   {
