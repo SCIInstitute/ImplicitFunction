@@ -47,15 +47,6 @@ set(ImplicitFunction_SRCS
   SparseMatrix.h
   Surface.cpp
   Surface.h
-  fault.cpp
-  fault.h
-  fileIO.h
-  structure.cpp
-  structure.h
-  tear.cpp
-  tear.h
-  tree.cpp
-  tree.h
   vec3.cpp
   vec3.h
   RBFInterface.cpp
