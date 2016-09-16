@@ -33,17 +33,17 @@
 class SparseMatrix
 {
 public:
-    SparseMatrix();
-    SparseMatrix(int n);
-    void push_back(int myRow, int myCol, double myVal);
-    void resize(int n);
-    void multiply(std::vector<double> &b, std::vector<double> &c);
-    std::vector<double> multiply(std::vector<double> &b);
+  SparseMatrix();
+  SparseMatrix(int n);
+  void push_back(int myRow, int myCol, double myVal);
+  void resize(int n);
+  void multiply(std::vector<double> &b, std::vector<double> &c);
+  std::vector<double> multiply(std::vector<double> &b);
 
 
 private:
-    std::vector< std::vector<int> > col;
-    std::vector< std::vector<double> > val;
+  std::vector< std::vector<int> > col;
+  std::vector< std::vector<double> > val;
 };
 
 #endif //_SPARSEMATRIX_H_
