@@ -31,20 +31,22 @@
 class BBox
 {
 public:
-    BBox();
-    ~BBox();
-    vec3 getMin(){return min;};
-    vec3 getMax(){return max;};
+  BBox();
+  ~BBox();
+  vec3 getMin() const { return this->min_; }
+  vec3 getMax() const { return this->max_; }
 
-    void setMin(vec3 _m);
-    void setMin(float _m);
-    void setMax(vec3 _m);
-    void setMax(float _m);
-    void reset();
-    bool isEmpty();
-    bool inside(const vec3 &pos);
+  void setMin(const vec3& m);
+  void setMin(float m);
+  void setMax(const vec3& m);
+  void setMax(float m);
+
+  void reset();
+  bool isEmpty();
+  bool inside(const vec3& pos);
 //private:
-    vec3 min, max;
-    bool empty;
+    vec3 min_, max_;
+private:
+  bool empty_;
 };
 #endif // BBOX_H
