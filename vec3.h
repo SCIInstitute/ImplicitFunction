@@ -46,41 +46,41 @@
 class vec3
 {
 public:
-    vec3();
-    vec3(double x, double y, double z);
-    vec3(const vec3 &x);
+  vec3();
+  vec3(double x, double y, double z);
+  vec3(const vec3 &x);
 
 public:
-    double x;
-    double y;
-    double z;
+  double x_;
+  double y_;
+  double z_;
 
-    bool operator!=(const vec3 &a) const;
-    bool operator==(const vec3 &a) const;
-    bool operator<=(const vec3 &a) const;
-    bool operator>=(const vec3 &a) const;
-    bool operator<(const vec3 &a) const;
-    bool operator>(const vec3 &a) const;
-    vec3& operator=(const vec3 &a);
-    vec3& operator+=(const vec3 &a);
-    vec3& operator*=(double c);
-    vec3& operator/=(double c);
+  bool operator!=(const vec3 &a) const;
+  bool operator==(const vec3 &a) const;
+  bool operator<=(const vec3 &a) const;
+  bool operator>=(const vec3 &a) const;
+  bool operator<(const vec3 &a) const;
+  bool operator>(const vec3 &a) const;
+  vec3& operator=(const vec3 &a);
+  vec3& operator+=(const vec3 &a);
+  vec3& operator*=(double c);
+  vec3& operator/=(double c);
 
-    double& operator[](const size_t);
-    double  operator[](const size_t) const;
+  double& operator[](const size_t);
+  double  operator[](const size_t) const;
 
-    double dot(const vec3 &b) const;
-    vec3 cross(const vec3 &b);
+  double dot(const vec3 &b) const;
+  vec3 cross(const vec3 &b);
 
-    static vec3 zero;
-    static vec3 unitX;
-    static vec3 unitY;
-    static vec3 unitZ;
-    static vec3 min(const vec3 &a, const vec3 &b);
-    static vec3 max(const vec3 &a, const vec3 &b);
+  static vec3 zero;
+  static vec3 unitX;
+  static vec3 unitY;
+  static vec3 unitZ;
+  static vec3 min(const vec3 &a, const vec3 &b);
+  static vec3 max(const vec3 &a, const vec3 &b);
 
-    std::string toString() const;
-    friend std::ostream& operator<<(std::ostream &stream, const vec3 &v);
+  std::string toString() const;
+  friend std::ostream& operator<<(std::ostream &stream, const vec3 &v);
 };
 
 vec3 cross(const vec3 &a, const vec3 &b);
@@ -91,10 +91,12 @@ double L1(const vec3 &a);
 double L2(const vec3 &a);
 double clamp(double value, double min, double max);
 vec3 normalize(const vec3 &v1);
+vec3 normalize(const vec3 &v1, float epsilon);
 
 double vec2polar(const vec3 &a);
 
 double angleBetween(const vec3 &a, const vec3 &b);
+double angleBetween(const vec3 &a, const vec3 &b, float epsilon);
 
 vec3 operator+(const vec3 &a, const vec3 &b);
 vec3 operator-(const vec3 &a, const vec3 &b);
