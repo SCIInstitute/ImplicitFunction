@@ -39,14 +39,10 @@ set(ImplicitFunction_SRCS
   LinearSolver.h
   RBF.cpp
   RBF.h
-  SampleData.cpp
-  SampleData.h
   ScatteredData.cpp
   ScatteredData.h
   SparseMatrix.cpp
   SparseMatrix.h
-  Surface.cpp
-  Surface.h
   vec3.cpp
   vec3.h
   RBFInterface.cpp
