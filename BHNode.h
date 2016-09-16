@@ -26,27 +26,30 @@
 
 #ifndef BHNODE_H
 #define BHNODE_H
-#include "vec3.h"
+
 #include <vector>
 #include <limits>
+
+#include "vec3.h"
 #include "BBox.h"
 
 
 class BHNode
 {
 public:
-    BHNode();
-    ~BHNode();
-    bool leaf;
-    double mass;
-    double coeff;
-    vec3 center;
-    BHNode *nodes[8];
-    BBox box;
-    std::vector<int> pts;
-    int index;
+  BHNode();
+  ~BHNode();
+  bool leaf_;
+  double mass_;
+  double coeff_;
+  vec3 center_;
+  BBox box_;
+  std::vector<int> pts_;
+  int index_;
+  double sum_coeff_, sum_coeff_xi_, sum_xi2_;
 
-    double sum_coeff, sum_coeff_xi, sum_xi2;
+  // TODO: magic number
+  BHNode *nodes[8];
 };
 
 #endif // BHNODE_H

@@ -14,24 +14,25 @@ using std::vector;
 
 FMM::FMM()
 {
-	theta=0.75;
+  theta=0.75;
 }
 
 FMM::~FMM()
 {
-	freeTheTree(tree);
+  freeTheTree(tree);
 }
 
 void FMM::freeTheTree(BHNode *myNode)
 {
-	if(myNode==NULL)
-		return;
+  if ( myNode == nullptr )
+    return;
 
-	for(int i=0; i<8; i++)
-		freeTheTree(myNode->nodes[i]);
+  // TODO: magic number
+  for(int i = 0; i < 8; i++)
+    freeTheTree(myNode->nodes[i]);
 }
 
 void FMM::setTheta(double myTheta)
 {
-	theta = myTheta;
+  theta = myTheta;
 }
