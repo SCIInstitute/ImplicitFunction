@@ -32,40 +32,39 @@
 #include "ScatteredData.h"
 #include "vec3.h"
 #include "RBF.h"
-#include "Surface.h"
+//#include "Surface.h"
 
-typedef std::vector< std::vector< std::vector<double> > > DataStructure;
+typedef std::vector< std::vector< std::vector<double> > > DataStorage;
 
 class RBFInterface
 {
 public:
-	ScatteredData *mySurfaceData;
-	Surface *mySurface;
-	RBF *mySurfaceRBF;
-	DataStructure value;
-
-	void CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 mySize, vec3 mySpacing, double myOffset, std::vector<axis_t> myAxis);
 	RBFInterface(std::vector<vec3> myData,
                vec3 myOrigin, vec3 mySize, vec3 mySpacing,
                double myOffset, std::vector<axis_t> myAxis, bool use2DConvexHull=false, Kernel kernel=ThinPlate);
 
+//  RBFInterface(std::vector<vec3> myData, 
+//               vec3 myOrigin, vec3 mySize, vec3 mySpacing,
+//               double myOffset, std::vector<axis_t> myAxis, bool use2DConvexHull=false, Kernel kernel=ThinPlate);
+
 	double getThresholdValue() const { return thresholdValue_; }
-	void setOffset(double myOffset);
-  void setKernel(Kernel myKernel);
-  Kernel getKernel() { return kernel_; }
+  const DataStorage getRasterData() const { return rasterData_; }
 
 private:
-	void augmentNormalData(ScatteredData *data, double myOffset);
-	vec3 findNormal(ScatteredData *data, int n);
-	vec3 findNormalAxis(ScatteredData *data, int n);
-	vec3 findSphericalNormal(ScatteredData *data, int n);
+  void CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 mySize, vec3 mySpacing, double myOffset, std::vector<axis_t> myAxis);
 
-  //vec3 centroid_;
+  void augmentNormalData(/*ScatteredData *data,*/ double myOffset);
+	vec3 findNormalAxis(/*ScatteredData *data,*/ int n);
+
+  ScatteredData *surfaceData_;
+  RBF *rbf_;
+  DataStorage rasterData_;
 
   double thresholdValue_;
   double offset_;
 	Kernel kernel_;
   bool use2DConvexHull_;
+  std::vector<double> points_x_, points_y_ , points_z_, threshold_;
 
   static const double EPSILON;
 };
