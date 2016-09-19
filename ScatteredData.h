@@ -37,16 +37,24 @@ class ScatteredData
 {
 public:
 	ScatteredData();
-	ScatteredData(std::vector<double> a, std::vector<double> b, std::vector<double> c, std::vector<double> d);
-	void setData(std::vector<double> a, std::vector<double> b, std::vector<double> c, std::vector<double> d);
-	std::vector<double> x[3], fnc;
-	std::vector<vec3> myData;
+  ScatteredData(const std::vector<double>& a,
+                const std::vector<double>& b,
+                const std::vector<double>& c,
+                const std::vector<double>& d);
+	void setData(const std::vector<double>& a,
+               const std::vector<double>& b,
+               const std::vector<double>& c,
+               const std::vector<double>& d);
+
+  std::vector<double> x_[3], fnc;
+	std::vector<vec3> inputData_, convexHullData_;
 	std::vector<axis_t> axisInformation;
-  void computeOrdering();
+
+//  void computeOrdering();
 	void compute2DHull();
 	int origSize;
 	vec3 centroid;
-  //static int myAxis;
+//static int myAxis;
 
 private:
   void SDsort();
