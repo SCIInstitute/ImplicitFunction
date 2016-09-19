@@ -36,28 +36,28 @@
 #include <vector>
 #include <utility>
 
-enum Kernel {Gaussian, ThinPlate, MultiQuadratic};
-enum Acceleration {None, FastMultipole};
-enum DataReduction {All, Random};
+enum Kernel { Gaussian, ThinPlate, MultiQuadratic };
+enum Acceleration { None, FastMultipole };
+enum DataReduction { All, Random };
+
 class RBF
 {
 public:
 	RBF(ScatteredData *myData, Kernel myKernel);
+  ~RBF();
 
-	void setKernel(Kernel myKernel);
-	void setData(ScatteredData *myData);
 	void setAcceleration(Acceleration myAcceleration);
 	void setDataReduction(DataReduction myDataReduction);
 
 	void computeFunction();
-	double computeValue(vec3 x);
+	double computeValue(const vec3& x);
 
 private:
 	ScatteredData *data_, *completeData_;
 	Kernel kernel_;
-	std::vector<double> coeff;
-	Acceleration acceleration;
-	DataReduction dataReduction;
+	std::vector<double> coeff_;
+	Acceleration acceleration_;
+	DataReduction dataReduction_;
 
 	FMM *fmm_;
 
@@ -65,19 +65,17 @@ private:
 	void computeErrorForData(std::vector<std::pair<double, int> > &error);
 
 	double computeKernel(int i, int j);
-	double computeKernel(int i, vec3 b);
+	double computeKernel(int i, const vec3& b);
 	double computeRadialFunction(double r);
 
-
-	void fmmComputeFunction();
 	void fmmBuildTree();
 	void fmmPrintTree(BHNode* myNode, int stack);
 	void fmmBuildTree(std::vector<int> &myPoints, BHNode *myNode);
-	double fmmComputeValue(vec3 x);
-	double fmmComputeValueRecurse(vec3 x, BHNode *myNode);
-	double fmmComputeKernel(vec3 b, BHNode *myNode);
-	double fmmComputeKernel(BHNode *myNode, vec3 b);
-	
+	double fmmComputeValue(const vec3& x);
+	double fmmComputeValueRecurse(const vec3& x, BHNode *myNode);
+	double fmmComputeKernel(const vec3& b, BHNode *myNode);
+
+  static const double EPSILON;
 };
 
 #endif //_RBF_H_

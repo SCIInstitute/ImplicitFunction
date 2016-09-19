@@ -134,14 +134,14 @@ vector<int> getConvexHull(vector<vec3> &inPoints, int dim)
 {
   Point *myPoints;
   myPoints = new Point[inPoints.size()];
-  for(int i=0; i<inPoints.size(); i++)
+  for(int i = 0; i < inPoints.size(); i++)
   {
-    int index=0;
-    for(int j=0; j<3; j++)
+    int index = 0;
+    for(int j = 0; j < 3; j++)
     {
-      if(j==dim) continue;
-      if(index == 0) myPoints[i].x = inPoints[i][j];
-      if(index == 1) myPoints[i].y = inPoints[i][j];
+      if (j == dim) continue;
+      if (index == 0) myPoints[i].x = inPoints[i][j];
+      if (index == 1) myPoints[i].y = inPoints[i][j];
       index++;
     }
     myPoints[i].index = i;
