@@ -158,55 +158,46 @@ double vec3::operator[](const size_t idx) const
   }
 }
 
-inline
 double vec3::dot(const vec3 &b) const
 {
   return this->x_*b.x_ + this->y_*b.y_ + this->z_*b.z_;
 }
 
-inline
 vec3 vec3::cross(const vec3 &b)
 {
   return vec3(this->y_*b.z_ - this->z_*b.y_, this->z_*b.x_ - this->x_*b.z_, this->x_*b.y_ - this->y_*b.x_);
 }
 
-inline
 vec3 cross(const vec3 &a, const vec3 &b)
 {
   return vec3(a.y_*b.z_ - a.z_*b.y_, a.z_*b.x_ - a.x_*b.z_, a.x_*b.y_ - a.y_*b.x_);
 }
 
-inline
 double dot(const vec3 &a, const vec3 &b)
 {
   return a.x_*b.x_ + a.y_*b.y_ + a.z_*b.z_;
 }
 
-inline
 double length(const vec3 &a)
 {
   return sqrt(a.x_*a.x_ + a.y_*a.y_ + a.z_*a.z_);
 }
 
-inline
 double L1(const vec3 &a)
 {
   return a.x_ + a.y_ + a.z_;
 }
 
-inline
 double L2(const vec3 &a)
 {
   return length(a);
 }
 
-inline
 vec3 normalize(const vec3 &v1)
 {
   return v1 / length(v1);
 }
 
-inline
 vec3 normalize(const vec3 &v1, float epsilon)
 {
   return v1 / (length(v1) + epsilon);
@@ -236,31 +227,26 @@ double vec2polar(const vec3 &a)
   }
 }
 
-inline
 vec3 operator+(const vec3 &a, const vec3 &b)
 {
   return vec3(a.x_+b.x_, a.y_+b.y_, a.z_+b.z_);
 }
 
-inline
 vec3 operator-(const vec3 &a, const vec3 &b)
 {
   return vec3(a.x_-b.x_, a.y_-b.y_, a.z_-b.z_);
 }
 
-inline
 vec3 operator*(const vec3 &a, double s)
 {
   return vec3(s*a.x_, s*a.y_, s*a.z_);
 }
 
-inline
 vec3 operator*(double s, const vec3 &a)
 {
   return vec3(s*a.x_, s*a.y_, s*a.z_);
 }
 
-inline
 vec3 operator/(const vec3 &a, double s)
 {
   // TODO: throw exception if s == 0
@@ -290,7 +276,6 @@ std::string vec3::toString() const
   return ss.str();
 }
 
-inline
 vec3 vec3::min(const vec3 &a, const vec3 &b)
 {
   return vec3((a.x_ < b.x_) ? a.x_ : b.x_,
@@ -298,7 +283,6 @@ vec3 vec3::min(const vec3 &a, const vec3 &b)
               (a.z_ < b.z_) ? a.z_ : b.z_);
 }
 
-inline
 vec3 vec3::max(const vec3 &a, const vec3 &b)
 {
   return vec3((a.x_ > b.x_) ? a.x_ : b.x_,
@@ -306,13 +290,11 @@ vec3 vec3::max(const vec3 &a, const vec3 &b)
               (a.z_ > b.z_) ? a.z_ : b.z_);
 }
 
-inline
 double angleBetween(const vec3 &a, const vec3 &b)
 {
   return acos( dot(a,b) / ( L2(a)*L2(b) ) );
 }
 
-inline
 double angleBetween(const vec3 &a, const vec3 &b, float epsilon)
 {
   return acos( dot(a,b) / ( ( L2(a)*L2(b) ) + epsilon ) );
