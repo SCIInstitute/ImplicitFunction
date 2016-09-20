@@ -88,13 +88,13 @@ void RBF::computeFunction()
       data_->setData(this->completeData_->x_[0],
                      this->completeData_->x_[1],
                      this->completeData_->x_[2],
-                     this->completeData_->fnc);
+                     this->completeData_->fnc_);
       computeFunctionForData();
       break;
       
     case Random:
       bool *added;
-      const int N = this->completeData_->fnc.size();
+      const int N = this->completeData_->fnc_.size();
       added = new bool[N];
       printf("%d\n", N);
       
@@ -113,8 +113,8 @@ void RBF::computeFunction()
         this->data_->x_[0].push_back(this->completeData_->x_[0][j]);
         this->data_->x_[1].push_back(this->completeData_->x_[1][j]);
         this->data_->x_[2].push_back(this->completeData_->x_[2][j]);
-        data_->fnc.push_back(this->completeData_->fnc[j]);
-        printf("%d %lf %lf %lf %lf\n", j, this->completeData_->x_[0][j],this->completeData_->x_[1][j],this->completeData_->x_[2][j],this->completeData_->fnc[j]);
+        this->data_->fnc_.push_back(this->completeData_->fnc_[j]);
+        printf("%d %lf %lf %lf %lf\n", j, this->completeData_->x_[0][j],this->completeData_->x_[1][j],this->completeData_->x_[2][j],this->completeData_->fnc_[j]);
       }
 
       vector<pair<double, int> > error;
@@ -143,11 +143,11 @@ void RBF::computeFunction()
             this->data_->x_[0].push_back(this->completeData_->x_[0][j]);
             this->data_->x_[1].push_back(this->completeData_->x_[1][j]);
             this->data_->x_[2].push_back(this->completeData_->x_[2][j]);
-            data_->fnc.push_back(this->completeData_->fnc[j]);
+            this->data_->fnc_.push_back(this->completeData_->fnc_[j]);
           }
         }
       }
-      printf("Total no. of data_ point: %d\n",  data_->fnc.size()); fflush(stdout);
+      printf("Total no. of data_ point: %d\n",  this->data_->fnc_.size()); fflush(stdout);
       delete [] added;
       break;
   }
@@ -163,7 +163,7 @@ void RBF::computeFunctionForData()
     case None:
     default:
       // TODO: move to function
-      const int N = data_->fnc.size();
+      const int N = this->data_->fnc_.size();
       printf("Solving linear equations: \n"); fflush(stdout);
       LinearSolver rbfSolver;
       SparseMatrix rbfMatrix(N);
@@ -181,7 +181,7 @@ void RBF::computeFunctionForData()
       printf("Done\n"); fflush(stdout);
       rbfSolver.setMatrix(&rbfMatrix);
       printf("Running BiCGSTAB Iterations ... "); fflush(stdout);
-      rbfSolver.biCGStab(data_->fnc, this->coeff_);
+      rbfSolver.biCGStab(this->data_->fnc_, this->coeff_);
       printf("Done\n"); fflush(stdout);
       break;
   }
@@ -205,14 +205,14 @@ double RBF::computeValue(const vec3& x)
 
 void RBF::computeErrorForData(vector<pair<double, int> > &error)
 {
-  const int N = this->completeData_->fnc.size();
+  const int N = this->completeData_->fnc_.size();
   error.clear();
   for (int i = 0; i < N; i++)
   {
     vec3 x(this->completeData_->x_[0][i],
            this->completeData_->x_[1][i],
            this->completeData_->x_[2][i]);
-    double err = this->completeData_->fnc[i]-computeValue(x);
+    double err = this->completeData_->fnc_[i]-computeValue(x);
     error.push_back( std::make_pair(err, i) );
   }
 }
