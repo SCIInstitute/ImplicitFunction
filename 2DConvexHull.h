@@ -103,10 +103,10 @@ stack<Point> convexHull(Point points[], int n)
    int m = 1; 
    for (int i=1; i<n; i++)
    {
-       while (i < n-1 && orientation(p0, points[i], points[i+1]) == 0)
-          i++;
-       points[m] = points[i];
-       m++;  // Update size of modified array
+     while (i < n-1 && orientation(p0, points[i], points[i+1]) == 0)
+        i++;
+     points[m] = points[i];
+     m++;  // Update size of modified array
    }
  
    stack<Point> S;
@@ -129,8 +129,8 @@ stack<Point> convexHull(Point points[], int n)
    return S;
 }
 
-vector<int> getConvexHull(vector<vec3> &inPoints, int dim)  
-//dim refers to the dimention that needs to be ignored
+// dim refers to the dimention that needs to be ignored
+vector<int> getConvexHull(vector<vec3> &inPoints, int dim)
 {
   Point *myPoints;
   myPoints = new Point[inPoints.size()];
@@ -155,6 +155,7 @@ vector<int> getConvexHull(vector<vec3> &inPoints, int dim)
     ret.push_back(p.index);
     myStack.pop();
   }
+  delete [] myPoints;
   return ret;
 }
 
