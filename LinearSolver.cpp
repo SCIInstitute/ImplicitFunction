@@ -1,8 +1,36 @@
-#include <vector>
+//-------------------------------------------------------------------
+//
+//  Permission is  hereby  granted, free  of charge, to any person
+//  obtaining a copy of this software and associated documentation
+//  files  ( the "Software" ),  to  deal in  the  Software without
+//  restriction, including  without limitation the rights to  use,
+//  copy, modify,  merge, publish, distribute, sublicense,  and/or
+//  sell copies of the Software, and to permit persons to whom the
+//  Software is  furnished  to do  so,  subject  to  the following
+//  conditions:
+//
+//  The above  copyright notice  and  this permission notice shall
+//  be included  in  all copies  or  substantial  portions  of the
+//  Software.
+//
+//  THE SOFTWARE IS  PROVIDED  "AS IS",  WITHOUT  WARRANTY  OF ANY
+//  KIND,  EXPRESS OR IMPLIED, INCLUDING  BUT NOT  LIMITED  TO THE
+//  WARRANTIES   OF  MERCHANTABILITY,  FITNESS  FOR  A  PARTICULAR
+//  PURPOSE AND NONINFRINGEMENT. IN NO EVENT  SHALL THE AUTHORS OR
+//  COPYRIGHT HOLDERS  BE  LIABLE FOR  ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+//  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+//  USE OR OTHER DEALINGS IN THE SOFTWARE.
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+
 #include "SparseMatrix.h"
 #include "LinearSolver.h"
+
+#include <vector>
 #include <cmath>
 #include <cstdio>
+#include <iostream>
 
 using std::vector;
 
@@ -58,14 +86,14 @@ void LinearSolver::biCGStab(vector<double> &b, vector<double> &x)
 
     if(norm(r)<n*1e-10)
         return;
-    //printf("norm(r)=%lf\n", norm(r)); fflush(stdout);
+    printf("norm(r)=%lf\n", norm(r)); fflush(stdout);
     while(iter<10*n)
     {
-        //std::cout << "iter: " << iter << " norm(r)= " << norm(r) << std::endl;
-        //printf("Iteration %d: Residual norm = %lf\n", iter, norm(r)); fflush(stdout);
+        std::cout << "iter: " << iter << " norm(r)= " << norm(r) << std::endl;
+        printf("Iteration %d: Residual norm = %lf\n", iter, norm(r)); fflush(stdout);
         iter++;
         rho = norm(rhat,r);
-        //printf("rho: %lf\n", rho);
+        printf("rho: %lf\n", rho);
         if(iter==1)
         {
             for(i=0; i<n; i++)
@@ -114,12 +142,12 @@ void LinearSolver::biCGStab(vector<double> &b, vector<double> &x)
 
         rhoold=rho; omegaold=omega;
     }
-    //printf("Iteration: %d: Residual norm = %lf\n", iter, norm(r)); fflush(stdout);
-    /*SpMV(x,v);
+    printf("Iteration: %d: Residual norm = %lf\n", iter, norm(r)); fflush(stdout);
+    //SpMV(x,v);
     for(i=0; i<n; i++)
     {
-        printf("x[%d] = %.10f r[%d]=%.10lf\n", i, x[i],i,v[i]-b[i]);
-    }*/
+      printf("x[%d] = %.10f r[%d]=%.10lf\n", i, x[i],i,v[i]-b[i]);
+    }
 }
 
 double LinearSolver::norm(vector<double> &a)
