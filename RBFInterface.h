@@ -32,7 +32,6 @@
 #include "ScatteredData.h"
 #include "vec3.h"
 #include "RBF.h"
-//#include "Surface.h"
 
 typedef std::vector< std::vector< std::vector<double> > > DataStorage;
 
@@ -41,7 +40,7 @@ class RBFInterface
 public:
 	RBFInterface(std::vector<vec3> myData,
                vec3 myOrigin, vec3 mySize, vec3 mySpacing,
-               double myOffset, std::vector<axis_t> myAxis, bool use2DConvexHull=false, Kernel kernel=ThinPlate);
+               double myOffset, std::vector<axis_t> myAxis, const bool use2DConvexHull=false, Kernel kernel=ThinPlate);
 
 //  RBFInterface(std::vector<vec3> myData, 
 //               vec3 myOrigin, vec3 mySize, vec3 mySpacing,
@@ -53,20 +52,26 @@ public:
 private:
   void CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 mySize, vec3 mySpacing, double myOffset, std::vector<axis_t> myAxis);
 
-  void augmentNormalData(/*ScatteredData *data,*/ double myOffset);
-	vec3 findNormalAxis(/*ScatteredData *data,*/ int n);
+  void augmentNormalData(const double myOffset);
+	vec3 findNormalAxis(const int n);
+
+  double distanceToLineSegment(const vec3& a, const vec3& b, const vec3& p);
 
   ScatteredData *surfaceData_;
   RBF *rbf_;
   DataStorage rasterData_;
 
-  double thresholdValue_;
-  double offset_;
+  const double thresholdValue_;
+//  double offset_;
+  const bool use2DConvexHull_;
 	Kernel kernel_;
-  bool use2DConvexHull_;
   std::vector<double> points_x_, points_y_ , points_z_, threshold_;
 
+  // change to inside or outside
+  std::vector<vec3> inNormals, outNormals;
+
   static const double EPSILON;
+  static const double SMALL_EPSILON;
 };
 
 #endif //_RBFInterface_H_ 

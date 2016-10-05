@@ -26,10 +26,14 @@
 
 #include "ScatteredData.h"
 #include "RBF.h"
-#include "SparseMatrix.h"
 #include "vec3.h"
-#include "LinearSolver.h"
 #include "FMM.h"
+
+#include "SparseMatrix.h"
+#include "LinearSolver.h"
+
+#include <Eigen/IterativeLinearSolvers>
+#include <Eigen/Dense>
 
 #include <cmath>
 #include <cstdio>
@@ -44,9 +48,12 @@ using std::pair;
 
 const double RBF::EPSILON = 1.0e-2;
 
+// debugging...
+#define USE_INTERNAL 0
+
 RBF::RBF(ScatteredData *myData, Kernel myKernel) :
-  kernel_(myKernel),
   completeData_(myData),
+  kernel_(myKernel),
   acceleration_(None),
   dataReduction_(All)
 {
@@ -55,7 +62,6 @@ RBF::RBF(ScatteredData *myData, Kernel myKernel) :
 RBF::~RBF()
 {
   delete this->data_;
-  delete this->completeData_;
   delete this->fmm_;
 }
 
@@ -85,9 +91,9 @@ void RBF::computeFunction()
   switch(this->dataReduction_)
   {
     case All:
-      data_->setData(this->completeData_->x_[0],
-                     this->completeData_->x_[1],
-                     this->completeData_->x_[2],
+      data_->setData(this->completeData_->surfacePoints_[0],
+                     this->completeData_->surfacePoints_[1],
+                     this->completeData_->surfacePoints_[2],
                      this->completeData_->fnc_);
       computeFunctionForData();
       break;
@@ -100,7 +106,8 @@ void RBF::computeFunction()
       
       for (int i = 0; i < N; i++)
         added[i] = false;
-      
+
+      // TODO: magic number
       for (int i = 0; i < 25; i++)
       {
         int j = rand() % N;
@@ -110,11 +117,11 @@ void RBF::computeFunction()
           continue;
         }
         added[j] = true;
-        this->data_->x_[0].push_back(this->completeData_->x_[0][j]);
-        this->data_->x_[1].push_back(this->completeData_->x_[1][j]);
-        this->data_->x_[2].push_back(this->completeData_->x_[2][j]);
+        this->data_->surfacePoints_[0].push_back(this->completeData_->surfacePoints_[0][j]);
+        this->data_->surfacePoints_[1].push_back(this->completeData_->surfacePoints_[1][j]);
+        this->data_->surfacePoints_[2].push_back(this->completeData_->surfacePoints_[2][j]);
         this->data_->fnc_.push_back(this->completeData_->fnc_[j]);
-        printf("%d %lf %lf %lf %lf\n", j, this->completeData_->x_[0][j],this->completeData_->x_[1][j],this->completeData_->x_[2][j],this->completeData_->fnc_[j]);
+        printf("%d %lf %lf %lf %lf\n", j, this->completeData_->surfacePoints_[0][j],this->completeData_->surfacePoints_[1][j],this->completeData_->surfacePoints_[2][j],this->completeData_->fnc_[j]);
       }
 
       vector<pair<double, int> > error;
@@ -140,9 +147,9 @@ void RBF::computeFunction()
             int j = error[k].second;
             printf("Adding data_ point %d\n", j);
             added[j] = true;
-            this->data_->x_[0].push_back(this->completeData_->x_[0][j]);
-            this->data_->x_[1].push_back(this->completeData_->x_[1][j]);
-            this->data_->x_[2].push_back(this->completeData_->x_[2][j]);
+            this->data_->surfacePoints_[0].push_back(this->completeData_->surfacePoints_[0][j]);
+            this->data_->surfacePoints_[1].push_back(this->completeData_->surfacePoints_[1][j]);
+            this->data_->surfacePoints_[2].push_back(this->completeData_->surfacePoints_[2][j]);
             this->data_->fnc_.push_back(this->completeData_->fnc_[j]);
           }
         }
@@ -165,24 +172,56 @@ void RBF::computeFunctionForData()
       // TODO: move to function
       const int N = this->data_->fnc_.size();
       printf("Solving linear equations: \n"); fflush(stdout);
-      LinearSolver rbfSolver;
-      SparseMatrix rbfMatrix(N);
-      printf("Constructing matrix ... "); fflush(stdout);
-      for (int i = 0; i < N; i++)
+
+      if (USE_INTERNAL)
       {
-        for (int j = 0; j < N; j++)
+        LinearSolver rbfSolver;
+        SparseMatrix rbfMatrix(N);
+        printf("Constructing matrix...\n"); fflush(stdout);
+        for (int i = 0; i < N; i++)
         {
-          //printf("%d %d ", i,j); fflush(stdout);
-          double val = computeKernel(i, j);
-          //printf("%lf\n", val); fflush(stdout);
-          rbfMatrix.push_back(i, j, val);
+          for (int j = 0; j < N; j++)
+          {
+            printf("%d %d ", i,j); fflush(stdout);
+            double val = computeKernel(i, j);
+            printf("%lf\n", val); fflush(stdout);
+            rbfMatrix.push_back(i, j, val);
+          }
         }
+        printf("Done\n"); fflush(stdout);
+//std::cerr << rbfMatrix << std::endl;
+        rbfSolver.setMatrix(&rbfMatrix);
+        printf("Running BiCGSTAB Iterations ... "); fflush(stdout);
+        rbfSolver.biCGStab(this->data_->fnc_, this->coeff_);
       }
-      printf("Done\n"); fflush(stdout);
-      rbfSolver.setMatrix(&rbfMatrix);
-      printf("Running BiCGSTAB Iterations ... "); fflush(stdout);
-      rbfSolver.biCGStab(this->data_->fnc_, this->coeff_);
-      printf("Done\n"); fflush(stdout);
+      else
+      {
+        Eigen::VectorXd b = Eigen::VectorXd::Map(&this->data_->fnc_[0], N);
+        Eigen::VectorXd x(N);
+        Eigen::SparseMatrix< double > A(N, N);
+        for (int i = 0; i < N; i++)
+        {
+          for (int j = 0; j < N; j++)
+          {
+            printf("%d %d ", i,j); fflush(stdout);
+            double val = computeKernel(i, j);
+            printf("%lf\n", val); fflush(stdout);
+            A.insert(i, j) = val;
+          }
+        }
+
+        Eigen::BiCGSTAB< Eigen::SparseMatrix<double> > solver;
+        solver.setTolerance(1e-10);
+        solver.compute(A);
+        x = solver.solve(b);
+        std::cout << "#iterations:     " << solver.iterations() << std::endl;
+        std::cout << "estimated error: " << solver.error()      << std::endl;
+
+        this->coeff_.resize(x.size());
+        Eigen::VectorXd::Map(&this->coeff_[0], x.size()) = x;
+        printf("Done\n"); fflush(stdout);
+      }
+
       break;
   }
 }
@@ -209,9 +248,9 @@ void RBF::computeErrorForData(vector<pair<double, int> > &error)
   error.clear();
   for (int i = 0; i < N; i++)
   {
-    vec3 x(this->completeData_->x_[0][i],
-           this->completeData_->x_[1][i],
-           this->completeData_->x_[2][i]);
+    vec3 x(this->completeData_->surfacePoints_[0][i],
+           this->completeData_->surfacePoints_[1][i],
+           this->completeData_->surfacePoints_[2][i]);
     double err = this->completeData_->fnc_[i]-computeValue(x);
     error.push_back( std::make_pair(err, i) );
   }
@@ -219,9 +258,12 @@ void RBF::computeErrorForData(vector<pair<double, int> > &error)
 
 double RBF::computeKernel(int i, int j)
 {
-  double r = sqrt( (this->data_->x_[0][i] - this->data_->x_[0][j])*(this->data_->x_[0][i] - this->data_->x_[0][j]) +
-                   (this->data_->x_[1][i] - this->data_->x_[1][j])*(this->data_->x_[1][i] - this->data_->x_[1][j]) +
-                   (this->data_->x_[2][i] - this->data_->x_[2][j])*(this->data_->x_[2][i] - this->data_->x_[2][j]) );
+  double r = sqrt( (this->data_->surfacePoints_[0][i] - this->data_->surfacePoints_[0][j]) *
+                   (this->data_->surfacePoints_[0][i] - this->data_->surfacePoints_[0][j]) +  // x
+                   (this->data_->surfacePoints_[1][i] - this->data_->surfacePoints_[1][j]) *
+                   (this->data_->surfacePoints_[1][i] - this->data_->surfacePoints_[1][j]) +  // y
+                   (this->data_->surfacePoints_[2][i] - this->data_->surfacePoints_[2][j]) *
+                   (this->data_->surfacePoints_[2][i] - this->data_->surfacePoints_[2][j]) ); // z
 
   return computeRadialFunction(r);
   
@@ -229,9 +271,9 @@ double RBF::computeKernel(int i, int j)
 
 double RBF::computeKernel(int i, const vec3& b)
 {
-  double r = sqrt( (this->data_->x_[0][i] - b[0])*(this->data_->x_[0][i] - b[0]) +
-                   (this->data_->x_[1][i] - b[1])*(this->data_->x_[1][i] - b[1]) +
-                   (this->data_->x_[2][i] - b[2])*(this->data_->x_[2][i] - b[2]) );
+  double r = sqrt( (this->data_->surfacePoints_[0][i] - b[0])*(this->data_->surfacePoints_[0][i] - b[0]) +  // x
+                   (this->data_->surfacePoints_[1][i] - b[1])*(this->data_->surfacePoints_[1][i] - b[1]) +  // y
+                   (this->data_->surfacePoints_[2][i] - b[2])*(this->data_->surfacePoints_[2][i] - b[2]) ); // z
 
   return computeRadialFunction(r);
 }
@@ -264,7 +306,7 @@ double RBF::computeRadialFunction(double r)
 void RBF::fmmBuildTree()
 {
   vector<int> myIndices;
-  const int N = this->data_->x_[0].size();
+  const int N = this->data_->surfacePoints_[0].size();
 
   for (int i = 0; i < N; i++)
     myIndices.push_back(i);
@@ -321,7 +363,7 @@ void RBF::fmmBuildTree(vector<int> &myPoints, BHNode *myNode)
   
   for (int i = 0; i < N; i++)
   {
-    vec3 location(this->data_->x_[0][myPoints[i]], this->data_->x_[1][myPoints[i]], this->data_->x_[2][myPoints[i]]);
+    vec3 location(this->data_->surfacePoints_[0][myPoints[i]], this->data_->surfacePoints_[1][myPoints[i]], this->data_->surfacePoints_[2][myPoints[i]]);
     myNode->center_ = myNode->center_ + (location/N);
   }
   
@@ -346,14 +388,14 @@ void RBF::fmmBuildTree(vector<int> &myPoints, BHNode *myNode)
   {
     int octant = 0;
     //FIND OCTANTS
-    if (this->data_->x_[0][myPoints[i]] > mid[0])
+    if (this->data_->surfacePoints_[0][myPoints[i]] > mid[0])
       octant += 1;
-    if (this->data_->x_[1][myPoints[i]] > mid[1])
+    if (this->data_->surfacePoints_[1][myPoints[i]] > mid[1])
       octant += 2;
-    if (this->data_->x_[2][myPoints[i]] > mid[2])
+    if (this->data_->surfacePoints_[2][myPoints[i]] > mid[2])
       octant += 4;
     
-    //printf("%d %d %d %lf %lf %lf\n", i,octant, myPoints[i], this->data_->x_[0][myPoints[i]],this->data_->x_[1][myPoints[i]], this->data_->x_[2][myPoints[i]]);
+    //printf("%d %d %d %lf %lf %lf\n", i,octant, myPoints[i], this->data_->surfacePoints_[0][myPoints[i]],this->data_->surfacePoints_[1][myPoints[i]], this->data_->surfacePoints_[2][myPoints[i]]);
     
     children[octant].push_back(myPoints[i]);
   }
