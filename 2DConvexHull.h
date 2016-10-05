@@ -31,6 +31,9 @@
 
 #include "vec3.h"
 
+#ifndef TWODCONVEXHULL
+#define TWODCONVEXHULL 1
+
 using std::vector;
 using std::stack;
  
@@ -127,7 +130,7 @@ stack<Point> convexHull(Point points[], const int n)
 
   qsort(&points[1], n-1, sizeof(Point), compare);
 
-  // First 3 points
+  // Process first 3 points
 
   // If two or more points make same angle with p0,
   // Remove all but the one that is farthest from p0
@@ -157,14 +160,14 @@ stack<Point> convexHull(Point points[], const int n)
       S.pop();
     S.push(points[i]);
   }
+
   return S;
 }
 
-// dim refers to the dimention that needs to be ignored
+// dim refers to the dimension that needs to be ignored
 vector<int> getConvexHull(const vector<vec3> &inPoints, const int dim)
 {
-  Point *myPoints;
-  myPoints = new Point[inPoints.size()];
+  Point *myPoints = new Point[inPoints.size()];
   for(int i = 0; i < inPoints.size(); i++)
   {
     int index = 0;
@@ -177,10 +180,12 @@ vector<int> getConvexHull(const vector<vec3> &inPoints, const int dim)
     }
     myPoints[i].index = i;
   }
+
+  // TODO: myPoints gets overwritten...
   stack<Point> myStack = convexHull(myPoints, inPoints.size());
 
   vector<int> ret;
-  while (!myStack.empty())
+  while (! myStack.empty() )
   {
     Point p = myStack.top();
     ret.push_back(p.index);
@@ -190,4 +195,6 @@ vector<int> getConvexHull(const vector<vec3> &inPoints, const int dim)
 
   return ret;
 }
+
+#endif
 
