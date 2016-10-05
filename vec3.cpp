@@ -183,6 +183,12 @@ double length(const vec3 &a)
   return sqrt(a.x_*a.x_ + a.y_*a.y_ + a.z_*a.z_);
 }
 
+double distance(const vec3 &a, const vec3 &b)
+{
+  double xdiff = a.x_-b.x_, ydiff = a.y_-b.y_, zdiff = a.z_-b.z_;
+  return sqrt(xdiff*xdiff + ydiff*ydiff + zdiff*zdiff);
+}
+
 double L1(const vec3 &a)
 {
   return a.x_ + a.y_ + a.z_;

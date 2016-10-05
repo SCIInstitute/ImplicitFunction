@@ -43,6 +43,7 @@
 #undef max
 #endif
 
+
 class vec3
 {
 public:
@@ -87,6 +88,7 @@ vec3 cross(const vec3 &a, const vec3 &b);
 vec3 bisect(const vec3 &a, const vec3 &b);
 double dot(const vec3 &a, const vec3 &b);
 double length(const vec3 &a);
+double distance(const vec3 &a, const vec3 &b);
 double L1(const vec3 &a);
 double L2(const vec3 &a);
 double clamp(double value, double min, double max);
