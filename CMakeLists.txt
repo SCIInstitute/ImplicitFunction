@@ -30,6 +30,22 @@ if(BUILD_TESTING)
   find_package(GTest 1.7 REQUIRED)
 endif()
 
+set(QHULL_LIBRARY_DIR "" CACHE PATH "QHull library directory.")
+if (IS_DIRECTORY ${QHULL_LIBRARY_DIR})
+  # TODO: this probably won't work in VS or Xcode
+  find_library(QHULL_STATIC_LIBRARY
+    NAMES qhullstatic qhullstatic_d
+    PATHS ${QHULL_LIBRARY_DIR}
+    DOC "QHull static library."
+  )
+  find_library(QHULL_CPP_LIBRARY
+    NAMES qhullcpp qhullcpp_d
+    PATHS ${QHULL_LIBRARY_DIR}
+    DOC "QHull C++ library."
+  )
+  message(STATUS "QHull libs (debug): ${QHULL_STATIC_LIBRARY} ${QHULL_CPP_LIBRARY}")
+endif()
+
 ###########################################
 # *Nix C++ compiler flags
 ###########################################
