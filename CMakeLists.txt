@@ -31,7 +31,7 @@ if(BUILD_TESTING)
 endif()
 
 set(QHULL_LIBRARY_DIR "" CACHE PATH "QHull library directory.")
-if (IS_DIRECTORY ${QHULL_LIBRARY_DIR})
+if(IS_DIRECTORY ${QHULL_LIBRARY_DIR})
   # TODO: this probably won't work in VS or Xcode
   find_library(QHULL_STATIC_LIBRARY
     NAMES qhullstatic qhullstatic_d
@@ -45,6 +45,8 @@ if (IS_DIRECTORY ${QHULL_LIBRARY_DIR})
   )
   message(STATUS "QHull libs (debug): ${QHULL_STATIC_LIBRARY} ${QHULL_CPP_LIBRARY}")
 endif()
+
+message(STATUS "CMake source dir: ${ImplicitFunction_SOURCE_DIR}")
 
 ###########################################
 # *Nix C++ compiler flags
@@ -92,6 +94,10 @@ set(ImplicitFunction_SRCS
 add_library(${ImplicitFunction_LIB_NAME}
   ${ImplicitFunction_SRCS}
 )
+
+if(BUILD_TESTING)
+  add_subdirectory(Tests)
+endif()
 
 set(ImplicitFunction_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR})
 set(ImplicitFunction_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
