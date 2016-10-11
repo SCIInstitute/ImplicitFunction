@@ -22,6 +22,9 @@
 
 set(ImplicitFunction_Tests_SRCS
   ConvexHull2DTests.cpp
+  ConvexHull3DTests.cpp
+  RBFInterfaceTests.cpp
+  Vec3Tests.cpp
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${ImplicitFunction_BINARY_DIR})
@@ -32,4 +35,10 @@ include_directories(
 )
 
 add_executable(ImplicitFunction_Tests ${ImplicitFunction_Tests_SRCS})
-target_link_libraries(ImplicitFunction_Tests ${GTEST_LIBRARY} ${GTEST_MAIN_LIBRARY})
+target_link_libraries(ImplicitFunction_Tests
+  ${ImplicitFunction_LIB_NAME}
+  ${QHULL_CPP_LIBRARY}
+  ${QHULL_STATIC_LIBRARY}
+  ${GTEST_LIBRARY}
+  ${GTEST_MAIN_LIBRARY}
+)
