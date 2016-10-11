@@ -190,8 +190,6 @@ void ScatteredData::SDmultisort()
 
 void ScatteredData::compute2DHull()
 {
-std::cerr << "ScatteredData::compute2DHull()" << std::endl;
-
   std::vector<int> reorderedData;
 
   // TODO: debug print
