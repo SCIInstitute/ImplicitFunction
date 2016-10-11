@@ -85,21 +85,21 @@ void RBFInterface::Create3DSurface()
 
   // TODO: debug print
   std::cerr << "Calling Qhull..." << std::endl;
-//  //orgQhull::RboxPoints rbox("D3");
-//  orgQhull::Qhull qhull("input", 3, POINT_LIST_SIZE, pointList, "");
-//  //qhull.runQhull(rbox, "");
-//  qhull.outputQhull();
-//
-//  if ( qhull.hasQhullMessage() )
-//  {
-//    std::cerr << "\nResults of qhull\n" << qhull.qhullMessage();
-//    qhull.clearQhullMessage();
-//  }
-//  orgQhull::QhullFacetList facets = qhull.facetList();
-//  std::cout << "\nFacets created by Qhull::runQhull()\n" << facets;
-//
-//  delete [] pointList;
-//  // TODO: same normal calc?
+  //orgQhull::RboxPoints rbox("D3");
+  orgQhull::Qhull qhull("input", 3, POINT_LIST_SIZE, pointList, "");
+  //qhull.runQhull(rbox, "");
+  qhull.outputQhull();
+
+  if ( qhull.hasQhullMessage() )
+  {
+    std::cerr << "\nResults of qhull\n" << qhull.qhullMessage();
+    qhull.clearQhullMessage();
+  }
+  orgQhull::QhullFacetList facets = qhull.facetList();
+  std::cout << "\nFacets created by Qhull::runQhull()\n" << facets;
+
+  delete [] pointList;
+  // TODO: same normal calc?
 }
 
 
