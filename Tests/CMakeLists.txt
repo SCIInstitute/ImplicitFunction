@@ -37,8 +37,9 @@ include_directories(
 add_executable(ImplicitFunction_Tests ${ImplicitFunction_Tests_SRCS})
 target_link_libraries(ImplicitFunction_Tests
   ${ImplicitFunction_LIB_NAME}
-  ${QHULL_CPP_LIBRARY}
-  ${QHULL_STATIC_LIBRARY}
+#  ${QHULL_CPP_LIBRARY}
+#  ${QHULL_STATIC_LIBRARY}
+#  ${HULL_STATIC_R_LIBRARY}
   ${GTEST_LIBRARY}
   ${GTEST_MAIN_LIBRARY}
 )

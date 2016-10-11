@@ -26,10 +26,6 @@
 
 #include "RBFInterface.h"
 
-#include <libqhullcpp/Qhull.h>
-#include <libqhullcpp/RboxPoints.h>
-#include <libqhullcpp/QhullFacetList.h>
-
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
@@ -73,33 +69,8 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
 
 void RBFInterface::Create3DSurface()
 {
-  const size_t POINT_LIST_SIZE = this->points_x_.size() * 3;
-  double *pointList = new double[POINT_LIST_SIZE];
-  for (size_t i = 0; i < this->points_x_.size(); ++i)
-  {
-    size_t j = i*3;
-    pointList[j] = this->points_x_[i];
-    pointList[j+1] = this->points_y_[i];
-    pointList[j+2] = this->points_z_[i];
-  }
-
   // TODO: debug print
   std::cerr << "Calling Qhull..." << std::endl;
-//  //orgQhull::RboxPoints rbox("D3");
-//  orgQhull::Qhull qhull("input", 3, POINT_LIST_SIZE, pointList, "");
-//  //qhull.runQhull(rbox, "");
-//  qhull.outputQhull();
-//
-//  if ( qhull.hasQhullMessage() )
-//  {
-//    std::cerr << "\nResults of qhull\n" << qhull.qhullMessage();
-//    qhull.clearQhullMessage();
-//  }
-//  orgQhull::QhullFacetList facets = qhull.facetList();
-//  std::cout << "\nFacets created by Qhull::runQhull()\n" << facets;
-//
-//  delete [] pointList;
-//  // TODO: same normal calc?
 }
 
 
