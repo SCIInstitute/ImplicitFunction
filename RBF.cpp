@@ -114,7 +114,7 @@ void RBF::computeFunction()
         this->data_->surfacePoints_[1].push_back(this->completeData_->surfacePoints_[1][j]);
         this->data_->surfacePoints_[2].push_back(this->completeData_->surfacePoints_[2][j]);
         this->data_->fnc_.push_back(this->completeData_->fnc_[j]);
-        printf("%d %lf %lf %lf %lf\n", j, this->completeData_->surfacePoints_[0][j],this->completeData_->surfacePoints_[1][j],this->completeData_->surfacePoints_[2][j],this->completeData_->fnc_[j]);
+        //printf("%d %lf %lf %lf %lf\n", j, this->completeData_->surfacePoints_[0][j],this->completeData_->surfacePoints_[1][j],this->completeData_->surfacePoints_[2][j],this->completeData_->fnc_[j]);
       }
 
       vector<pair<double, int> > error;
@@ -138,7 +138,7 @@ void RBF::computeFunction()
           if (error[k].first > EPSILON || error[k].first != error[k].first)
           {
             int j = error[k].second;
-            printf("Adding data_ point %d\n", j);
+            //printf("Adding data point %d\n", j);
             added[j] = true;
             this->data_->surfacePoints_[0].push_back(this->completeData_->surfacePoints_[0][j]);
             this->data_->surfacePoints_[1].push_back(this->completeData_->surfacePoints_[1][j]);
@@ -147,7 +147,7 @@ void RBF::computeFunction()
           }
         }
       }
-      printf("Total no. of data_ point: %d\n",  this->data_->fnc_.size()); fflush(stdout);
+      //printf("Total no. of data_ point: %d\n",  this->data_->fnc_.size()); fflush(stdout);
       delete [] added;
       break;
   }
@@ -167,18 +167,18 @@ void RBF::computeFunctionForData()
       printf("Solving linear equations: \n"); fflush(stdout);
       LinearSolver rbfSolver;
       SparseMatrix rbfMatrix(N);
-      printf("Constructing matrix...\n"); fflush(stdout);
+      //printf("Constructing matrix...\n"); fflush(stdout);
       for (int i = 0; i < N; i++)
       {
         for (int j = 0; j < N; j++)
         {
-          printf("%d %d ", i,j); fflush(stdout);
+          //printf("%d %d ", i,j); fflush(stdout);
           double val = computeKernel(i, j);
-          printf("%lf\n", val); fflush(stdout);
+          //printf("%lf\n", val); fflush(stdout);
           rbfMatrix.push_back(i, j, val);
         }
       }
-      printf("Done\n"); fflush(stdout);
+      //printf("Done\n"); fflush(stdout);
       rbfSolver.setMatrix(&rbfMatrix);
       printf("Running BiCGSTAB Iterations ... "); fflush(stdout);
       rbfSolver.biCGStab(this->data_->fnc_, this->coeff_);
