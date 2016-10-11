@@ -26,6 +26,10 @@
 
 #include "RBFInterface.h"
 
+#include <libqhullcpp/Qhull.h>
+#include <libqhullcpp/RboxPoints.h>
+#include <libqhullcpp/QhullFacetList.h>
+
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
@@ -35,14 +39,21 @@ const double RBFInterface::SMALL_EPSILON = 1.0e-6;
 
 RBFInterface::RBFInterface(std::vector<vec3> myData,
                            vec3 myOrigin, vec3 mySize, vec3 mySpacing,
-                           double myOffset, std::vector<axis_t> myAxis, const bool use2DConvexHull, Kernel kernel) :
+                           double myOffset, std::vector<axis_t> myAxis,
+                           const bool useConvexHull, const bool compute2DConvexHull,
+                           Kernel kernel) :
   thresholdValue_(0),
-  use2DConvexHull_(use2DConvexHull),
+  useConvexHull_(useConvexHull),
+  compute2DConvexHull_(compute2DConvexHull),
   kernel_(kernel)
 {
+//for (int i = 0; i < myAxis.size(); ++i) {
+//std::cerr << "axis " << i << ": " << myAxis[i] << std::endl;
+//}
   for (int i = 0; i < myData.size(); i++)
   {
-    std::cerr << "point : " << myData[i][0] << ", " << myData[i][1] << ", " << myData[i][2] << std::endl;
+//    std::cerr << "point: " << myData[i][0] << ", " << myData[i][1] << ", " << myData[i][2] << std::endl;
+    // TODO: would be better to skip this step...
     // Input point components:
     this->points_x_.push_back(myData[i][0]); // X component
     this->points_y_.push_back(myData[i][1]); // Y component
@@ -50,9 +61,49 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
     this->threshold_.push_back(this->thresholdValue_);
   }
 
-  CreateSurface(myData, myOrigin, mySize, mySpacing, myOffset, myAxis);
+  if ( this->useConvexHull_ && ! this->compute2DConvexHull_ )
+  {
+    Create3DSurface();
+  }
+  else
+  {
+    CreateSurface(myData, myOrigin, mySize, mySpacing, myOffset, myAxis);
+  }
 }
 
+void RBFInterface::Create3DSurface()
+{
+  const size_t POINT_LIST_SIZE = this->points_x_.size() * 3;
+  double *pointList = new double[POINT_LIST_SIZE];
+  for (size_t i = 0; i < this->points_x_.size(); ++i)
+  {
+    size_t j = i*3;
+    pointList[j] = this->points_x_[i];
+    pointList[j+1] = this->points_y_[i];
+    pointList[j+2] = this->points_z_[i];
+  }
+
+  // TODO: debug print
+  std::cerr << "Calling Qhull..." << std::endl;
+//  //orgQhull::RboxPoints rbox("D3");
+//  orgQhull::Qhull qhull("input", 3, POINT_LIST_SIZE, pointList, "");
+//  //qhull.runQhull(rbox, "");
+//  qhull.outputQhull();
+//
+//  if ( qhull.hasQhullMessage() )
+//  {
+//    std::cerr << "\nResults of qhull\n" << qhull.qhullMessage();
+//    qhull.clearQhullMessage();
+//  }
+//  orgQhull::QhullFacetList facets = qhull.facetList();
+//  std::cout << "\nFacets created by Qhull::runQhull()\n" << facets;
+//
+//  delete [] pointList;
+//  // TODO: same normal calc?
+}
+
+
+// TODO: why is myData arg???
 // driver
 void RBFInterface::CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 mySize, vec3 mySpacing, double myOffset, std::vector<axis_t> myAxis)
 {
@@ -73,7 +124,7 @@ void RBFInterface::CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 m
 
   this->surfaceData_ = new ScatteredData(this->points_x_, this->points_y_, this->points_z_, this->threshold_, myAxis);
   //this->surfaceData_->axisInformation_ = myAxis;
-  if ( this->use2DConvexHull_ )
+  if ( this->useConvexHull_ && this->compute2DConvexHull_ ) // TODO: not sure this is necessary...
   {
     this->surfaceData_->compute2DHull();
     // TODO: this is bad - ScatteredData should set this to maintain correct internal state!!!
@@ -104,7 +155,7 @@ void RBFInterface::CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 m
     //double myVal = mySurface->computeValue(location);
 
     double myVal = this->rbf_->computeValue(location);
-    printf("myVal: %lf, fnc: %lf\n", myVal, this->surfaceData_->fnc_[i]);
+//    printf("myVal: %lf, fnc: %lf\n", myVal, this->surfaceData_->fnc_[i]);
     double error  = fabs(myVal - this->surfaceData_->fnc_[i]);
     if (error > EPSILON)
     {
@@ -205,7 +256,7 @@ void RBFInterface::augmentNormalData(const double myOffset)
   const size_t N = this->surfaceData_->origSize_;
   const size_t M = this->surfaceData_->leftovers_[0].size();
 
-  if ( this->use2DConvexHull_ )
+  if ( this->useConvexHull_ )
   {
     // iterate through list of points not on hull, add to list as zero points
     for (int i = 0; i < M; ++i)
@@ -246,26 +297,26 @@ void RBFInterface::augmentNormalData(const double myOffset)
     this->surfaceData_->fnc_.push_back(NORMAL_OUT);
   }
 
-  std::cerr << "points x component: ";
-  for (int i = 0; i < this->surfaceData_->surfacePoints_[0].size(); ++i)
-  {
-    std::cerr << this->surfaceData_->surfacePoints_[0][i] << " ";
-  }
-  std::cerr << std::endl;
-
-  std::cerr << "points y component: ";
-  for (int i = 0; i < this->surfaceData_->surfacePoints_[1].size(); ++i)
-  {
-    std::cerr << this->surfaceData_->surfacePoints_[1][i] << " ";
-  }
-  std::cerr << std::endl;
-
-  std::cerr << "points z component: ";
-  for (int i = 0; i < this->surfaceData_->surfacePoints_[2].size(); ++i)
-  {
-    std::cerr << this->surfaceData_->surfacePoints_[2][i] << " ";
-  }
-  std::cerr << std::endl;
+//  std::cerr << "points x component: ";
+//  for (int i = 0; i < this->surfaceData_->surfacePoints_[0].size(); ++i)
+//  {
+//    std::cerr << this->surfaceData_->surfacePoints_[0][i] << " ";
+//  }
+//  std::cerr << std::endl;
+//
+//  std::cerr << "points y component: ";
+//  for (int i = 0; i < this->surfaceData_->surfacePoints_[1].size(); ++i)
+//  {
+//    std::cerr << this->surfaceData_->surfacePoints_[1][i] << " ";
+//  }
+//  std::cerr << std::endl;
+//
+//  std::cerr << "points z component: ";
+//  for (int i = 0; i < this->surfaceData_->surfacePoints_[2].size(); ++i)
+//  {
+//    std::cerr << this->surfaceData_->surfacePoints_[2][i] << " ";
+//  }
+//  std::cerr << std::endl;
 }
 
 vec3 RBFInterface::findNormalAxis(const int n)

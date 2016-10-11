@@ -40,7 +40,9 @@ class RBFInterface
 public:
 	RBFInterface(std::vector<vec3> myData,
                vec3 myOrigin, vec3 mySize, vec3 mySpacing,
-               double myOffset, std::vector<axis_t> myAxis, const bool use2DConvexHull=false, Kernel kernel=ThinPlate);
+               double myOffset, std::vector<axis_t> myAxis,
+               const bool useConvexHull=false, const bool compute2DConvexHull=true,
+               Kernel kernel=ThinPlate);
 
 //  RBFInterface(std::vector<vec3> myData, 
 //               vec3 myOrigin, vec3 mySize, vec3 mySpacing,
@@ -50,7 +52,9 @@ public:
   const DataStorage getRasterData() const { return rasterData_; }
 
 private:
+  // 2D calculation
   void CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 mySize, vec3 mySpacing, double myOffset, std::vector<axis_t> myAxis);
+  void Create3DSurface();
 
   void augmentNormalData(const double myOffset);
   vec3 findNormalAxis(const int n);
@@ -61,7 +65,8 @@ private:
 
   const double thresholdValue_;
 //  double offset_;
-  const bool use2DConvexHull_;
+  const bool useConvexHull_;
+  const bool compute2DConvexHull_;
   Kernel kernel_;
   std::vector<double> points_x_, points_y_ , points_z_, threshold_;
 
