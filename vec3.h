@@ -28,9 +28,6 @@
 #ifndef VEC3_H
 #define VEC3_H
 
-#ifndef PI
-#define PI 3.14159265
-#endif
 
 #include <iostream>
 
@@ -51,11 +48,12 @@ public:
   vec3(double x, double y, double z);
   vec3(const vec3 &x);
 
-public:
+private:
   double x_;
   double y_;
   double z_;
 
+public:
   bool operator!=(const vec3 &a) const;
   bool operator==(const vec3 &a) const;
   bool operator<=(const vec3 &a) const;
@@ -73,12 +71,22 @@ public:
   double dot(const vec3 &b) const;
   vec3 cross(const vec3 &b);
 
+  const double x() const { return this->x_; }
+  void x( double b ) { this->x_ = b; }
+
+  const double y() const { return this->y_; }
+  void y( double b ) { this->y_ = b; }
+
+  const double z() const { return this->z_; }
+  void z( double b ) { this->z_ = b; }
+
   static vec3 zero;
   static vec3 unitX;
   static vec3 unitY;
   static vec3 unitZ;
   static vec3 min(const vec3 &a, const vec3 &b);
   static vec3 max(const vec3 &a, const vec3 &b);
+  static const double PI;
 
   std::string toString() const;
   friend std::ostream& operator<<(std::ostream &stream, const vec3 &v);

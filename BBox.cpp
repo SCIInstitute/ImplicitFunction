@@ -76,16 +76,16 @@ void BBox::reset()
 inline
 bool BBox::isEmpty()
 {
-  this->empty_ = !(this->min_.x_ < this->max_.x_ &&
-                   this->min_.y_ < this->max_.y_ &&
-                   this->min_.z_ < this->max_.z_);
+  this->empty_ = !(this->min_.x() < this->max_.x() &&
+                   this->min_.y() < this->max_.y() &&
+                   this->min_.z() < this->max_.z());
   return this->empty_;
 }
 
 inline
 bool BBox::inside(const vec3 &pos)
 {
-  return (pos.x_ >= this->min_.x_ && pos.x_ <= this->max_.x_ &&
-          pos.y_ >= this->min_.y_ && pos.y_ <= this->max_.y_ &&
-          pos.z_ >= this->min_.z_ && pos.z_ <= this->max_.z_);
+  return (pos.x() >= this->min_.x() && pos.x() <= this->max_.x() &&
+          pos.y() >= this->min_.y() && pos.y() <= this->max_.y() &&
+          pos.z() >= this->min_.z() && pos.z() <= this->max_.z());
 }

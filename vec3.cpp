@@ -33,11 +33,14 @@
 #include <sstream>
 
 using namespace std;
+
+
 // static variables
 vec3 vec3::zero(0,0,0);
 vec3 vec3::unitX(1,0,0);
 vec3 vec3::unitY(0,1,0);
 vec3 vec3::unitZ(0,0,1);
+const double vec3::PI = 3.14159265;
 
 vec3::vec3() : x_(0), y_(0), z_(0)
 {
@@ -170,28 +173,28 @@ vec3 vec3::cross(const vec3 &b)
 
 vec3 cross(const vec3 &a, const vec3 &b)
 {
-  return vec3(a.y_*b.z_ - a.z_*b.y_, a.z_*b.x_ - a.x_*b.z_, a.x_*b.y_ - a.y_*b.x_);
+  return vec3(a.y()*b.z() - a.z()*b.y(), a.z()*b.x() - a.x()*b.z(), a.x()*b.y() - a.y()*b.x());
 }
 
 double dot(const vec3 &a, const vec3 &b)
 {
-  return a.x_*b.x_ + a.y_*b.y_ + a.z_*b.z_;
+  return a.x()*b.x() + a.y()*b.y() + a.z()*b.z();
 }
 
 double length(const vec3 &a)
 {
-  return sqrt(a.x_*a.x_ + a.y_*a.y_ + a.z_*a.z_);
+  return sqrt(a.x()*a.x() + a.y()*a.y() + a.z()*a.z());
 }
 
 double distance(const vec3 &a, const vec3 &b)
 {
-  double xdiff = a.x_-b.x_, ydiff = a.y_-b.y_, zdiff = a.z_-b.z_;
+  double xdiff = a.x()-b.x(), ydiff = a.y()-b.y(), zdiff = a.z()-b.z();
   return sqrt(xdiff*xdiff + ydiff*ydiff + zdiff*zdiff);
 }
 
 double L1(const vec3 &a)
 {
-  return a.x_ + a.y_ + a.z_;
+  return a.x() + a.y() + a.z();
 }
 
 double L2(const vec3 &a)
@@ -211,23 +214,23 @@ vec3 normalize(const vec3 &v1, float epsilon)
 
 double vec2polar(const vec3 &a)
 {
-  if (a.x_ > 0)
+  if (a.x() > 0)
   {
-    if(a.y_ >= 0)
-      return atan(a.y_ / a.x_);
+    if(a.y() >= 0)
+      return atan(a.y() / a.x());
     else
-      return atan(a.y_ / a.x_) + 2*PI;
+      return atan(a.y() / a.x()) + 2*vec3::PI;
   }
-  else if (a.x_ < 0)
+  else if (a.x() < 0)
   {
-    return atan(a.y_/a.x_) + PI;
+    return atan(a.y()/a.x()) + vec3::PI;
   }
   else
   {
-    if(a.y_ > 0)
-      return PI/2;
-    else if (a.y_ < 0)
-      return 3*PI/2;
+    if(a.y() > 0)
+      return vec3::PI/2;
+    else if (a.y() < 0)
+      return 3*vec3::PI/2;
     else
       return 0;
   }
@@ -235,34 +238,34 @@ double vec2polar(const vec3 &a)
 
 vec3 operator+(const vec3 &a, const vec3 &b)
 {
-  return vec3(a.x_+b.x_, a.y_+b.y_, a.z_+b.z_);
+  return vec3(a.x()+b.x(), a.y()+b.y(), a.z()+b.z());
 }
 
 vec3 operator-(const vec3 &a, const vec3 &b)
 {
-  return vec3(a.x_-b.x_, a.y_-b.y_, a.z_-b.z_);
+  return vec3(a.x()-b.x(), a.y()-b.y(), a.z()-b.z());
 }
 
 vec3 operator*(const vec3 &a, double s)
 {
-  return vec3(s*a.x_, s*a.y_, s*a.z_);
+  return vec3(s*a.x(), s*a.y(), s*a.z());
 }
 
 vec3 operator*(double s, const vec3 &a)
 {
-  return vec3(s*a.x_, s*a.y_, s*a.z_);
+  return vec3(s*a.x(), s*a.y(), s*a.z());
 }
 
 vec3 operator/(const vec3 &a, double s)
 {
   // TODO: throw exception if s == 0
-  return vec3(a.x_/s, a.y_/s, a.z_/s);
+  return vec3(a.x()/s, a.y()/s, a.z()/s);
 }
 
 std::ostream &operator<<(std::ostream &stream, const vec3 &v)
 {
   stream << std::fixed;
-  return stream << std::setprecision(3) << v.x_ << " " << v.y_ << " " << v.z_;
+  return stream << std::setprecision(3) << v.x() << " " << v.y() << " " << v.z();
 }
 
 double clamp(double value, double min, double max)
@@ -278,7 +281,7 @@ double clamp(double value, double min, double max)
 std::string vec3::toString() const
 {
   std::stringstream ss;
-  ss << "[" << std::setprecision(5) << this->x_ << ", " << this->y_ << ", " << this->z_ << "]";
+  ss << "[" << std::setprecision(5) << this->x() << ", " << this->y_ << ", " << this->z_ << "]";
   return ss.str();
 }
 
