@@ -42,11 +42,7 @@ public:
                vec3 myOrigin, vec3 mySize, vec3 mySpacing,
                double myOffset, std::vector<axis_t> myAxis,
                const bool useConvexHull=false, const bool compute2DConvexHull=true,
-               Kernel kernel=ThinPlate);
-
-//  RBFInterface(std::vector<vec3> myData, 
-//               vec3 myOrigin, vec3 mySize, vec3 mySpacing,
-//               double myOffset, std::vector<axis_t> myAxis, bool use2DConvexHull=false, Kernel kernel=ThinPlate);
+               const bool invertSeedOrder=false, Kernel kernel=ThinPlate);
 
 	double getThresholdValue() const { return thresholdValue_; }
   const DataStorage getRasterData() const { return rasterData_; }
@@ -67,6 +63,7 @@ private:
 //  double offset_;
   const bool useConvexHull_;
   const bool compute2DConvexHull_;
+  const bool invertSeedOrder_;
   Kernel kernel_;
   std::vector<double> points_x_, points_y_ , points_z_, threshold_;
 

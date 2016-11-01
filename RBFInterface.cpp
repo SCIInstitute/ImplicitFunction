@@ -29,6 +29,11 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <exception>
+#include <algorithm>
+
+//#define TETLIBRARY   // Required definition for use of tetgen library
+#include <tetgen.h>
 
 const double RBFInterface::EPSILON = 1.0e-3;
 const double RBFInterface::SMALL_EPSILON = 1.0e-6;
@@ -37,15 +42,19 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
                            vec3 myOrigin, vec3 mySize, vec3 mySpacing,
                            double myOffset, std::vector<axis_t> myAxis,
                            const bool useConvexHull, const bool compute2DConvexHull,
-                           Kernel kernel) :
+                           const bool invertSeedOrder, Kernel kernel) :
   thresholdValue_(0),
   useConvexHull_(useConvexHull),
   compute2DConvexHull_(compute2DConvexHull),
+  invertSeedOrder_(invertSeedOrder),
   kernel_(kernel)
 {
-//for (int i = 0; i < myAxis.size(); ++i) {
-//std::cerr << "axis " << i << ": " << myAxis[i] << std::endl;
-//}
+  if ( this->invertSeedOrder_ )
+  {
+    // inplace
+    std::reverse( myData.begin(), myData.end() );
+  }
+
   for (int i = 0; i < myData.size(); i++)
   {
 //    std::cerr << "point: " << myData[i][0] << ", " << myData[i][1] << ", " << myData[i][2] << std::endl;
@@ -70,7 +79,118 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
 void RBFInterface::Create3DSurface()
 {
   // TODO: debug print
-  std::cerr << "Calling Qhull..." << std::endl;
+  std::cerr << "Calling Tetgen..." << std::endl;
+  tetgenio in, out;
+  in.numberofpoints = this->points_x_.size();
+  in.pointlist = new REAL[in.numberofpoints * 3];
+  for ( size_t i = 0; i < in.numberofpoints; ++i )
+  {
+    in.pointlist[i*3] = this->points_x_[i];
+    in.pointlist[i*3+1] = this->points_y_[i];
+    in.pointlist[i*3+2] = this->points_z_[i];
+  }
+
+  // no faces...
+  try
+  {
+    tetrahedralize("BE", &in, &out);
+  }
+  catch (std::exception& e)
+  {
+    std::cerr << "TetGen failed to generate a mesh: " << e.what() << std::endl;
+    return;
+  }
+  catch (...)
+  {
+    std::cerr << "TetGen failed to generate a mesh" << std::endl;
+    return;
+  }
+
+  // trifaces == convex hull
+  std::cerr << "# tri faces=" << out.numberoftrifaces << std::endl;
+  for (int i = 0; i < out.numberoftrifaces; ++i)
+  {
+    std::cerr << "trifacelist " << i << ": " << out.trifacelist[i*3] << " "
+                                             << out.trifacelist[i*3+1] << " "
+                                             << out.trifacelist[i*3+2] << std::endl;
+  }
+
+  std::cerr << "# points=" << out.numberofpoints << std::endl;
+  for (int i = 0; i < out.numberofpoints; ++i)
+  {
+    std::cerr << "pointlist " << i << ": " << out.pointlist[i*3] << " "
+                                           << out.pointlist[i*3+1] << " "
+                                           << out.pointlist[i*3+2] << std::endl;
+  }
+
+  std::vector< std::vector< int > > listOfIntsPerVertex(out.numberofpoints);
+  for (int i = 0; i < out.numberoftrifaces; ++i)
+  {
+    for (int j = 0; j < 3; ++j)
+    {
+      int index = out.trifacelist[i*3+j];
+      listOfIntsPerVertex[index].push_back(i);
+    }
+  }
+
+  for (int i = 0; i < listOfIntsPerVertex.size(); ++i)
+  {
+    std::cerr << i << ": ";
+    for (int j = 0; j < listOfIntsPerVertex[i].size(); ++j)
+    {
+      std::cerr << listOfIntsPerVertex[i][j] << " ";
+    }
+    std::cerr << std::endl;
+  }
+
+  // normal calculation on face
+  // For triangle p1, p2, p3 and vectors U = p2 - p1, V = p3 - p1, then normal N = UxV:
+  //  Nx = UyVz - UzVy
+  //  Ny = UzVx - UxVz
+  //  Nz = UxVy - UyVx
+
+  std::vector< vec3 > normalsPerFace;
+  for (int i = 0; i < out.numberoftrifaces; ++i)
+  {
+    const int i1 = out.trifacelist[i*3];
+    const int i2 = out.trifacelist[i*3+1];
+    const int i3 = out.trifacelist[i*3+2];
+
+    vec3 p1( out.pointlist[i1], out.pointlist[i1+1], out.pointlist[i1+2] );
+    vec3 p2( out.pointlist[i2], out.pointlist[i2+1], out.pointlist[i2+2] );
+    vec3 p3( out.pointlist[i3], out.pointlist[i3+1], out.pointlist[i3+2] );
+
+    vec3 u = p2 - p1;
+    vec3 v = p3 - p1;
+
+    vec3 n(
+           ( u.y() * v.z() ) - ( u.z() * v.y() ),
+           ( u.z() * v.x() ) - ( u.x() * v.z() ),
+           ( u.x() * v.y() ) - ( u.y() * v.x() )
+          );
+    normalsPerFace.push_back(n);
+  }
+
+  std::vector< vec3 > normalsPerVertex(out.numberofpoints);
+  for (int i = 0; i < listOfIntsPerVertex.size(); ++i)
+  {
+    const int tmpSize = listOfIntsPerVertex[i].size();
+    vec3 tmpVec;
+    std::cerr << "i=" << i << " tmpSize=" << tmpSize << " ";
+    for (int j = 0; j < tmpSize; ++j)
+    {
+      tmpVec += normalsPerFace[ listOfIntsPerVertex[i][j] ];
+      std::cerr << "j=" << j << " normalsPerFace=" << normalsPerFace[ listOfIntsPerVertex[i][j] ] << " ";
+    }
+    std::cerr << std::endl;
+    normalsPerVertex[i] = normalize(tmpVec, 1.0e-6);
+  }
+
+  for (int i = 0; i < normalsPerVertex.size(); ++i)
+  {
+    std::cerr << normalsPerVertex[i] << std::endl;
+  }
+
 }
 
 
