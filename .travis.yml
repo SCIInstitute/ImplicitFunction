@@ -13,5 +13,10 @@ addons:
     - gcc-4.8
     - g++-4.8
     - clang
+    - tetgen
 notifications:
   email: false
+script:
+  - mkdir build
+  - cd build
+  - cmake -DBUILD_TESTING:BOOL=OFF .. && make
