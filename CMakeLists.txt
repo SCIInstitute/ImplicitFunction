@@ -37,6 +37,7 @@ set(TravisCI_BUILD "" CACHE BOOL OFF)
 # Tetgen cmake files downloaded by Travis-CI build
 # TODO: is there a better way to handle this?
 if(TravisCI_BUILD)
+message(STATUS "Tetgen_DIR=${Tetgen_DIR}")
   set(TETGEN_INCLUDE ${Tetgen_DIR})
   set(TETGEN_LIBRARY_DIR ${Tetgen_DIR})
   set(TETGEN_USE_FILE ${CMAKE_CURRENT_BINARY_DIR}/UseTetgen.cmake)
