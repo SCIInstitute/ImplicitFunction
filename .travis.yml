@@ -23,7 +23,7 @@ script:
   - tar xzvf ./tetgen1.4.3.tar.gz
   - pushd tetgen1.4.3
   - make tetlib
+  - popd
   - wget http://www.sci.utah.edu/devbuilds/seg3d/tetgen_cmake.tgz
   - tar xzvf ./tetgen_cmake.tgz
-  - popd
   - cmake -DBUILD_TESTING:BOOL=OFF -DTravisCI_BUILD:BOOL=ON -DTetgen_DIR=`pwd`/tetgen1.4.3 .. && make
