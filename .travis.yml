@@ -26,6 +26,6 @@ script:
   - wget http://www.sci.utah.edu/devbuilds/seg3d/tetgen_cmake.tgz
   - tar xzf ./tetgen_cmake.tgz
   - popd
-  - cmake -DBUILD_TESTING:BOOL=OFF -DTravisCI_BUILD:BOOL=ON -DTetgen_DIR=`pwd`/tetgen1.4.3 ..
+  - cmake -DBUILD_TESTING:BOOL=ON -DTravisCI_BUILD:BOOL=ON -DTetgen_DIR=`pwd`/tetgen1.4.3 ..
   - make -j4
   - ./ImplicitFunction_Tests
