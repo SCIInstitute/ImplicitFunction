@@ -35,11 +35,13 @@ include_directories(
 )
 
 add_executable(ImplicitFunction_Tests ${ImplicitFunction_Tests_SRCS})
+
+target_compile_definitions(ImplicitFunction_Tests
+  PUBLIC -DREGRESSION_DIR="${CMAKE_CURRENT_SOURCE_DIR}/regression")
+
 target_link_libraries(ImplicitFunction_Tests
   ${ImplicitFunction_LIB_NAME}
-#  ${QHULL_CPP_LIBRARY}
-#  ${QHULL_STATIC_LIBRARY}
-#  ${HULL_STATIC_R_LIBRARY}
+  ${TETGEN_LIBRARY}
   ${GTEST_LIBRARY}
   ${GTEST_MAIN_LIBRARY}
 )
