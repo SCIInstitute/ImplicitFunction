@@ -30,38 +30,26 @@ if(BUILD_TESTING)
   find_package(GTest 1.7 REQUIRED)
 endif()
 
-#set(QHULL_LIBRARY_DIR "" CACHE PATH "QHull library directory.")
-#if(IS_DIRECTORY ${QHULL_LIBRARY_DIR})
-#  # TODO: this probably won't work in VS or Xcode
-#  find_library(QHULL_STATIC_LIBRARY
-#    NAMES qhullstatic qhullstatic_d
-#    PATHS ${QHULL_LIBRARY_DIR}
-#    DOC "QHull static library."
-#  )
-#  find_library(QHULL_STATIC_R_LIBRARY
-#    NAMES qhullstatic_r qhullstatic_rd
-#    PATHS ${QHULL_LIBRARY_DIR}
-#    DOC "QHull static reentrant library."
-#  )
-#  find_library(QHULL_CPP_LIBRARY
-#    NAMES qhullcpp qhullcpp_d
-#    PATHS ${QHULL_LIBRARY_DIR}
-#    DOC "QHull C++ library."
-#  )
-#  message(STATUS "QHull libs (debug): ${QHULL_STATIC_LIBRARY} ${QHULL_CPP_LIBRARY}")
-#endif()
-#
-#set(QHULL_INCLUDE_DIR "" CACHE PATH "QHull include directory.")
-#if(IS_DIRECTORY ${QHULL_INCLUDE_DIR})
-#  # check
-#  find_path(QHULL_INCLUDE_FILE Qhull.h
-#    PATHS ${QHULL_INCLUDE_DIR}
-#    PATH_SUFFIXES libqhullcpp
-#    DOC "QHull.h file path."
-#  )
-#  message(STATUS "QHull include: ${QHULL_INCLUDE_DIR}")
-#endif()
+set(Tetgen_DIR "" CACHE PATH "Tetgen directory.")
+set(TravisCI_BUILD "" CACHE BOOL OFF)
 
+# have to hardcode some setting for the Travis-CI build
+# Tetgen cmake files downloaded by Travis-CI build
+# TODO: is there a better way to handle this?
+if(TravisCI_BUILD)
+  set(TETGEN_INCLUDE ${Tetgen_DIR})
+  set(TETGEN_LIBRARY_DIR ${Tetgen_DIR})
+  set(TETGEN_USE_FILE ${CMAKE_CURRENT_BINARY_DIR}/UseTetgen.cmake)
+  set(TETGEN_LIBRARY "tet")
+  configure_file(${CMAKE_CURRENT_BINARY_DIR}/TetgenConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/TetgenConfig.cmake @ONLY)
+  configure_file(${CMAKE_CURRENT_BINARY_DIR}/UseTetgen.cmake ${TETGEN_USE_FILE} COPYONLY)
+endif()
+
+find_package(Tetgen CONFIGS TetgenConfig.cmake HINTS ${Tetgen_DIR} NO_SYSTEM_ENVIRONMENT_PATH)
+if(NOT Tetgen_FOUND)
+  message(FATAL_ERROR "Tetgen library not found in ${Tetgen_DIR}")
+endif()
+include(${TETGEN_USE_FILE})
 
 ###########################################
 # *Nix C++ compiler flags
@@ -79,7 +67,6 @@ if(UNIX)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--no-as-needed -ldl -lrt")
   endif()
 endif()
-
 
 set(ImplicitFunction_LIB_NAME "rbf")
 
@@ -110,15 +97,9 @@ add_library(${ImplicitFunction_LIB_NAME}
   ${ImplicitFunction_SRCS}
 )
 
-#target_link_libraries(${ImplicitFunction_LIB_NAME}
-#  ${QHULL_CPP_LIBRARY}
-#  ${HULL_STATIC_LIBRARY}
-#  ${HULL_STATIC_R_LIBRARY}
-#)
-#
-#include_directories(
-#  ${QHULL_INCLUDE_DIR}
-#)
+target_link_libraries(${ImplicitFunction_LIB_NAME}
+  ${TETGEN_LIBRARY}
+)
 
 if(BUILD_TESTING)
   add_subdirectory(Tests)
