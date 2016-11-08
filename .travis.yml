@@ -29,5 +29,5 @@ script:
   - pwd
   - wget http://www.sci.utah.edu/devbuilds/seg3d/tetgen_cmake.tgz
   - tar xzvf ./tetgen_cmake.tgz
-  - cmake -DBUILD_TESTING:BOOL=OFF -DTravisCI_BUILD:BOOL=ON -DTetgen_DIR=$TRAVIS_BUILD_DIR/tetgen1.4.3 .. && make
+  - cmake -DBUILD_TESTING:BOOL=OFF -DTravisCI_BUILD:BOOL=ON -DTetgen_DIR=`pwd` .. && make
 #  - cmake -DBUILD_TESTING:BOOL=OFF .. && make
