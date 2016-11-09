@@ -13,18 +13,32 @@ addons:
     - gcc-4.8
     - g++-4.8
     - clang
-    - libgtest-dev
 notifications:
   email: false
+cache:
+  directories:
+    - $HOME/deps
+before_cache:
+  - cd $HOME/deps
+  - wget http://tetgen.org/files/tetgen1.4.3.tar.gz
+  - wget http://www.sci.utah.edu/devbuilds/seg3d/tetgen_cmake.tgz
+  - wget https://github.com/google/googletest/archive/release-1.7.0.tar.gz
 script:
   - mkdir build
   - cd build
-  - wget http://tetgen.org/files/tetgen1.4.3.tar.gz
-  - tar xzf ./tetgen1.4.3.tar.gz
+  #- wget http://tetgen.org/files/tetgen1.4.3.tar.gz
+  - tar xzf $HOME/deps/tetgen1.4.3.tar.gz
   - pushd tetgen1.4.3
   - make tetlib
-  - wget http://www.sci.utah.edu/devbuilds/seg3d/tetgen_cmake.tgz
-  - tar xzf ./tetgen_cmake.tgz
+  #- wget http://www.sci.utah.edu/devbuilds/seg3d/tetgen_cmake.tgz
+  - tar xzf $HOME/deps/tetgen_cmake.tgz
+  - popd
+  - tar xzvf $HOME/deps/release-1.7.0.tar.gz
+  - pushd googletest-release-1.7.0
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make -j4
   - popd
   - cmake -DBUILD_TESTING:BOOL=ON -DTravisCI_BUILD:BOOL=ON -DTetgen_DIR=`pwd`/tetgen1.4.3 ..
   - make -j4
