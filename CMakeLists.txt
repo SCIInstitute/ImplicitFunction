@@ -31,7 +31,7 @@ if(BUILD_TESTING)
 endif()
 
 set(Tetgen_DIR "" CACHE PATH "Tetgen directory.")
-set(TravisCI_BUILD "" CACHE BOOL OFF)
+option(TravisCI_BUILD "Enable if Travis-CI build." OFF)
 
 # have to hardcode some setting for the Travis-CI build
 # Tetgen cmake files downloaded by Travis-CI build
@@ -56,7 +56,21 @@ include(${TETGEN_USE_FILE})
 ###########################################
 
 if(UNIX)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
+  option(ENABLE_COVERAGE "Enable coverage compiler options." OFF)
+  if(ENABLE_COVERAGE)
+    #if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+    #  set(COVERAGE_FLAGS "")
+    #else()
+    #  # probably GCC
+    #  set(COVERAGE_FLAGS " -fprofile-arcs -ftest-coverage")
+    #endif()
+    set(COVERAGE_FLAGS "--coverage")
+    set(CTEST_CUSTOM_COVERAGE_EXCLUDE "/Tests/")
+  else()
+    set(COVERAGE_FLAGS "")
+  endif()
+
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall ${COVERAGE_FLAGS}")
   if(APPLE)
     set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++11")
     set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")

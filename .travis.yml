@@ -15,6 +15,7 @@ before_install:
   - if [ ! -f "tetgen1.4.3.tar.gz" ]; then wget --quiet --directory-prefix=$HOME/deps http://tetgen.org/files/tetgen1.4.3.tar.gz; fi
   - if [ ! -f "tetgen_cmake.tgz" ]; then wget --quiet --directory-prefix=$HOME/deps http://www.sci.utah.edu/devbuilds/seg3d/tetgen_cmake.tgz; fi
   - if [ ! -f "release-1.7.0.tar.gz" ]; then wget --quiet --directory-prefix=$HOME/deps https://github.com/google/googletest/archive/release-1.7.0.tar.gz; fi
+  - pip install --user cpp-coveralls
 install:
   # C++11 support required
   - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
@@ -48,9 +49,10 @@ script:
   - make -j4
   - popd
   # build ImplicitFunction library
-  - cmake -DBUILD_TESTING:BOOL=ON -DTravisCI_BUILD:BOOL=ON -DGTEST_INCLUDE_DIR:PATH=`pwd`/googletest-release-1.7.0/include -DGTEST_LIBRARY:FILEPATH=`pwd`/googletest-release-1.7.0/build/libgtest.a -DGTEST_MAIN_LIBRARY:FILEPATH=`pwd`/googletest-release-1.7.0/build/libgtest_main.a -DTetgen_DIR=`pwd`/tetgen1.4.3 ..
+  - cmake -DBUILD_TESTING:BOOL=ON -DENABLE_COVERAGE:BOOL=ON -DTravisCI_BUILD:BOOL=ON -DGTEST_INCLUDE_DIR:PATH=`pwd`/googletest-release-1.7.0/include -DGTEST_LIBRARY:FILEPATH=`pwd`/googletest-release-1.7.0/build/libgtest.a -DGTEST_MAIN_LIBRARY:FILEPATH=`pwd`/googletest-release-1.7.0/build/libgtest_main.a -DTetgen_DIR=`pwd`/tetgen1.4.3 ..
   - make -j4
 #after_failure:
 after_success:
   - ./ImplicitFunction_Tests
+  - coveralls --gcov-options '\-lp'
 #after_script:
