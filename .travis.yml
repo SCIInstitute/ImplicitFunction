@@ -54,5 +54,6 @@ script:
   - ./ImplicitFunction_Tests
 #after_failure:
 after_success:
-  - coveralls --exclude tetgen1.4.3 --exclude googletest-release-1.7.0 --gcov-options '\-lp'
+  - cd $TRAVIS_BUILD_DIR
+  - coveralls --exclude build --exclude Tests --gcov-options '\-lp'
 #after_script:
