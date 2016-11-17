@@ -34,13 +34,15 @@
 #include "RBF.h"
 
 typedef std::vector< std::vector< std::vector<double> > > DataStorage;
+typedef std::vector<size_t> IndexList;
+typedef std::vector<axis_t> AxisList;
 
 class RBFInterface
 {
 public:
 	RBFInterface(std::vector<vec3> myData,
-               vec3 myOrigin, vec3 mySize, vec3 mySpacing,
-               double myOffset, std::vector<axis_t> myAxis,
+               const vec3& myOrigin, const vec3& mySize, const vec3& mySpacing,
+               const double myOffset, AxisList myAxis,
                const bool useConvexHull=false, const bool compute2DConvexHull=true,
                const bool invertSeedOrder=false, Kernel kernel=ThinPlate);
 
@@ -49,10 +51,10 @@ public:
 
 private:
   // 2D calculation
-  void CreateSurface(std::vector<vec3> myData, vec3 myOrigin, vec3 mySize, vec3 mySpacing, double myOffset, std::vector<axis_t> myAxis);
+  void CreateSurface();
   void Create3DSurface();
 
-  void augmentNormalData(const double myOffset);
+  void augmentNormalData();
   vec3 findNormalAxis(const int n);
 
   ScatteredData *surfaceData_;
@@ -60,11 +62,15 @@ private:
   DataStorage rasterData_;
 
   const double thresholdValue_;
-//  double offset_;
+  const vec3 origin_;
+  const vec3 size_;
+  const vec3 spacing_;
+  const double offset_;
+  AxisList axisList_;
   const bool useConvexHull_;
   const bool compute2DConvexHull_;
   const bool invertSeedOrder_;
-  Kernel kernel_;
+  const Kernel kernel_;
   std::vector<double> points_x_, points_y_ , points_z_, threshold_;
 
   // change to inside or outside
