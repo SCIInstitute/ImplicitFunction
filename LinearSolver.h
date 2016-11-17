@@ -41,8 +41,12 @@ public:
 	//Sparse Linear Solvers
 	std::vector<double> biCGStab(std::vector<double> &b);
 	void biCGStab(std::vector<double> &b, std::vector<double> &x);
+  const double residualNorm() const { return this->residualNorm_; }
+
 private:
-	SparseMatrix *A;
+	SparseMatrix *A_;
+  double residualNorm_;
+
 	double norm(std::vector<double> &a);
 	double norm(std::vector<double> &a, std::vector<double> &b);
 	void SpMV(std::vector<double> &a, std::vector<double> &b);

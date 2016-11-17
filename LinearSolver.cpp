@@ -31,21 +31,23 @@
 #include <cmath>
 #include <cstdio>
 #include <iostream>
+#include <limits>
 
 using std::vector;
 
-LinearSolver::LinearSolver()
+LinearSolver::LinearSolver() :
+  residualNorm_( std::numeric_limits<double>::max() )
 {
 }
 
 LinearSolver::LinearSolver(SparseMatrix *myMat)
 {
-	A = myMat;
+	this->A_ = myMat;
 }
 
 void LinearSolver::setMatrix(SparseMatrix *myMat)
 {
-	A = myMat;
+	this->A_ = myMat;
 }
 
 vector<double> LinearSolver::biCGStab(vector<double> &b)
@@ -58,9 +60,11 @@ vector<double> LinearSolver::biCGStab(vector<double> &b)
 void LinearSolver::biCGStab(vector<double> &b, vector<double> &x)
 {
   int i, iter = 0;
-  const int n = b.size();
+  const size_t n = b.size();
   vector<double> r, rhat, v, p, t, s, diag, y, z, pret, pres;
   double rho, rhoold, alpha, omega, omegaold, beta;
+
+  this->residualNorm_ = std::numeric_limits<double>::max();
 
   x.resize(n);
   r.resize(n);
@@ -79,7 +83,7 @@ void LinearSolver::biCGStab(vector<double> &b, vector<double> &x)
   {
     x[i] = v[i] = p[i] = 0;
     r[i] = rhat[i] = b[i];
-    diag[i] = 1.0; //A.val[i][A.length[i]-1];
+    diag[i] = 1.0; //this->A_.val[i][this->A_.length[i]-1];
   }
   rho = rhoold = alpha = omega = omegaold=1;
 
@@ -148,7 +152,9 @@ void LinearSolver::biCGStab(vector<double> &b, vector<double> &x)
 
     rhoold=rho; omegaold=omega;
   }
-  printf("Iteration: %d: Residual norm = %lf\n", iter, norm(r)); fflush(stdout);
+
+  this->residualNorm_ = norm(r);
+  printf("Iteration: %d: Residual norm = %lf\n", iter, this->residualNorm_); fflush(stdout);
   //SpMV(x,v);
   for (i = 0; i < n; i++)
   {
@@ -156,25 +162,29 @@ void LinearSolver::biCGStab(vector<double> &b, vector<double> &x)
   }
 }
 
+// TODO: bother with range check here?
+
 double LinearSolver::norm(vector<double> &a)
 {
-    int i, n=a.size();
-    double ret=0;
-    for (i=0; i<n; i++)
-        ret += a[i]*a[i];
-    return sqrt(ret);
+  const size_t N = a.size();
+  double ret = 0;
+  for (size_t i = 0; i < N; i++)
+    ret += a[i]*a[i];
+
+  return sqrt(ret);
 }
 
 double LinearSolver::norm(vector<double> &a, vector<double> &b)
 {
-    int i, n=a.size();
-    double ret=0;
-    for (i=0; i<n; i++)
-        ret += a[i]*b[i];
-    return ret;
+  const size_t N = a.size();
+  double ret = 0;
+  for (size_t i = 0; i < N; i++)
+    ret += a[i]*b[i];
+
+  return ret;
 }
 
 void LinearSolver::SpMV(vector<double> &a, vector<double> &b)
 {
-	A->multiply(a,b);
+	this->A_->multiply(a,b);
 }
