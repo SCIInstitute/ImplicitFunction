@@ -182,25 +182,25 @@ std::cerr << "normalsPerFace[" << i << "]=" << normalsPerFace[i] << ", len=" << 
   }
 
   //vec3* normalsPerVertex = new vec3[NUMBER_POINTS];
-  std::vector< vec3 > normalsPerVertex;
-  for (size_t i = 0; i < NUMBER_POINTS; ++i)
-  {
-    const size_t TMP_SIZE = listOfIntsPerVertex[i].size();
-    if (TMP_SIZE == 0) continue;
-
-    vec3 tmpVec;
-    for (size_t j = 0; j < TMP_SIZE; ++j)
-    {
-      tmpVec += normalsPerFace[ listOfIntsPerVertex[i][j] ];
-    }
-
-    normalsPerVertex.push_back( normalize(tmpVec/3, SMALL_EPSILON) );
-  }
-
-for (int i = 0; i < normalsPerVertex.size(); ++i)
-{
-std::cerr << "normalsPerVertex[" << i << "]=" << normalsPerVertex[i] << ", len=" << length(normalsPerVertex[i]) << std::endl;
-}
+//  std::vector< vec3 > normalsPerVertex;
+//  for (size_t i = 0; i < NUMBER_POINTS; ++i)
+//  {
+//    const size_t TMP_SIZE = listOfIntsPerVertex[i].size();
+//    if (TMP_SIZE == 0)
+//    {
+//      continue;
+//    }
+//    else
+//    {
+//      vec3 tmpVec;
+//      for (size_t j = 0; j < TMP_SIZE; ++j)
+//      {
+//        tmpVec += normalsPerFace[ listOfIntsPerVertex[i][j] ];
+//      }
+//
+//      normalsPerVertex.push_back( normalize(tmpVec/3, SMALL_EPSILON) );
+//    }
+//  }
 
   // TODO: set up surface data class...
   this->surfaceData_ = new ScatteredData(this->points_x_, this->points_y_, this->points_z_, this->threshold_, this->axisList_);
@@ -216,6 +216,7 @@ std::cerr << "normalsPerVertex[" << i << "]=" << normalsPerVertex[i] << ", len="
   this->surfaceData_->leftovers_[2].clear();
 
   // convex hull...
+
   for (size_t i = 0; i < NUMBER_POINTS; ++i)
   {
     // indices of points not in convex hull
@@ -226,17 +227,39 @@ std::cerr << "Point " << i << " in leftovers." << std::endl;
       this->surfaceData_->leftovers_[1].push_back( out.pointlist[i*NUMBER_TRI_POINTS+1] );
       this->surfaceData_->leftovers_[2].push_back( out.pointlist[i*NUMBER_TRI_POINTS+2] );
     }
-    else
-    {
-      this->surfaceData_->surfacePoints_[0].push_back( out.pointlist[i*NUMBER_TRI_POINTS] );
-      this->surfaceData_->surfacePoints_[1].push_back( out.pointlist[i*NUMBER_TRI_POINTS+1] );
-      this->surfaceData_->surfacePoints_[2].push_back( out.pointlist[i*NUMBER_TRI_POINTS+2] );
-    }
   }
-  this->surfaceData_->origSize_ = this->surfaceData_->surfacePoints_[0].size();
-std::cerr << "#points=" << this->surfaceData_->surfacePoints_[0].size() << ", " << "#leftovers=" << this->surfaceData_->leftovers_[0].size() << std::endl;
 
   const size_t M = this->surfaceData_->leftovers_[0].size();
+
+  std::vector< vec3 > normalsPerVertex;
+  for (size_t i = 0; i < NUMBER_POINTS; ++i)
+  {
+    if ( listOfIntsPerVertex[i].size() == 0 ) continue;
+
+std::cerr << "Point " << i << " in surface points." << std::endl;
+    this->surfaceData_->surfacePoints_[0].push_back( out.pointlist[i*NUMBER_TRI_POINTS] );
+    this->surfaceData_->surfacePoints_[1].push_back( out.pointlist[i*NUMBER_TRI_POINTS+1] );
+    this->surfaceData_->surfacePoints_[2].push_back( out.pointlist[i*NUMBER_TRI_POINTS+2] );
+
+    vec3 tmpVec;
+    for (size_t j = 0; j < listOfIntsPerVertex[i].size(); ++j)
+    {
+      tmpVec += normalsPerFace[ listOfIntsPerVertex[i][j] ];
+    }
+
+//    normalsPerVertex.push_back( normalize(tmpVec/3, SMALL_EPSILON) );
+    normalsPerVertex.push_back( normalize(tmpVec, SMALL_EPSILON) );
+  }
+
+  this->surfaceData_->origSize_ = this->surfaceData_->surfacePoints_[0].size();
+std::cerr << "#points=" << this->surfaceData_->surfacePoints_[0].size() << ", "
+          << "#leftovers=" << this->surfaceData_->leftovers_[0].size() << std::endl;
+
+for (int i = 0; i < normalsPerVertex.size(); ++i)
+{
+  std::cerr << "normalsPerVertex[" << i << "]=" << normalsPerVertex[i] << ", len=" << length(normalsPerVertex[i]) << std::endl;
+}
+
   // iterate through list of points not on hull, add to list as zero points
   for (int i = 0; i < M; ++i)
   {
