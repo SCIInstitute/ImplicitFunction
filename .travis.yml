@@ -12,9 +12,9 @@ cache:
 before_install:
   # set up dependency cache
   - if [ ! -d $HOME/deps ]; then mkdir $HOME/deps; fi
-  - if [ ! -f "tetgen1.4.3.tar.gz" ]; then wget --quiet --directory-prefix=$HOME/deps http://tetgen.org/files/tetgen1.4.3.tar.gz; fi
-  - if [ ! -f "tetgen_cmake.tgz" ]; then wget --quiet --directory-prefix=$HOME/deps http://www.sci.utah.edu/devbuilds/seg3d/tetgen_cmake.tgz; fi
-  - if [ ! -f "release-1.7.0.tar.gz" ]; then wget --quiet --directory-prefix=$HOME/deps https://github.com/google/googletest/archive/release-1.7.0.tar.gz; fi
+  - if [ ! -f "$HOME/deps/tetgen1.4.3.tar.gz" ]; then wget --quiet --directory-prefix=$HOME/deps http://tetgen.org/files/tetgen1.4.3.tar.gz; fi
+  - if [ ! -f "$HOME/deps/tetgen_cmake.tgz" ]; then wget --quiet --directory-prefix=$HOME/deps http://www.sci.utah.edu/devbuilds/seg3d/tetgen_cmake.tgz; fi
+  - if [ ! -f "$HOME/deps/release-1.7.0.tar.gz" ]; then wget --quiet --directory-prefix=$HOME/deps https://github.com/google/googletest/archive/release-1.7.0.tar.gz; fi
   - pip install --user cpp-coveralls
 install:
   # C++11 support required
