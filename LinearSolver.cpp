@@ -90,15 +90,24 @@ void LinearSolver::biCGStab(vector<double> &b, vector<double> &x)
   if (norm(r) < n*1e-10)
     return;
 
+#ifndef NDEBUG
   printf("norm(r)=%lf\n", norm(r)); fflush(stdout);
+#endif
 
   while (iter < 10*n)
   {
+#ifndef NDEBUG
     std::cout << "iter: " << iter << " norm(r)= " << norm(r) << std::endl;
     printf("Iteration %d: Residual norm = %lf\n", iter, norm(r)); fflush(stdout);
+#endif
+
     iter++;
     rho = norm(rhat, r);
+
+#ifndef NDEBUG
     printf("rho: %lf\n", rho);
+#endif
+
     if (1 == iter)
     {
       for (i = 0; i < n; i++)
@@ -154,12 +163,15 @@ void LinearSolver::biCGStab(vector<double> &b, vector<double> &x)
   }
 
   this->residualNorm_ = norm(r);
+
+#ifndef NDEBUG
   printf("Iteration: %d: Residual norm = %lf\n", iter, this->residualNorm_); fflush(stdout);
   //SpMV(x,v);
   for (i = 0; i < n; i++)
   {
     printf("x[%d] = %.10f r[%d]=%.10lf\n", i, x[i],i,v[i]-b[i]);
   }
+#endif
 }
 
 // TODO: bother with range check here?

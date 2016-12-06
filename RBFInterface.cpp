@@ -69,6 +69,8 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
     this->threshold_.push_back(this->thresholdValue_);
   }
 
+  // TODO: error reporting???
+  // TODO: would it be better to break this out, or have constructor throw exception???
   if ( this->useConvexHull_ && ! this->compute2DConvexHull_ )
   {
     Create3DSurface();
@@ -113,22 +115,24 @@ void RBFInterface::Create3DSurface()
   const size_t NUMBER_TRI_FACES = out.numberoftrifaces;
   const size_t NUMBER_TRI_POINTS = 3;
 
-// trifaces == convex hull
-std::cerr << "# tri faces=" << NUMBER_TRI_FACES << std::endl;
-for (size_t i = 0; i < out.numberoftrifaces; ++i)
-{
-  std::cerr << "trifacelist " << i << ": " << out.trifacelist[i*NUMBER_TRI_POINTS] << " "
-                                           << out.trifacelist[i*NUMBER_TRI_POINTS+1] << " "
-                                           << out.trifacelist[i*NUMBER_TRI_POINTS+2] << std::endl;
-}
+#ifndef NDEBUG
+  // trifaces == convex hull
+  std::cerr << "# tri faces=" << NUMBER_TRI_FACES << std::endl;
+  for (size_t i = 0; i < out.numberoftrifaces; ++i)
+  {
+    std::cerr << "trifacelist " << i << ": " << out.trifacelist[i*NUMBER_TRI_POINTS] << " "
+                                             << out.trifacelist[i*NUMBER_TRI_POINTS+1] << " "
+                                             << out.trifacelist[i*NUMBER_TRI_POINTS+2] << std::endl;
+  }
 
-std::cerr << "# points=" << NUMBER_POINTS << std::endl;
-for (size_t i = 0; i < NUMBER_POINTS; ++i)
-{
-  std::cerr << "pointlist " << i << ": " << out.pointlist[i*NUMBER_TRI_POINTS] << " "
-                                         << out.pointlist[i*NUMBER_TRI_POINTS+1] << " "
-                                         << out.pointlist[i*NUMBER_TRI_POINTS+2] << std::endl;
-}
+  std::cerr << "# points=" << NUMBER_POINTS << std::endl;
+  for (size_t i = 0; i < NUMBER_POINTS; ++i)
+  {
+    std::cerr << "pointlist " << i << ": " << out.pointlist[i*NUMBER_TRI_POINTS] << " "
+                                           << out.pointlist[i*NUMBER_TRI_POINTS+1] << " "
+                                           << out.pointlist[i*NUMBER_TRI_POINTS+2] << std::endl;
+  }
+#endif
 
   IndexList* listOfIntsPerVertex = new IndexList[NUMBER_POINTS];
   for (size_t i = 0; i < NUMBER_TRI_FACES; ++i)
@@ -138,17 +142,17 @@ for (size_t i = 0; i < NUMBER_POINTS; ++i)
       size_t index = out.trifacelist[i*NUMBER_TRI_POINTS+j];
       listOfIntsPerVertex[index].push_back(i);
     }
-  }
+    }
 
-for (int i = 0; i < NUMBER_POINTS; ++i)
-{
-std::cerr << i << ": ";
-for (int j = 0; j < listOfIntsPerVertex[i].size(); ++j)
-{
-std::cerr << listOfIntsPerVertex[i][j] << " ";
-}
-std::cerr << std::endl;
-}
+  for (int i = 0; i < NUMBER_POINTS; ++i)
+  {
+    std::cerr << i << ": ";
+    for (int j = 0; j < listOfIntsPerVertex[i].size(); ++j)
+    {
+      std::cerr << listOfIntsPerVertex[i][j] << " ";
+    }
+    std::cerr << std::endl;
+  }
 
   // normal calculation on face
   // For triangle p1, p2, p3 and vectors U = p2 - p1, V = p3 - p1, then normal N = UxV:
@@ -180,27 +184,6 @@ std::cerr << std::endl;
     normalsPerFace[i] = normalize(n, SMALL_EPSILON);
 std::cerr << "normalsPerFace[" << i << "]=" << normalsPerFace[i] << ", len=" << length(normalsPerFace[i]) << std::endl;
   }
-
-  //vec3* normalsPerVertex = new vec3[NUMBER_POINTS];
-//  std::vector< vec3 > normalsPerVertex;
-//  for (size_t i = 0; i < NUMBER_POINTS; ++i)
-//  {
-//    const size_t TMP_SIZE = listOfIntsPerVertex[i].size();
-//    if (TMP_SIZE == 0)
-//    {
-//      continue;
-//    }
-//    else
-//    {
-//      vec3 tmpVec;
-//      for (size_t j = 0; j < TMP_SIZE; ++j)
-//      {
-//        tmpVec += normalsPerFace[ listOfIntsPerVertex[i][j] ];
-//      }
-//
-//      normalsPerVertex.push_back( normalize(tmpVec/3, SMALL_EPSILON) );
-//    }
-//  }
 
   // TODO: set up surface data class...
   this->surfaceData_ = new ScatteredData(this->points_x_, this->points_y_, this->points_z_, this->threshold_, this->axisList_);
@@ -475,46 +458,6 @@ void RBFInterface::CreateSurface()
   // TODO: duplicated code (end)
 }
 
-//vec3 RBFInterface::findNormal(ScatteredData *data, int n)
-//{
-//  int tot = data->origSize;
-//  int prev = (n-1)>=0?n-1:tot-1;
-//  int next = (n+1)<tot?n+1:0;
-//  
-//  while(data->surfacePoints_[2][prev]!=data->surfacePoints_[2][n])
-//  {
-//    prev = (prev-1)>=0?prev-1:tot-1;
-//  }
-//  
-//  while(data->surfacePoints_[2][next]!=data->surfacePoints_[2][n])
-//  {
-//    next = (next+1)<tot?next+1:0;
-//  }
-//  printf("%d %d %d %d\n", prev,n,next,tot); fflush(stdout);
-//  
-//  vec3 a(data->surfacePoints_[0][n], data->surfacePoints_[1][n], data->surfacePoints_[2][n]);
-//  vec3 b(data->surfacePoints_[0][prev], data->surfacePoints_[1][prev], data->surfacePoints_[2][prev]);
-//  vec3 c(data->surfacePoints_[0][next], data->surfacePoints_[1][next], data->surfacePoints_[2][next]);
-//  
-//  vec3 tangent = b-c;
-//  //rotate by 90 degrees on the x-y plane
-//  double ret_x = -tangent[1];
-//  double ret_y = tangent[0];
-//  vec3 ret(ret_x, ret_y, tangent[2]);
-//  
-//  return ret;
-//}
-//
-//vec3 RBFInterface::findSphericalNormal(ScatteredData *data, int n)
-//{
-//  vec3 ret(0,0,0);
-//  for(int j=0; j<3; j++)
-//    // TODO: hardcoded normal scaling?
-//    ret[j] = (data->surfacePoints_[j][n] - data->centroid[j])/10;
-//  
-//  return ret;
-//}
-
 // TODO: move this and findNormalAxis to new class?
 void RBFInterface::augmentNormalData()
 {
@@ -563,27 +506,6 @@ void RBFInterface::augmentNormalData()
     // normals pointing outward
     this->surfaceData_->fnc_.push_back(NORMAL_OUT);
   }
-
-//  std::cerr << "points x component: ";
-//  for (int i = 0; i < this->surfaceData_->surfacePoints_[0].size(); ++i)
-//  {
-//    std::cerr << this->surfaceData_->surfacePoints_[0][i] << " ";
-//  }
-//  std::cerr << std::endl;
-//
-//  std::cerr << "points y component: ";
-//  for (int i = 0; i < this->surfaceData_->surfacePoints_[1].size(); ++i)
-//  {
-//    std::cerr << this->surfaceData_->surfacePoints_[1][i] << " ";
-//  }
-//  std::cerr << std::endl;
-//
-//  std::cerr << "points z component: ";
-//  for (int i = 0; i < this->surfaceData_->surfacePoints_[2].size(); ++i)
-//  {
-//    std::cerr << this->surfaceData_->surfacePoints_[2][i] << " ";
-//  }
-//  std::cerr << std::endl;
 }
 
 vec3 RBFInterface::findNormalAxis(const int n)
@@ -594,9 +516,6 @@ vec3 RBFInterface::findNormalAxis(const int n)
   int next = (n+1) < TOT ? n+1 : 0; // wrap
   //axis_t myAxis = this->surfaceData_->axisInformation_[n];
   axis_t myAxis = this->surfaceData_->updatedAxisInformation_[n];
-
-//printf("Computing normals (1): prev=%d, n=%d, next=%d, TOT=%d\n", prev,n,next,TOT); fflush(stdout);
-//std::cerr << fabs(this->surfaceData_->surfacePoints_[myAxis][prev] - this->surfaceData_->surfacePoints_[myAxis][n]) << ", " << fabs(this->surfaceData_->surfacePoints_[myAxis][next] - this->surfaceData_->surfacePoints_[myAxis][n]) << std::endl;
 
   // TODO: why is this needed? AK 09/13/2016
   while (fabs(this->surfaceData_->surfacePoints_[myAxis][prev] - this->surfaceData_->surfacePoints_[myAxis][n]) > SMALL_EPSILON)
