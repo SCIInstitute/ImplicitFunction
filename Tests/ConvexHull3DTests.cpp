@@ -36,53 +36,135 @@ class ConvexHull3DTest : public ::testing::Test
 protected:
   virtual void SetUp()
   {
-    pointsTet.push_back( vec3(1.0, 1.0, 1.0) );
-    pointsTet.push_back( vec3(-1.0, -1.0, 1.0) );
-    pointsTet.push_back( vec3(-1.0, 1.0, -1.0) );
-    pointsTet.push_back( vec3(1.0, -1.0, -1.0) );
+    // TODO: new coordinates needed to match Seg3D
+//    tet.push_back( vec3( 1.0,  1.0,  1.0) );
+//    tet.push_back( vec3(-1.0, -1.0,  1.0) );
+//    tet.push_back( vec3(-1.0,  1.0, -1.0) );
+//    tet.push_back( vec3( 1.0, -1.0, -1.0) );
+//
+//    cube.push_back( vec3(-1.0, -1.0,  1.0) );
+//    cube.push_back( vec3( 1.0, -1.0,  1.0) );
+//    cube.push_back( vec3( 1.0,  1.0,  1.0) );
+//    cube.push_back( vec3(-1.0,  1.0,  1.0) );
+//    cube.push_back( vec3(-1.0, -1.0, -1.0) );
+//    cube.push_back( vec3( 1.0, -1.0, -1.0) );
+//    cube.push_back( vec3( 1.0,  1.0, -1.0) );
+//    cube.push_back( vec3(-1.0,  1.0, -1.0) );
+//
+//    prism.push_back( vec3(-1.0, -0.58, -1.0) );
+//    prism.push_back( vec3(-1.0, -0.58,  1.0) );
+//    prism.push_back( vec3( 1.0, -0.58, -1.0) );
+//    prism.push_back( vec3( 1.0, -0.58,  1.0) );
+//    prism.push_back( vec3(   0,  1.15, -1.0) );
+//    prism.push_back( vec3(   0,  1.15,  1.0) );
+//
+//    prismWithInternalPoint.push_back( vec3(-1.0, -0.58, -1.0) );
+//    prismWithInternalPoint.push_back( vec3(-1.0, -0.58,  1.0) );
+//    prismWithInternalPoint.push_back( vec3( 1.0, -0.58, -1.0) );
+//    prismWithInternalPoint.push_back( vec3( 1.0, -0.58,  1.0) );
+//    prismWithInternalPoint.push_back( vec3(   0,  1.15, -1.0) );
+//    prismWithInternalPoint.push_back( vec3(   0,  1.15,  1.0) );
+//    prismWithInternalPoint.push_back( vec3(   0,     0,    0) );
+//
+//    prism2.push_back( vec3(    0, 1.0,   0) );
+//    prism2.push_back( vec3(  1.0,   0,   0) );
+//    prism2.push_back( vec3( -1.0,   0,   0) );
+//    prism2.push_back( vec3(    0, 1.0, 1.0) );
+//    prism2.push_back( vec3(  1.0,   0, 1.0) );
+//    prism2.push_back( vec3( -1.0,   0, 1.0) );
+
+    prismWithInternalPoint2.push_back( vec3(    0, 1.0,   0) );
+    prismWithInternalPoint2.push_back( vec3(  1.0,   0,   0) );
+    prismWithInternalPoint2.push_back( vec3( -1.0,   0,   0) );
+    prismWithInternalPoint2.push_back( vec3(    0, 1.0, 1.0) );
+    prismWithInternalPoint2.push_back( vec3(  1.0,   0, 1.0) );
+    prismWithInternalPoint2.push_back( vec3( -1.0,   0, 1.0) );
+    prismWithInternalPoint2.push_back( vec3(    0, 0.5, 0.5) );
+
     gridSize50[0] = 50.0; gridSize50[1] = 50.0; gridSize50[2] = 50.0;
     gridSpacing1[0] = 1.0; gridSpacing1[1] = 1.0; gridSpacing1[2] = 1.0;
-    normalOffset10 = 10;
+    normalOffset = 2.0;
     axisDataZ.insert(axisDataZ.begin(), 3, axis_t::Z);
     thinPlateKernel = ThinPlate;
     gaussianPlateKernel = Gaussian;
     multiQuadKernel = MultiQuadratic;
   }
 
-  // virtual void TearDown() {}
-  std::vector<vec3> pointsTet;
+// virtual void TearDown() {}
+
+//  std::vector<vec3> tet;
+//  std::vector<vec3> cube;
+//  std::vector<vec3> prism;
+//  std::vector<vec3> prismWithInternalPoint;
+//  std::vector<vec3> prism2;
+  std::vector<vec3> prismWithInternalPoint2;
+
   vec3 origin0; // (0, 0, 0)
   vec3 gridSize50; // (50, 50, 50)
   vec3 gridSpacing1; // (1, 1, 1)
-  double normalOffset10;
+  double normalOffset;
   std::vector<axis_t> axisDataZ; // #axis entries min 3
   Kernel thinPlateKernel;
   Kernel gaussianPlateKernel;
   Kernel multiQuadKernel;
 };
 
-TEST_F(ConvexHull3DTest, BasicInterfaceTest)
+TEST_F(ConvexHull3DTest, PrismWithInternalPoint2BasicInterfaceTest)
 {
-  RBFInterface rbfInterface( pointsTet, origin0,
+  RBFInterface rbfInterface( prismWithInternalPoint2, origin0,
                              gridSize50, gridSpacing1,
-                             normalOffset10, axisDataZ,
+                             normalOffset, axisDataZ,
                              true, false, ThinPlate );
   double threshold = rbfInterface.getThresholdValue();
   ASSERT_EQ( threshold, 0 ); // default
-//  const DataStorage rasterData = rbfInterface.getRasterData();
-//  // at least check that values in threshold range were generated
-//  // TODO: check linear system numerics
-//  int counter = 0;
-//  for (size_t i = 0; i < rasterData.size(); ++i)
-//  {
-//    for (size_t j = 0; j < rasterData[i].size(); ++j)
-//    {
-//      for (size_t k = 0; k < rasterData[i][j].size(); ++k)
-//      {
-//        if ( rasterData[i][j][k] > threshold )
-//          ++counter;
-//      }
-//    }
-//  }
-//  EXPECT_GT(counter, 0);
 }
+
+//TEST_F(ConvexHull3DTest, Prism2BasicInterfaceTest)
+//{
+//  RBFInterface rbfInterface( prism2, origin0,
+//                             gridSize50, gridSpacing1,
+//                             normalOffset10, axisDataZ,
+//                             true, false, ThinPlate );
+//  double threshold = rbfInterface.getThresholdValue();
+//  ASSERT_EQ( threshold, 0 ); // default
+//}
+//
+//TEST_F(ConvexHull3DTest, PrismWithInternalPointBasicInterfaceTest)
+//{
+//  RBFInterface rbfInterface( prismWithInternalPoint, origin0,
+//                             gridSize50, gridSpacing1,
+//                             normalOffset10, axisDataZ,
+//                             true, false, ThinPlate );
+//  double threshold = rbfInterface.getThresholdValue();
+//  ASSERT_EQ( threshold, 0 ); // default
+//}
+//
+//TEST_F(ConvexHull3DTest, PrismBasicInterfaceTest)
+//{
+//  RBFInterface rbfInterface( prism, origin0,
+//                             gridSize50, gridSpacing1,
+//                             normalOffset10, axisDataZ,
+//                             true, false, ThinPlate );
+//  double threshold = rbfInterface.getThresholdValue();
+//  ASSERT_EQ( threshold, 0 ); // default
+//}
+//
+//TEST_F(ConvexHull3DTest, CubeBasicInterfaceTest)
+//{
+//  RBFInterface rbfInterface( cube, origin0,
+//                             gridSize50, gridSpacing1,
+//                             normalOffset10, axisDataZ,
+//                             true, false, ThinPlate );
+//  double threshold = rbfInterface.getThresholdValue();
+//  ASSERT_EQ( threshold, 0 ); // default
+//}
+//
+//TEST_F(ConvexHull3DTest, TetBasicInterfaceTest)
+//{
+//  RBFInterface rbfInterface( tet, origin0,
+//                             gridSize50, gridSpacing1,
+//                             normalOffset10, axisDataZ,
+//                             true, false, ThinPlate );
+//  double threshold = rbfInterface.getThresholdValue();
+//  ASSERT_EQ( threshold, 0 ); // default
+//}
