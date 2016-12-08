@@ -24,12 +24,16 @@
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 
-#include "ScatteredData.h"
 #include "RBF.h"
-#include "SparseMatrix.h"
+#include "ScatteredData.h"
 #include "vec3.h"
-#include "LinearSolver.h"
 #include "FMM.h"
+
+#include "SparseMatrix.h"
+#include "LinearSolver.h"
+
+#include <Eigen/IterativeLinearSolvers>
+#include <Eigen/Dense>
 
 #include <cmath>
 #include <cstdio>
@@ -38,11 +42,15 @@
 #include <vector>
 #include <utility>
 #include <algorithm>
+#include <iostream>
 
 using std::vector;
 using std::pair;
 
 const double RBF::EPSILON = 1.0e-2;
+
+// debugging...
+#define USE_INTERNAL 0
 
 RBF::RBF(ScatteredData *myData, Kernel myKernel) :
   completeData_(myData),
@@ -90,13 +98,13 @@ void RBF::computeFunction()
                      this->completeData_->fnc_);
       computeFunctionForData();
       break;
-      
+
     case Random:
       bool *added;
       const int N = this->completeData_->fnc_.size();
       added = new bool[N];
       printf("%d\n", N);
-      
+
       for (int i = 0; i < N; i++)
         added[i] = false;
 
@@ -125,7 +133,7 @@ void RBF::computeFunction()
         computeErrorForData(error);
         std::sort(error.begin(), error.end());
         std::reverse(error.begin(), error.end());
-        
+
         printf("Largest error: %lf\n", error[0].first);
         if (error[0].first < EPSILON)
         {
@@ -163,25 +171,97 @@ void RBF::computeFunctionForData()
     case None:
     default:
       // TODO: move to function
-      const int N = this->data_->fnc_.size();
+      const double SMALL_EPSILON = 1.0e-6, ERROR_EPSILON = 1.0e-3;
+      const int N = static_cast<int>( this->data_->fnc_.size() );
+
+#ifndef NDEBUG
       printf("Solving linear equations: \n"); fflush(stdout);
-      LinearSolver rbfSolver;
-      SparseMatrix rbfMatrix(N);
-      //printf("Constructing matrix...\n"); fflush(stdout);
-      for (int i = 0; i < N; i++)
+#endif
+
+      if (USE_INTERNAL)
       {
-        for (int j = 0; j < N; j++)
+        LinearSolver rbfSolver;
+        SparseMatrix rbfMatrix(N);
+        //printf("Constructing matrix...\n"); fflush(stdout);
+        for (int i = 0; i < N; i++)
         {
-          //printf("%d %d ", i,j); fflush(stdout);
-          double val = computeKernel(i, j);
-          //printf("%lf\n", val); fflush(stdout);
-          rbfMatrix.push_back(i, j, val);
+          for (int j = 0; j < N; j++)
+          {
+            //printf("%d %d ", i,j); fflush(stdout);
+            double val = computeKernel(i, j);
+            //printf("%lf\n", val); fflush(stdout);
+            rbfMatrix.push_back(i, j, val);
+          }
+        }
+        //printf("Done\n"); fflush(stdout);
+        rbfSolver.setMatrix(&rbfMatrix);
+#ifndef NDEBUG
+        printf("Running BiCGSTAB Iterations ... "); fflush(stdout);
+#endif
+        rbfSolver.biCGStab(this->data_->fnc_, this->coeff_);
+
+        bool throwException = false;
+        // TODO: nan check???
+        if ( rbfSolver.residualNorm() > SMALL_EPSILON )
+        {
+#ifndef NDEBUG
+          std::cerr << "Residual norm=" << rbfSolver.residualNorm() << std::endl;
+#endif
+          throwException = true;
+        }
+#ifndef NDEBUG
+        // sanity check - debug only
+        for (size_t i = 0; i < this->completeData_->fnc_.size(); ++i)
+        {
+          // X == 0, Y == 1, Z == 2
+          // TODO: also how to convert to vec3 structure...
+          vec3 location(this->completeData_->surfacePoints_[0][i],
+                        this->completeData_->surfacePoints_[1][i],
+                        this->completeData_->surfacePoints_[2][i]);
+          //double myVal = mySurface->computeValue(location);
+
+          double myVal = this->computeValue(location);
+          // printf("myVal: %lf, fnc: %lf\n", myVal, this->surfaceData_->fnc_[i]);
+          double error = fabs( myVal - this->completeData_->fnc_[i] );
+          if (error > ERROR_EPSILON)
+          {
+            std::cerr << "ERROR (numerics): " << error << std::endl;
+            if (! throwException) throwException = true;
+          }
+        }
+#endif
+        if (throwException)
+        {
+          throw std::runtime_error("Linear system failed to converge.");
         }
       }
-      //printf("Done\n"); fflush(stdout);
-      rbfSolver.setMatrix(&rbfMatrix);
-      printf("Running BiCGSTAB Iterations ... "); fflush(stdout);
-      rbfSolver.biCGStab(this->data_->fnc_, this->coeff_);
+      else
+      {
+        Eigen::VectorXd b = Eigen::VectorXd::Map(&this->data_->fnc_[0], N);
+        Eigen::VectorXd x(N);
+        Eigen::SparseMatrix< double > A(N, N);
+        for (int i = 0; i < N; i++)
+        {
+          for (int j = 0; j < N; j++)
+          {
+            printf("%d %d ", i,j); fflush(stdout);
+            double val = computeKernel(i, j);
+            printf("%lf\n", val); fflush(stdout);
+            A.insert(i, j) = val;
+          }
+        }
+
+        Eigen::BiCGSTAB< Eigen::SparseMatrix<double> > solver;
+        solver.setTolerance(1e-10);
+        solver.compute(A);
+        x = solver.solve(b);
+        std::cout << "#iterations:     " << solver.iterations() << std::endl;
+        std::cout << "estimated error: " << solver.error()      << std::endl;
+
+        this->coeff_.resize(x.size());
+        Eigen::VectorXd::Map(&this->coeff_[0], x.size()) = x;
+        printf("Done\n"); fflush(stdout);
+      }
 
       break;
   }

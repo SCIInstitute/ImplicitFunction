@@ -30,6 +30,18 @@ if(BUILD_TESTING)
   find_package(GTest 1.7 REQUIRED)
 endif()
 
+set(EIGEN3_INSTALL_DIR "" CACHE PATH "Eigen 3 include directory.")
+if (IS_DIRECTORY ${EIGEN3_INSTALL_DIR})
+  find_path(EIGEN3_INCLUDE_DIR signature_of_eigen3_matrix_library
+    PATHS ${EIGEN3_INSTALL_DIR} ${EIGEN3_INSTALL_DIR}/include
+    PATH_SUFFIXES eigen3 eigen
+    NO_DEFAULT_PATH
+  )
+  if (NOT EIGEN3_INCLUDE_DIR)
+    MESSAGE(ERROR "${EIGEN3_INCLUDE_DIR} not valid Eigen include directory.")
+  endif()
+endif()
+
 set(Tetgen_DIR "" CACHE PATH "Tetgen directory.")
 option(TravisCI_BUILD "Enable if Travis-CI build." OFF)
 
@@ -106,6 +118,8 @@ set(ImplicitFunction_SRCS
   RBFInterface.cpp
   RBFInterface.h
 )
+
+include_directories(${EIGEN3_INCLUDE_DIR})
 
 add_library(${ImplicitFunction_LIB_NAME}
   ${ImplicitFunction_SRCS}
