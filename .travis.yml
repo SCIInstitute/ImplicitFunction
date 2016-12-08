@@ -11,11 +11,11 @@ cache:
     - $HOME/deps
 before_install:
   # set up dependency cache
-  - if [ ! -d "$HOME/deps" ]; then mkdir $HOME/deps; fi
-  - if [ ! -f "$HOME/deps/tetgen1.4.3.tar.gz" ]; then wget --quiet --directory-prefix=$HOME/deps http://tetgen.org/files/tetgen1.4.3.tar.gz; fi
-  - if [ ! -f "$HOME/deps/tetgen_cmake.tgz" ]; then wget --quiet --directory-prefix=$HOME/deps http://www.sci.utah.edu/devbuilds/seg3d/tetgen_cmake.tgz; fi
-  - if [ ! -f "$HOME/deps/release-1.7.0.tar.gz" ]; then wget --quiet --directory-prefix=$HOME/deps https://github.com/google/googletest/archive/release-1.7.0.tar.gz; fi
-  - if [ ! -f "$HOME/deps/eigen-eigen-b9cd8366d4e8.tar.gz" ]; then wget --quiet --directory-prefix=$HOME/deps http://bitbucket.org/eigen/eigen/get/3.2.10.tar.gz; fi
+  - if [ ! -d $HOME/deps ]; then mkdir $HOME/deps; fi
+  - if [ ! -f $HOME/deps/tetgen1.4.3.tar.gz ]; then wget --quiet --directory-prefix=$HOME/deps http://tetgen.org/files/tetgen1.4.3.tar.gz; fi
+  - if [ ! -f $HOME/deps/tetgen_cmake.tgz ]; then wget --quiet --directory-prefix=$HOME/deps http://www.sci.utah.edu/devbuilds/seg3d/tetgen_cmake.tgz; fi
+  - if [ ! -f $HOME/deps/release-1.7.0.tar.gz ]; then wget --quiet --directory-prefix=$HOME/deps https://github.com/google/googletest/archive/release-1.7.0.tar.gz; fi
+  - if [ ! -f $HOME/deps/3.2.10.tar.gz ]; then wget --quiet --directory-prefix=$HOME/deps http://bitbucket.org/eigen/eigen/get/3.2.10.tar.gz; fi
   - pip install --user cpp-coveralls
   - ls $HOME/deps
 install:
@@ -51,7 +51,8 @@ script:
   - make -j4
   - popd
   # untar Eigen dependency (no build needed)
-  - tar xzvf $HOME/deps/eigen-eigen-b9cd8366d4e8.tar.gz
+  - tar xzvf $HOME/deps/3.2.10.tar.gz
+  - ls eigen-eigen-b9cd8366d4e8
   # build ImplicitFunction library
   - cmake -DBUILD_TESTING:BOOL=ON -DENABLE_COVERAGE:BOOL=ON -DTravisCI_BUILD:BOOL=ON
           -DGTEST_INCLUDE_DIR:PATH=`pwd`/googletest-release-1.7.0/include
