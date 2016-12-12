@@ -37,7 +37,8 @@
 using std::vector;
 
 //int ScatteredData::myAxis = 2;
-ScatteredData::ScatteredData()
+ScatteredData::ScatteredData() :
+  origSize_(0)
 {
 }
 
@@ -45,9 +46,10 @@ ScatteredData::ScatteredData(const std::vector<double>& points_x,
                              const std::vector<double>& points_y,
                              const std::vector<double>& points_z,
                              const std::vector<double>& func,
-                             const std::vector<axis_t>& axisInfo):
+                             const std::vector<axis_t>& axisInfo) :
   axisInformation_(axisInfo),
-  updatedAxisInformation_(axisInfo)
+  updatedAxisInformation_(axisInfo),
+  origSize_(0)
 {
   setData(points_x, points_y, points_z, func);
 }

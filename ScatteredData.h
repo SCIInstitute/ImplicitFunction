@@ -36,7 +36,8 @@ enum axis_t { X = 0, Y, Z };
 class ScatteredData
 {
 public:
-	ScatteredData();
+  // TODO: what happens when vector sizes don't match???
+  ScatteredData();
   ScatteredData(const std::vector<double>& points_x,
                 const std::vector<double>& points_y,
                 const std::vector<double>& points_z,
