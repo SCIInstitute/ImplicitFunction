@@ -23,7 +23,7 @@
 set(ImplicitFunction_Tests_SRCS
   ConvexHull2DTests.cpp
   ConvexHull3DTests.cpp
-  RBFTests.cpp
+//  RBFTests.cpp
   RBFInterfaceTests.cpp
   ScatteredDataTests.cpp
   Vec3Tests.cpp
