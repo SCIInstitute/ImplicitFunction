@@ -32,11 +32,6 @@
 #include <exception>
 #include <stdexcept>
 
-// test
-#include <iostream>
-#include <iomanip>
-// test
-
 #include <tetgen.h>
 
 //const double RBFInterface::EPSILON = 1.0e-3;
@@ -296,57 +291,6 @@ for (int i = 0; i < normalsPerVertex.size(); ++i)
   }
 
   createRasterizedSurface();
-
-//  // TODO: duplicated code
-//  this->rbf_ = new RBF(this->surfaceData_, kernel_);
-//  this->rbf_->setDataReduction(All);
-//
-//  // Construct RBFs
-//  this->rbf_->computeFunction(); // throws exception...
-//
-//  // Fill the values into the vector.
-//  // In the first loop, we initialize the matrix with all values set to -100.
-//  // In the second loop, we change the values from -100 to the correct rasterData_ if the point in the domain described above.
-//
-//  this->rasterData_.resize(static_cast<int>(this->size_[0]));
-//  for (int i = 0; i < this->size_[0]; i++)
-//  {
-//    this->rasterData_[i].resize(static_cast<int>(this->size_[1]));
-//    for (int j = 0; j < this->size_[1]; j++)
-//    {
-//      this->rasterData_[i][j].resize(static_cast<int>(this->size_[2]), -100);
-//    }
-//  }
-//
-//  for (int i = 0; i < this->size_[0]; i++)
-//  {
-//    //vec3 location = this->origin_ + this->spacing_[0] * i * vec3::unitX;
-//    //if (location[0]<myMin[0]||location[0]>myMax[0])
-//    //  continue;
-//    for (int j = 0; j < this->size_[1]; j++)
-//    {
-//      //location = this->origin_ + this->spacing_[1]*j*vec3::unitY;
-//      //if (location[1]<myMin[1]||location[1]>myMax[1])
-//      //  continue;
-//      for (int k = 0; k < this->size_[2]; k++)
-//      {
-//        // TODO: shadowing variables in outer scopes!!!
-//        //location = this->origin_ + this->spacing_[0]*i*vec3::unitX + this->spacing_[1]*j*vec3::unitY + this->spacing_[2]*k*vec3::unitZ;
-//        vec3 location = this->origin_ + this->spacing_[0] * i * vec3::unitX + this->spacing_[1] * j * vec3::unitY + this->spacing_[2] * k * vec3::unitZ;
-//
-//        //if (location[2]<myMin[2]||location[2]>myMax[2])
-//        //  continue;
-//        //std::cout<<"Computing Val ... "<<std::endl;
-//        //double myVal = mySurface->computeValue(location);
-//
-//        double myVal = this->rbf_->computeValue(location);
-//
-//        //printf("Interpolant: %lf %lf %lf %lf\n", location[0], location[1], location[2], myVal); fflush(stdout);
-//        this->rasterData_[i][j][k] = myVal;
-//      }
-//    }
-//  }
-//  // TODO: duplicated code (end)
 
   delete [] listOfIntsPerVertex;
   delete [] normalsPerFace;
