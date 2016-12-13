@@ -46,16 +46,23 @@ public:
                const bool useConvexHull=false, const bool compute2DConvexHull=true,
                const bool invertSeedOrder=false, Kernel kernel=ThinPlate);
 
+//  ~RBFInterface();
+
 	double getThresholdValue() const { return thresholdValue_; }
   const DataStorage getRasterData() const { return rasterData_; }
+  const ScatteredData* getSurfaceData() const { return this->surfaceData_; }
 
 private:
   // 2D calculation
-  void CreateSurface();
-  void Create3DSurface();
+  void create2DSurface(); // propagates exceptions
+  void create3DSurface();
 
   void augmentNormalData();
   vec3 findNormalAxis(const int n);
+
+  void createRasterizedSurface();
+
+  bool pointInsideConvexHull();
 
   ScatteredData *surfaceData_;
   RBF *rbf_;
@@ -76,7 +83,7 @@ private:
   // change to inside or outside
   std::vector<vec3> inNormals, outNormals;
 
-  static const double EPSILON;
+//  static const double EPSILON;
   static const double SMALL_EPSILON;
 };
 

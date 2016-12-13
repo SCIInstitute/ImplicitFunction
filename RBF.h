@@ -61,7 +61,7 @@ private:
 
 	FMM *fmm_;
 
-	void computeFunctionForData();
+	void computeFunctionForData(); // throws std::runtime_error
 	void computeErrorForData(std::vector<std::pair<double, int> > &error);
 
 	double computeKernel(int i, int j);

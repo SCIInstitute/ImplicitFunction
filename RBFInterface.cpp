@@ -30,10 +30,16 @@
 #include <cmath>
 #include <cstdio>
 #include <exception>
+#include <stdexcept>
+
+// test
+#include <iostream>
+#include <iomanip>
+// test
 
 #include <tetgen.h>
 
-const double RBFInterface::EPSILON = 1.0e-3;
+//const double RBFInterface::EPSILON = 1.0e-3;
 const double RBFInterface::SMALL_EPSILON = 1.0e-6;
 
 RBFInterface::RBFInterface(std::vector<vec3> myData,
@@ -73,15 +79,21 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
   // TODO: would it be better to break this out, or have constructor throw exception???
   if ( this->useConvexHull_ && ! this->compute2DConvexHull_ )
   {
-    Create3DSurface();
+    create3DSurface();
   }
   else
   {
-    CreateSurface();
+    create2DSurface();
   }
 }
 
-void RBFInterface::Create3DSurface()
+//RBFInterface::~RBFInterface()
+//{
+//std::cerr << "RBFInterface::~RBFInterface()" << std::endl;
+//  delete this->surfaceData_;
+//}
+
+void RBFInterface::create3DSurface()
 {
   // TODO: debug print
   std::cerr << "Calling Tetgen..." << std::endl;
@@ -103,12 +115,12 @@ void RBFInterface::Create3DSurface()
   catch (std::exception& e)
   {
     std::cerr << "TetGen failed to generate a mesh: " << e.what() << std::endl;
-    return;
+    throw;
   }
   catch (...)
   {
     std::cerr << "TetGen failed to generate a mesh" << std::endl;
-    return;
+    throw;
   }
 
   const size_t NUMBER_POINTS = out.numberofpoints;
@@ -142,8 +154,9 @@ void RBFInterface::Create3DSurface()
       size_t index = out.trifacelist[i*NUMBER_TRI_POINTS+j];
       listOfIntsPerVertex[index].push_back(i);
     }
-    }
+  }
 
+#ifndef NDEBUG
   for (int i = 0; i < NUMBER_POINTS; ++i)
   {
     std::cerr << i << ": ";
@@ -153,6 +166,7 @@ void RBFInterface::Create3DSurface()
     }
     std::cerr << std::endl;
   }
+#endif
 
   // normal calculation on face
   // For triangle p1, p2, p3 and vectors U = p2 - p1, V = p3 - p1, then normal N = UxV:
@@ -185,10 +199,11 @@ void RBFInterface::Create3DSurface()
 std::cerr << "normalsPerFace[" << i << "]=" << normalsPerFace[i] << ", len=" << length(normalsPerFace[i]) << std::endl;
   }
 
-  // TODO: set up surface data class...
+  // TODO: initialize in constructor?
   this->surfaceData_ = new ScatteredData(this->points_x_, this->points_y_, this->points_z_, this->threshold_, this->axisList_);
 
   // TODO: this code mirrors the 2D convex hull method...refactor?
+  // TODO: difficult to keep the ScatteredData point and function vectors in sync...
 
   this->surfaceData_->surfacePoints_[0].clear();
   this->surfaceData_->surfacePoints_[1].clear();
@@ -197,6 +212,8 @@ std::cerr << "normalsPerFace[" << i << "]=" << normalsPerFace[i] << ", len=" << 
   this->surfaceData_->leftovers_[0].clear();
   this->surfaceData_->leftovers_[1].clear();
   this->surfaceData_->leftovers_[2].clear();
+
+  this->surfaceData_->fnc_.clear();
 
   // convex hull...
 
@@ -223,6 +240,7 @@ std::cerr << "Point " << i << " in surface points." << std::endl;
     this->surfaceData_->surfacePoints_[0].push_back( out.pointlist[i*NUMBER_TRI_POINTS] );
     this->surfaceData_->surfacePoints_[1].push_back( out.pointlist[i*NUMBER_TRI_POINTS+1] );
     this->surfaceData_->surfacePoints_[2].push_back( out.pointlist[i*NUMBER_TRI_POINTS+2] );
+    this->surfaceData_->fnc_.push_back( this->thresholdValue_ );
 
     vec3 tmpVec;
     for (size_t j = 0; j < listOfIntsPerVertex[i].size(); ++j)
@@ -244,7 +262,7 @@ for (int i = 0; i < normalsPerVertex.size(); ++i)
 }
 
   // iterate through list of points not on hull, add to list as zero points
-  for (int i = 0; i < M; ++i)
+  for (size_t i = 0; i < M; ++i)
   {
     this->surfaceData_->surfacePoints_[0].push_back(this->surfaceData_->leftovers_[0][i]);
     this->surfaceData_->surfacePoints_[1].push_back(this->surfaceData_->leftovers_[1][i]);
@@ -256,10 +274,12 @@ for (int i = 0; i < normalsPerVertex.size(); ++i)
   const size_t DIM_3D = 3;
   const int NORMAL_IN = 10, NORMAL_OUT = -10;
 
-  for (int i = 0; i < N; i++)
+  for (size_t i = 0; i < N; i++)
   {
-    for (int j = 0; j < DIM_3D; j++)
+    for (size_t j = 0; j < DIM_3D; j++)
     {
+      // check endpoint of normal from this->surfaceData_->surfacePoints_[j][i] + this->offset_ * normalsPerVertex[i][j] for inside c hull
+      // printed warning
       this->surfaceData_->surfacePoints_[j].push_back(this->surfaceData_->surfacePoints_[j][i] + this->offset_ * normalsPerVertex[i][j]);
     }
 
@@ -275,100 +295,72 @@ for (int i = 0; i < normalsPerVertex.size(); ++i)
     this->surfaceData_->fnc_.push_back(NORMAL_OUT);
   }
 
-  // TODO: duplicated code
-  this->rbf_ = new RBF(this->surfaceData_, kernel_);
-  this->rbf_->setDataReduction(All);
+  createRasterizedSurface();
 
-  // Construct RBFs
-  this->rbf_->computeFunction();
-
-  // sanity check
-  for (int i = 0; i < this->surfaceData_->fnc_.size(); i++)
-  {
-    // X == 0, Y == 1, Z == 2
-    // TODO: also how to convert to vec3 structure...
-    vec3 location(this->surfaceData_->surfacePoints_[0][i],
-                  this->surfaceData_->surfacePoints_[1][i],
-                  this->surfaceData_->surfacePoints_[2][i]);
-    //double myVal = mySurface->computeValue(location);
-
-    double myVal = this->rbf_->computeValue(location);
-    //    printf("myVal: %lf, fnc: %lf\n", myVal, this->surfaceData_->fnc_[i]);
-    double error  = fabs(myVal - this->surfaceData_->fnc_[i]);
-    if (error > EPSILON)
-    {
-      printf("ERROR (numerics): %lf\n", error);
-      fflush(stdout);
-    }
-  }
-
-  // Fill the values into the vector.
-  // In the first loop, we initialize the matrix with all values set to -100.
-  // In the second loop, we change the values from -100 to the correct rasterData_ if the point in the domain described above.
-
-  this->rasterData_.resize(static_cast<int>(this->size_[0]));
-  for (int i = 0; i < this->size_[0]; i++)
-  {
-    this->rasterData_[i].resize(static_cast<int>(this->size_[1]));
-    for (int j = 0; j < this->size_[1]; j++)
-    {
-      this->rasterData_[i][j].resize(static_cast<int>(this->size_[2]), -100);
-    }
-  }
-
-  for (int i = 0; i < this->size_[0]; i++)
-  {
-    //vec3 location = this->origin_ + this->spacing_[0] * i * vec3::unitX;
-    //if (location[0]<myMin[0]||location[0]>myMax[0])
-    //  continue;
-    for (int j = 0; j < this->size_[1]; j++)
-    {
-      //location = this->origin_ + this->spacing_[1]*j*vec3::unitY;
-      //if (location[1]<myMin[1]||location[1]>myMax[1])
-      //  continue;
-      for (int k = 0; k < this->size_[2]; k++)
-      {
-        // TODO: shadowing variables in outer scopes!!!
-        //location = this->origin_ + this->spacing_[0]*i*vec3::unitX + this->spacing_[1]*j*vec3::unitY + this->spacing_[2]*k*vec3::unitZ;
-        vec3 location = this->origin_ + this->spacing_[0] * i * vec3::unitX + this->spacing_[1] * j * vec3::unitY + this->spacing_[2] * k * vec3::unitZ;
-
-        //if (location[2]<myMin[2]||location[2]>myMax[2])
-        //  continue;
-        //std::cout<<"Computing Val ... "<<std::endl;
-        //double myVal = mySurface->computeValue(location);
-
-        double myVal = this->rbf_->computeValue(location);
-
-        //printf("Interpolant: %lf %lf %lf %lf\n", location[0], location[1], location[2], myVal); fflush(stdout);
-        this->rasterData_[i][j][k] = myVal;
-      }
-    }
-  }
-  // TODO: duplicated code (end)
+//  // TODO: duplicated code
+//  this->rbf_ = new RBF(this->surfaceData_, kernel_);
+//  this->rbf_->setDataReduction(All);
+//
+//  // Construct RBFs
+//  this->rbf_->computeFunction(); // throws exception...
+//
+//  // Fill the values into the vector.
+//  // In the first loop, we initialize the matrix with all values set to -100.
+//  // In the second loop, we change the values from -100 to the correct rasterData_ if the point in the domain described above.
+//
+//  this->rasterData_.resize(static_cast<int>(this->size_[0]));
+//  for (int i = 0; i < this->size_[0]; i++)
+//  {
+//    this->rasterData_[i].resize(static_cast<int>(this->size_[1]));
+//    for (int j = 0; j < this->size_[1]; j++)
+//    {
+//      this->rasterData_[i][j].resize(static_cast<int>(this->size_[2]), -100);
+//    }
+//  }
+//
+//  for (int i = 0; i < this->size_[0]; i++)
+//  {
+//    //vec3 location = this->origin_ + this->spacing_[0] * i * vec3::unitX;
+//    //if (location[0]<myMin[0]||location[0]>myMax[0])
+//    //  continue;
+//    for (int j = 0; j < this->size_[1]; j++)
+//    {
+//      //location = this->origin_ + this->spacing_[1]*j*vec3::unitY;
+//      //if (location[1]<myMin[1]||location[1]>myMax[1])
+//      //  continue;
+//      for (int k = 0; k < this->size_[2]; k++)
+//      {
+//        // TODO: shadowing variables in outer scopes!!!
+//        //location = this->origin_ + this->spacing_[0]*i*vec3::unitX + this->spacing_[1]*j*vec3::unitY + this->spacing_[2]*k*vec3::unitZ;
+//        vec3 location = this->origin_ + this->spacing_[0] * i * vec3::unitX + this->spacing_[1] * j * vec3::unitY + this->spacing_[2] * k * vec3::unitZ;
+//
+//        //if (location[2]<myMin[2]||location[2]>myMax[2])
+//        //  continue;
+//        //std::cout<<"Computing Val ... "<<std::endl;
+//        //double myVal = mySurface->computeValue(location);
+//
+//        double myVal = this->rbf_->computeValue(location);
+//
+//        //printf("Interpolant: %lf %lf %lf %lf\n", location[0], location[1], location[2], myVal); fflush(stdout);
+//        this->rasterData_[i][j][k] = myVal;
+//      }
+//    }
+//  }
+//  // TODO: duplicated code (end)
 
   delete [] listOfIntsPerVertex;
   delete [] normalsPerFace;
 }
 
-// driver
-void RBFInterface::CreateSurface()
+bool RBFInterface::pointInsideConvexHull()
 {
-  // TODO: code never used!
-  // This code figures out the bounds for the data selected
-//  std::vector<double>::iterator minx = std::min_element(this->points_x_.begin(), this->points_x_.end());
-//  std::vector<double>::iterator miny = std::min_element(this->points_y_.begin(), this->points_y_.end());
-//  std::vector<double>::iterator minz = std::min_element(this->points_z_.begin(), this->points_z_.end());
-//
-//  std::vector<double>::iterator maxx = std::max_element(this->points_x_.begin(), this->points_x_.end());
-//  std::vector<double>::iterator maxy = std::max_element(this->points_y_.begin(), this->points_y_.end());
-//  std::vector<double>::iterator maxz = std::max_element(this->points_z_.begin(), this->points_z_.end());
-//
-//  vec3 myMin(*minx, *miny, *minz), myMax(*maxx, *maxy, *maxz);
-//
-//  // TODO: magic number
-//  myMin = myMin - 0.05 * this->size_;
-//  myMax = myMax + 0.05 * this->size_;
+  return false;
+}
 
+// driver
+void RBFInterface::create2DSurface()
+{
+  // TODO: initialize in constructor?
   this->surfaceData_ = new ScatteredData(this->points_x_, this->points_y_, this->points_z_, this->threshold_, this->axisList_);
   //this->surfaceData_->axisInformation_ = myAxis;
   if ( this->useConvexHull_ && this->compute2DConvexHull_ ) // TODO: not sure this is necessary...
@@ -385,38 +377,22 @@ void RBFInterface::CreateSurface()
   // TODO: does not include points outside convex hull (if computed)...
   augmentNormalData();
 
-  // TODO: duplicated code
+  createRasterizedSurface();
+}
+
+void RBFInterface::createRasterizedSurface()
+{
+  // TODO: make local?
   this->rbf_ = new RBF(this->surfaceData_, kernel_);
   this->rbf_->setDataReduction(All);
 
   // Construct RBFs
-  //mySurface->computeRBF();
-  this->rbf_->computeFunction();
-  
-  // sanity check
-  for (int i = 0; i < this->surfaceData_->fnc_.size(); i++)
-  {
-    // X == 0, Y == 1, Z == 2
-    // TODO: also how to convert to vec3 structure...
-    vec3 location(this->surfaceData_->surfacePoints_[0][i],
-                  this->surfaceData_->surfacePoints_[1][i],
-                  this->surfaceData_->surfacePoints_[2][i]);
-    //double myVal = mySurface->computeValue(location);
+  this->rbf_->computeFunction();  // throws exception if internal code used...
 
-    double myVal = this->rbf_->computeValue(location);
-//    printf("myVal: %lf, fnc: %lf\n", myVal, this->surfaceData_->fnc_[i]);
-    double error  = fabs(myVal - this->surfaceData_->fnc_[i]);
-    if (error > EPSILON)
-    {
-      printf("ERROR (numerics): %lf\n", error);
-      fflush(stdout);
-    }
-  }
-  
   // Fill the values into the vector.
   // In the first loop, we initialize the matrix with all values set to -100.
   // In the second loop, we change the values from -100 to the correct rasterData_ if the point in the domain described above.
-  
+
   this->rasterData_.resize(static_cast<int>(this->size_[0]));
   for (int i = 0; i < this->size_[0]; i++)
   {
@@ -426,7 +402,7 @@ void RBFInterface::CreateSurface()
       this->rasterData_[i][j].resize(static_cast<int>(this->size_[2]), -100);
     }
   }
-  
+
   for (int i = 0; i < this->size_[0]; i++)
   {
     //vec3 location = this->origin_ + this->spacing_[0] * i * vec3::unitX;
@@ -455,7 +431,8 @@ void RBFInterface::CreateSurface()
       }
     }
   }
-  // TODO: duplicated code (end)
+
+  //delete this->rbf_;
 }
 
 // TODO: move this and findNormalAxis to new class?

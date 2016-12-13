@@ -53,6 +53,7 @@ protected:
 
   // virtual void TearDown() {}
   std::vector<vec3> pointsBowtieClockwise;
+  std::vector<vec3> squareClockwise;
   vec3 origin0; // (0, 0, 0)
   vec3 gridSize50; // (50, 50, 50)
   vec3 gridSpacing1; // (1, 1, 1)

@@ -27,6 +27,8 @@
 #include <gtest/gtest.h>
 
 #include <vector>
+#include <fstream>
+#include <sstream>
 
 #include "RBFInterface.h"
 #include "vec3.h"
@@ -39,9 +41,9 @@ class RBFInterfaceTest : public ::testing::Test
 protected:
   virtual void SetUp()
   {
-    pointsTriangleClockwise.push_back( vec3(10.7, 38.5, 10.0) );
-    pointsTriangleClockwise.push_back( vec3(34.7, 37.8, 10.0) );
-    pointsTriangleClockwise.push_back( vec3(22.3, 15.0, 10.0) );
+    pointsTriangleClockwise.push_back( vec3(9.02381, 36.8638, 10.0) );
+    pointsTriangleClockwise.push_back( vec3(34.8002, 36.8638, 10.0) );
+    pointsTriangleClockwise.push_back( vec3(20.2824, 14.4397, 10.0) );
     gridSize50[0] = 50.0; gridSize50[1] = 50.0; gridSize50[2] = 50.0;
     gridSpacing1[0] = 1.0; gridSpacing1[1] = 1.0; gridSpacing1[2] = 1.0;
     normalOffset10 = 10;
@@ -72,21 +74,28 @@ TEST_F(RBFInterfaceTest, BasicInterfaceTestThinPlate)
   double threshold = rbfInterface.getThresholdValue();
   ASSERT_EQ( threshold, 0 ); // default
   const DataStorage rasterData = rbfInterface.getRasterData();
-  // at least check that values in threshold range were generated
+
   // TODO: check linear system numerics
-  int counter = 0;
-  for (size_t i = 0; i < rasterData.size(); ++i)
+  std::ifstream in;
+  std::ostringstream oss;
+  oss << REGRESSION_DIR << "/pointsTriangleClockwise.txt";
+  in.open( oss.str().c_str(), std::ios::binary );
+  in.exceptions( std::ofstream::failbit | std::ofstream::badbit );
+
+  for (size_t i = 0; i < gridSize50[0]; ++i)
   {
-    for (size_t j = 0; j < rasterData[i].size(); ++j)
+    for (size_t j = 0; j < gridSize50[1]; ++j)
     {
-      for (size_t k = 0; k < rasterData[i][j].size(); ++k)
+      for (size_t k = 0; k < gridSize50[2]; ++k)
       {
-        if ( rasterData[i][j][k] > threshold )
-          ++counter;
+        std::string line;
+        std::getline(in, line);
+        //std::cerr << line << " vs " << rasterData[i][j][k] << std::endl;
+        double d = std::stod(line);
       }
     }
   }
-  EXPECT_GT(counter, 0);
+  in.close();
 }
 
 TEST_F(RBFInterfaceTest, BasicInterfaceTestGaussian)
