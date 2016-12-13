@@ -44,10 +44,6 @@
 #include <algorithm>
 #include <iostream>
 
-// test
-#include <iomanip>
-// test
-
 using std::vector;
 using std::pair;
 
@@ -167,54 +163,6 @@ void RBF::computeFunction()
 
 void RBF::computeFunctionForData()
 {
-// test
-//for (size_t i = 0; i < this->data_->surfacePoints_[0].size(); ++i)
-//{
-//if ( this->data_->surfacePoints_[0][i] != this->completeData_->surfacePoints_[0][i] )
-//{
-//std::cerr << i << ": " << std::setprecision(std::numeric_limits<double>::digits10 + 1) << this->data_->surfacePoints_[0][i] << " " << this->completeData_->surfacePoints_[0][i] << std::endl;
-//}
-//}
-//for (size_t i = 0; i < this->data_->surfacePoints_[1].size(); ++i)
-//{
-//if ( this->data_->surfacePoints_[1][i] != this->completeData_->surfacePoints_[1][i] )
-//{
-//std::cerr << i << ": " << std::setprecision(std::numeric_limits<double>::digits10 + 1) << this->data_->surfacePoints_[1][i] << " " << this->completeData_->surfacePoints_[1][i] << std::endl;
-//}
-//}
-//for (size_t i = 0; i < this->data_->surfacePoints_[2].size(); ++i)
-//{
-//if ( this->data_->surfacePoints_[2][i] != this->completeData_->surfacePoints_[2][i] )
-//{
-//std::cerr << i << ": " << std::setprecision(std::numeric_limits<double>::digits10 + 1) << this->data_->surfacePoints_[2][i] << " " << this->completeData_->surfacePoints_[2][i] << std::endl;
-//}
-//}
-//for (size_t i = 0; i < this->data_->fnc_.size(); ++i)
-//{
-//if ( this->data_->fnc_[i] != this->completeData_->fnc_[i] )
-//{
-//std::cerr << i << ": " << std::setprecision(std::numeric_limits<double>::digits10 + 1) << this->data_->fnc_[i] << " " << this->completeData_->fnc_[i] << std::endl;
-//}
-//}
-//
-//if (this->data_->surfacePoints_[0].size() != this->data_->surfacePoints_[1].size())
-//{
-//std::cerr << this->data_->surfacePoints_[0].size() << ", " << this->data_->surfacePoints_[1].size() << std::endl;
-//}
-//if (this->data_->surfacePoints_[0].size() != this->data_->surfacePoints_[2].size())
-//{
-//std::cerr << this->data_->surfacePoints_[0].size() << ", " << this->data_->surfacePoints_[2].size() << std::endl;
-//}
-//if (this->data_->surfacePoints_[1].size() != this->data_->surfacePoints_[2].size())
-//{
-//std::cerr << this->data_->surfacePoints_[1].size() << ", " << this->data_->surfacePoints_[2].size() << std::endl;
-//}
-if (this->data_->surfacePoints_[0].size() != this->data_->fnc_.size())
-{
-std::cerr << this->data_->surfacePoints_[0].size() << ", " << this->data_->fnc_.size() << std::endl;
-}
-// test
-
   switch(this->acceleration_)
   {
     case FastMultipole:
@@ -291,8 +239,8 @@ std::cerr << this->data_->surfacePoints_[0].size() << ", " << this->data_->fnc_.
       {
         Eigen::VectorXd b = Eigen::VectorXd::Map(&this->data_->fnc_[0], N);
         Eigen::VectorXd x(N);
-        Eigen::SparseMatrix< double > A(N, N);
-        //Eigen::MatrixXd A(N, N);
+        //Eigen::SparseMatrix< double > A(N, N);
+        Eigen::MatrixXd A(N, N);
         for (int i = 0; i < N; i++)
         {
           for (int j = 0; j < N; j++)
@@ -302,13 +250,13 @@ std::cerr << this->data_->surfacePoints_[0].size() << ", " << this->data_->fnc_.
 //            printf("%d %d ", i,j); fflush(stdout);
 //            printf("%lf\n", val); fflush(stdout);
 //#endif
-            A.insert(i, j) = val;
-            //A(i, j) = val;
+            //A.insert(i, j) = val;
+            A(i, j) = val;
           }
         }
-        Eigen::BiCGSTAB< Eigen::SparseMatrix<double> > solver;
-        //Eigen::BiCGSTAB< Eigen::MatrixXd > solver;
-        solver.setTolerance(1.0e-6);
+        //Eigen::BiCGSTAB< Eigen::SparseMatrix<double> > solver;
+        Eigen::BiCGSTAB< Eigen::MatrixXd > solver;
+        solver.setTolerance(1.0e-10);
         solver.compute(A);
         x = solver.solve(b);
         std::cout << "#iterations:     " << solver.iterations() << std::endl;
@@ -361,18 +309,8 @@ double RBF::computeKernel(int i, int j)
                    (this->data_->surfacePoints_[1][i] - this->data_->surfacePoints_[1][j]) +  // y
                    (this->data_->surfacePoints_[2][i] - this->data_->surfacePoints_[2][j]) *
                    (this->data_->surfacePoints_[2][i] - this->data_->surfacePoints_[2][j]) ); // z
-#ifndef NDEBUG
-  printf("r: %d %d %lf\n", i, j, r); fflush(stdout);
-#endif
 
-#ifdef NDEBUG
   return computeRadialFunction(r);
-#else
-  double val = computeRadialFunction(r);
-  printf("k: %d %d %lf\n", i, j, val); fflush(stdout);
-  return val;
-#endif
-
 }
 
 double RBF::computeKernel(int i, const vec3& b)
