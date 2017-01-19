@@ -133,78 +133,78 @@ TEST_F(ConvexHull3DTest, PrismBasicInterfaceTest)
 
   const DataStorage rasterData = rbfInterface.getRasterData();
 
-  std::string filename("testPrism.nrrd");
-  std::cout << "Writing file '" << filename << "'" << std::endl;
-  std::ofstream nrrdFile(filename.c_str(), std::ofstream::binary);
-  nrrdFile.exceptions( std::ofstream::failbit | std::ofstream::badbit );
-
-  if ( nrrdFile.is_open() )
-  {
-//    nrrdFile << "NRRD0001" << std::endl;
-//    nrrdFile << "# Complete NRRD file format specification at:" << std::endl;
-//    nrrdFile << "# http://teem.sourceforge.net/nrrd/format.html" << std::endl;
-//    nrrdFile << "type: double" << std::endl;
-//    nrrdFile << "dimension: 3" << std::endl;
-//    nrrdFile << "sizes: " << gridSize50[0] << " " << gridSize50[1] << " " << gridSize50[2] << std::endl;
-//    nrrdFile << "axis mins: " << origin0[0] << ", " << origin0[1] << ", " << origin0[2] << std::endl;
-//    nrrdFile << "spacings: " << gridSpacing1[0] << " " << gridSpacing1[1] << " " << gridSpacing1[2] << std::endl;
-////    nrrdFile << "centerings: cell cell cell" << std::endl;
-//    nrrdFile << "centerings: node node node" << std::endl;
-//    nrrdFile << "endian: little" << std::endl;
-//    nrrdFile << "encoding: raw" << std::endl;
-////    nrrdFile << "encoding: ascii" << std::endl;
-//    nrrdFile << std::endl;
-
-    // write data portion
-    for (size_t i = 0; i < gridSize50[0]; ++i)
-    {
-      for (size_t j = 0; j < gridSize50[1]; ++j)
-      {
-        for (size_t k = 0; k < gridSize50[2]; ++k)
-        {
-          double val = rasterData[i][j][k];
-          nrrdFile.write((char*)&val, sizeof(double));
-//          nrrdFile << std::setprecision(std::numeric_limits<double>::digits10 + 1) << val << " ";
-        }
-      }
-    }
-
-    nrrdFile.close();
-  }
-
-  std::ifstream baselineNrrdFile;
-  std::ostringstream oss;
-  oss << REGRESSION_DIR << "/testPrism.nrrd";
-  baselineNrrdFile.open( oss.str().c_str(), std::ios::binary );
-  baselineNrrdFile.exceptions( std::ofstream::failbit | std::ofstream::badbit );
-
-  std::string line;
-  if ( baselineNrrdFile.is_open() )
-  {
-    std::getline(baselineNrrdFile, line);
-    std::cout << line << std::endl;
-    std::getline(baselineNrrdFile, line);
-    std::cout << line << std::endl;
-    std::getline(baselineNrrdFile, line);
-    std::cout << line << std::endl;
-    std::getline(baselineNrrdFile, line);
-    std::cout << line << std::endl;
-    std::getline(baselineNrrdFile, line);
-    std::cout << line << std::endl;
-    std::getline(baselineNrrdFile, line);
-    std::cout << line << std::endl;
-    std::getline(baselineNrrdFile, line);
-    std::cout << line << std::endl;
-    std::getline(baselineNrrdFile, line);
-    std::cout << line << std::endl;
-    std::getline(baselineNrrdFile, line);
-    std::cout << line << std::endl;
-    std::getline(baselineNrrdFile, line);
-    std::cout << line << std::endl;
-    std::getline(baselineNrrdFile, line);
-    std::cout << line << std::endl;
-    std::cout << baselineNrrdFile.tellg() << std::endl;
-  }
+//  std::string filename("testPrism.nrrd");
+//  std::cout << "Writing file '" << filename << "'" << std::endl;
+//  std::ofstream nrrdFile(filename.c_str(), std::ofstream::binary);
+//  nrrdFile.exceptions( std::ofstream::failbit | std::ofstream::badbit );
+//
+//  if ( nrrdFile.is_open() )
+//  {
+////    nrrdFile << "NRRD0001" << std::endl;
+////    nrrdFile << "# Complete NRRD file format specification at:" << std::endl;
+////    nrrdFile << "# http://teem.sourceforge.net/nrrd/format.html" << std::endl;
+////    nrrdFile << "type: double" << std::endl;
+////    nrrdFile << "dimension: 3" << std::endl;
+////    nrrdFile << "sizes: " << gridSize50[0] << " " << gridSize50[1] << " " << gridSize50[2] << std::endl;
+////    nrrdFile << "axis mins: " << origin0[0] << ", " << origin0[1] << ", " << origin0[2] << std::endl;
+////    nrrdFile << "spacings: " << gridSpacing1[0] << " " << gridSpacing1[1] << " " << gridSpacing1[2] << std::endl;
+//////    nrrdFile << "centerings: cell cell cell" << std::endl;
+////    nrrdFile << "centerings: node node node" << std::endl;
+////    nrrdFile << "endian: little" << std::endl;
+////    nrrdFile << "encoding: raw" << std::endl;
+//////    nrrdFile << "encoding: ascii" << std::endl;
+////    nrrdFile << std::endl;
+//
+//    // write data portion
+//    for (size_t i = 0; i < gridSize50[0]; ++i)
+//    {
+//      for (size_t j = 0; j < gridSize50[1]; ++j)
+//      {
+//        for (size_t k = 0; k < gridSize50[2]; ++k)
+//        {
+//          double val = rasterData[i][j][k];
+//          nrrdFile.write((char*)&val, sizeof(double));
+////          nrrdFile << std::setprecision(std::numeric_limits<double>::digits10 + 1) << val << " ";
+//        }
+//      }
+//    }
+//
+//    nrrdFile.close();
+//  }
+//
+//  std::ifstream baselineNrrdFile;
+//  std::ostringstream oss;
+//  oss << REGRESSION_DIR << "/testPrism.nrrd";
+//  baselineNrrdFile.open( oss.str().c_str(), std::ios::binary );
+//  baselineNrrdFile.exceptions( std::ofstream::failbit | std::ofstream::badbit );
+//
+//  std::string line;
+//  if ( baselineNrrdFile.is_open() )
+//  {
+//    std::getline(baselineNrrdFile, line);
+//    std::cout << line << std::endl;
+//    std::getline(baselineNrrdFile, line);
+//    std::cout << line << std::endl;
+//    std::getline(baselineNrrdFile, line);
+//    std::cout << line << std::endl;
+//    std::getline(baselineNrrdFile, line);
+//    std::cout << line << std::endl;
+//    std::getline(baselineNrrdFile, line);
+//    std::cout << line << std::endl;
+//    std::getline(baselineNrrdFile, line);
+//    std::cout << line << std::endl;
+//    std::getline(baselineNrrdFile, line);
+//    std::cout << line << std::endl;
+//    std::getline(baselineNrrdFile, line);
+//    std::cout << line << std::endl;
+//    std::getline(baselineNrrdFile, line);
+//    std::cout << line << std::endl;
+//    std::getline(baselineNrrdFile, line);
+//    std::cout << line << std::endl;
+//    std::getline(baselineNrrdFile, line);
+//    std::cout << line << std::endl;
+//    std::cout << baselineNrrdFile.tellg() << std::endl;
+//  }
 }
 
 TEST_F(ConvexHull3DTest, PrismWithInternalPointBasicInterfaceTest)
@@ -254,55 +254,55 @@ TEST_F(ConvexHull3DTest, PrismWithInternalPointBasicInterfaceTest)
 
   const DataStorage rasterData = rbfInterface.getRasterData();
 
-  std::string filename("testPrismWithInternalPoint.nrrd");
-  std::cout << "Writing file '" << filename << "'" << std::endl;
-  std::ofstream nrrdFile(filename.c_str(), std::ofstream::binary);
-  nrrdFile.exceptions( std::ofstream::failbit | std::ofstream::badbit );
-
-  if ( nrrdFile.is_open() )
-  {
-    nrrdFile << "NRRD0001" << std::endl;
-    nrrdFile << "# Complete NRRD file format specification at:" << std::endl;
-    nrrdFile << "# http://teem.sourceforge.net/nrrd/format.html" << std::endl;
-    nrrdFile << "type: double" << std::endl;
-    nrrdFile << "dimension: 3" << std::endl;
-    nrrdFile << "sizes: " << gridSize50[0] << " " << gridSize50[1] << " " << gridSize50[2] << std::endl;
-    nrrdFile << "axis mins: " << origin0[0] << ", " << origin0[1] << ", " << origin0[2] << std::endl;
-    nrrdFile << "spacings: " << gridSpacing1[0] << " " << gridSpacing1[1] << " " << gridSpacing1[2] << std::endl;
-//    nrrdFile << "centerings: cell cell cell" << std::endl;
-    nrrdFile << "centerings: node node node" << std::endl;
-    nrrdFile << "endian: little" << std::endl;
-    nrrdFile << "encoding: raw" << std::endl;
-    nrrdFile << std::endl;
-
-    // write data portion
-    for (size_t i = 0; i < gridSize50[0]; ++i)
-    {
-      for (size_t j = 0; j < gridSize50[1]; ++j)
-      {
-        for (size_t k = 0; k < gridSize50[2]; ++k)
-        {
-          double val = rasterData[i][j][k];
-          nrrdFile.write((char*)&val, sizeof(double));
-        }
-      }
-    }
-
-    nrrdFile.close();
-  }
-
-  std::ifstream baselineNrrdFile;
-  std::ostringstream oss;
-  oss << REGRESSION_DIR << "/testPrismWithInternalPoint.nrrd";
-  baselineNrrdFile.open( oss.str().c_str(), std::ios::binary );
-  baselineNrrdFile.exceptions( std::ofstream::failbit | std::ofstream::badbit );
-
-  std::string line;
-  if ( baselineNrrdFile.is_open() )
-  {
-    std::getline(baselineNrrdFile, line);
-    std::cout << line << std::endl;
-  }
+//  std::string filename("testPrismWithInternalPoint.nrrd");
+//  std::cout << "Writing file '" << filename << "'" << std::endl;
+//  std::ofstream nrrdFile(filename.c_str(), std::ofstream::binary);
+//  nrrdFile.exceptions( std::ofstream::failbit | std::ofstream::badbit );
+//
+//  if ( nrrdFile.is_open() )
+//  {
+//    nrrdFile << "NRRD0001" << std::endl;
+//    nrrdFile << "# Complete NRRD file format specification at:" << std::endl;
+//    nrrdFile << "# http://teem.sourceforge.net/nrrd/format.html" << std::endl;
+//    nrrdFile << "type: double" << std::endl;
+//    nrrdFile << "dimension: 3" << std::endl;
+//    nrrdFile << "sizes: " << gridSize50[0] << " " << gridSize50[1] << " " << gridSize50[2] << std::endl;
+//    nrrdFile << "axis mins: " << origin0[0] << ", " << origin0[1] << ", " << origin0[2] << std::endl;
+//    nrrdFile << "spacings: " << gridSpacing1[0] << " " << gridSpacing1[1] << " " << gridSpacing1[2] << std::endl;
+////    nrrdFile << "centerings: cell cell cell" << std::endl;
+//    nrrdFile << "centerings: node node node" << std::endl;
+//    nrrdFile << "endian: little" << std::endl;
+//    nrrdFile << "encoding: raw" << std::endl;
+//    nrrdFile << std::endl;
+//
+//    // write data portion
+//    for (size_t i = 0; i < gridSize50[0]; ++i)
+//    {
+//      for (size_t j = 0; j < gridSize50[1]; ++j)
+//      {
+//        for (size_t k = 0; k < gridSize50[2]; ++k)
+//        {
+//          double val = rasterData[i][j][k];
+//          nrrdFile.write((char*)&val, sizeof(double));
+//        }
+//      }
+//    }
+//
+//    nrrdFile.close();
+//  }
+//
+//  std::ifstream baselineNrrdFile;
+//  std::ostringstream oss;
+//  oss << REGRESSION_DIR << "/testPrismWithInternalPoint.nrrd";
+//  baselineNrrdFile.open( oss.str().c_str(), std::ios::binary );
+//  baselineNrrdFile.exceptions( std::ofstream::failbit | std::ofstream::badbit );
+//
+//  std::string line;
+//  if ( baselineNrrdFile.is_open() )
+//  {
+//    std::getline(baselineNrrdFile, line);
+//    std::cout << line << std::endl;
+//  }
 }
 
 //TEST_F(ConvexHull3DTest, CubeBasicInterfaceTest)
