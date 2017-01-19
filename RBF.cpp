@@ -29,9 +29,6 @@
 #include "vec3.h"
 #include "FMM.h"
 
-#include "SparseMatrix.h"
-#include "LinearSolver.h"
-
 #include <Eigen/IterativeLinearSolvers>
 #include <Eigen/Dense>
 
@@ -49,8 +46,6 @@ using std::pair;
 
 const double RBF::EPSILON = 1.0e-2;
 
-// debugging...
-#define USE_INTERNAL 0
 
 RBF::RBF(ScatteredData *myData, Kernel myKernel) :
   completeData_(myData),
@@ -62,8 +57,9 @@ RBF::RBF(ScatteredData *myData, Kernel myKernel) :
 
 RBF::~RBF()
 {
-  delete this->data_;
-  delete this->fmm_;
+// if ( this->data_ != nullptr ) delete this->data_;
+// if ( this->fmm_ != nullptr ) delete this->fmm_;
+// this->completeData_ = 0;
 }
 
 void RBF::setAcceleration(Acceleration myAcceleration)
@@ -178,94 +174,37 @@ void RBF::computeFunctionForData()
       printf("Solving linear equations: \n"); fflush(stdout);
 #endif
 
-      if (USE_INTERNAL)
+      Eigen::VectorXd b = Eigen::VectorXd::Map(&this->data_->fnc_[0], N);
+      Eigen::VectorXd x(N);
+      //Eigen::SparseMatrix< double > A(N, N);
+      Eigen::MatrixXd A(N, N);
+      for (int i = 0; i < N; i++)
       {
-        LinearSolver rbfSolver;
-        SparseMatrix rbfMatrix(N);
-        //printf("Constructing matrix...\n"); fflush(stdout);
-        for (int i = 0; i < N; i++)
+        for (int j = 0; j < N; j++)
         {
-          for (int j = 0; j < N; j++)
-          {
-            //printf("%d %d ", i,j); fflush(stdout);
-            double val = computeKernel(i, j);
-            //printf("%lf\n", val); fflush(stdout);
-            rbfMatrix.push_back(i, j, val);
-          }
-        }
-        //printf("Done\n"); fflush(stdout);
-        rbfSolver.setMatrix(&rbfMatrix);
-#ifndef NDEBUG
-        printf("Running BiCGSTAB Iterations ... "); fflush(stdout);
-#endif
-        rbfSolver.biCGStab(this->data_->fnc_, this->coeff_);
-
-        bool throwException = false;
-        // TODO: nan check???
-        if ( rbfSolver.residualNorm() > SMALL_EPSILON )
-        {
-#ifndef NDEBUG
-          std::cerr << "Residual norm=" << rbfSolver.residualNorm() << std::endl;
-#endif
-          throwException = true;
-        }
-#ifndef NDEBUG
-        // sanity check - debug only
-        for (size_t i = 0; i < this->completeData_->fnc_.size(); ++i)
-        {
-          // X == 0, Y == 1, Z == 2
-          // TODO: also how to convert to vec3 structure...
-          vec3 location(this->completeData_->surfacePoints_[0][i],
-                        this->completeData_->surfacePoints_[1][i],
-                        this->completeData_->surfacePoints_[2][i]);
-          //double myVal = mySurface->computeValue(location);
-
-          double myVal = this->computeValue(location);
-          // printf("myVal: %lf, fnc: %lf\n", myVal, this->surfaceData_->fnc_[i]);
-          double error = fabs( myVal - this->completeData_->fnc_[i] );
-          if (error > ERROR_EPSILON)
-          {
-            std::cerr << "ERROR (numerics): " << error << std::endl;
-            if (! throwException) throwException = true;
-          }
-        }
-#endif
-        if (throwException)
-        {
-          throw std::runtime_error("Linear system failed to converge.");
-        }
-      }
-      else
-      {
-        Eigen::VectorXd b = Eigen::VectorXd::Map(&this->data_->fnc_[0], N);
-        Eigen::VectorXd x(N);
-        //Eigen::SparseMatrix< double > A(N, N);
-        Eigen::MatrixXd A(N, N);
-        for (int i = 0; i < N; i++)
-        {
-          for (int j = 0; j < N; j++)
-          {
-            double val = computeKernel(i, j);
+          double val = computeKernel(i, j);
 //#ifndef NDEBUG
 //            printf("%d %d ", i,j); fflush(stdout);
 //            printf("%lf\n", val); fflush(stdout);
 //#endif
-            //A.insert(i, j) = val;
-            A(i, j) = val;
-          }
+          //A.insert(i, j) = val;
+          A(i, j) = val;
         }
-        //Eigen::BiCGSTAB< Eigen::SparseMatrix<double> > solver;
-        Eigen::BiCGSTAB< Eigen::MatrixXd > solver;
-        solver.setTolerance(1.0e-10);
-        solver.compute(A);
-        x = solver.solve(b);
-        std::cout << "#iterations:     " << solver.iterations() << std::endl;
-        std::cout << "estimated error: " << solver.error()      << std::endl;
-
-        this->coeff_.resize(x.size());
-        Eigen::VectorXd::Map(&this->coeff_[0], x.size()) = x;
-        printf("Done\n"); fflush(stdout);
       }
+      //Eigen::BiCGSTAB< Eigen::SparseMatrix<double> > solver;
+      Eigen::BiCGSTAB< Eigen::MatrixXd > solver;
+      solver.setTolerance(1.0e-10);
+      solver.compute(A);
+      x = solver.solve(b);
+
+      // TODO: error reporting?
+      // TODO: log this...or pass to caller (i.e. Seg3D)
+      std::cout << "#iterations:     " << solver.iterations() << std::endl;
+      std::cout << "estimated error: " << solver.error()      << std::endl;
+
+      this->coeff_.resize(x.size());
+      Eigen::VectorXd::Map(&this->coeff_[0], x.size()) = x;
+      printf("Done\n"); fflush(stdout);
 
       break;
   }
