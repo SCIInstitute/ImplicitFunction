@@ -40,7 +40,7 @@ const double RBFInterface::SMALL_EPSILON = 1.0e-6;
 RBFInterface::RBFInterface(std::vector<vec3> myData,
                            const vec3& myOrigin, const vec3& mySize, const vec3& mySpacing,
                            const double myOffset, AxisList myAxis,
-                           const bool useConvexHull, const bool compute2DConvexHull,
+                           const bool compute2DConvexHull,
                            const bool invertSeedOrder, Kernel kernel) :
   thresholdValue_(0),
   origin_(myOrigin),
@@ -48,7 +48,6 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
   spacing_(mySpacing),
   offset_(myOffset),
   axisList_(myAxis),
-  useConvexHull_(useConvexHull),
   compute2DConvexHull_(compute2DConvexHull),
   invertSeedOrder_(invertSeedOrder),
   kernel_(kernel)
@@ -72,7 +71,7 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
 
   // TODO: error reporting???
   // TODO: would it be better to break this out, or have constructor throw exception???
-  if ( this->useConvexHull_ && ! this->compute2DConvexHull_ )
+  if ( ! this->compute2DConvexHull_ )
   {
     create3DSurface();
   }
@@ -271,12 +270,21 @@ for (int i = 0; i < normalsPerVertex.size(); ++i)
 
   for (size_t i = 0; i < N; i++)
   {
+//    vec3 point;
     for (size_t j = 0; j < DIM_3D; j++)
     {
-      // check endpoint of normal from this->surfaceData_->surfacePoints_[j][i] + this->offset_ * normalsPerVertex[i][j] for inside c hull
-      // printed warning
+      // TODO: check endpoint of normal from this->surfaceData_->surfacePoints_[j][i] + this->offset_ * normalsPerVertex[i][j] for inside c hull
+      // generated printed warning
       this->surfaceData_->surfacePoints_[j].push_back(this->surfaceData_->surfacePoints_[j][i] + this->offset_ * normalsPerVertex[i][j]);
+
+//std::cerr << j << ": " << this->surfaceData_->surfacePoints_[j][i] << ", " << this->surfaceData_->surfacePoints_[j][i] + this->offset_ * normalsPerVertex[i][j] << std::endl;
+//      point[j] = this->surfaceData_->surfacePoints_[j][i] + this->offset_ * normalsPerVertex[i][j];
+//      this->surfaceData_->surfacePoints_[j].push_back( point[j] );
     }
+
+    // check endpoint of normal from this->surfaceData_->surfacePoints_[j][i] + this->offset_ * normalsPerVertex[i][j] for inside c hull
+    // printed warning, member variable for testing...
+    //pointInsideConvexHull( point );
 
     // normals point inward
     this->surfaceData_->fnc_.push_back(NORMAL_IN);
@@ -296,27 +304,22 @@ for (int i = 0; i < normalsPerVertex.size(); ++i)
   delete [] normalsPerFace;
 }
 
-bool RBFInterface::pointInsideConvexHull()
-{
-  return false;
-}
+//bool RBFInterface::pointInsideConvexHull( const vec3& point )
+//{
+////  std::cerr << point << std::endl;
+//  return false;
+//}
 
 // driver
 void RBFInterface::create2DSurface()
 {
   // TODO: initialize in constructor?
   this->surfaceData_ = new ScatteredData(this->points_x_, this->points_y_, this->points_z_, this->threshold_, this->axisList_);
+
   //this->surfaceData_->axisInformation_ = myAxis;
-  if ( this->useConvexHull_ && this->compute2DConvexHull_ ) // TODO: not sure this is necessary...
-  {
-    this->surfaceData_->compute2DHull();
-    // TODO: this is bad - ScatteredData should set this to maintain correct internal state!!!
-    this->surfaceData_->origSize_ = this->surfaceData_->surfacePoints_[0].size();
-  }
-  else
-  {
-    this->surfaceData_->origSize_ = this->points_x_.size();
-  }
+  this->surfaceData_->compute2DHull();
+  // TODO: this is bad - ScatteredData should set this to maintain correct internal state!!!
+  this->surfaceData_->origSize_ = this->surfaceData_->surfacePoints_[0].size();
 
   // TODO: does not include points outside convex hull (if computed)...
   augmentNormalData();
@@ -331,7 +334,7 @@ void RBFInterface::createRasterizedSurface()
   this->rbf_->setDataReduction(All);
 
   // Construct RBFs
-  this->rbf_->computeFunction();  // throws exception if internal code used...
+  this->rbf_->computeFunction();  // TODO: throws exception if internal code used...
 
   // Fill the values into the vector.
   // In the first loop, we initialize the matrix with all values set to -100.
@@ -387,17 +390,14 @@ void RBFInterface::augmentNormalData()
   const size_t N = this->surfaceData_->origSize_;
   const size_t M = this->surfaceData_->leftovers_[0].size();
 
-  if ( this->useConvexHull_ )
+  // iterate through list of points not on hull, add to list as zero points
+  for (int i = 0; i < M; ++i)
   {
-    // iterate through list of points not on hull, add to list as zero points
-    for (int i = 0; i < M; ++i)
-    {
-      this->surfaceData_->surfacePoints_[0].push_back(this->surfaceData_->leftovers_[0][i]);
-      this->surfaceData_->surfacePoints_[1].push_back(this->surfaceData_->leftovers_[1][i]);
-      this->surfaceData_->surfacePoints_[2].push_back(this->surfaceData_->leftovers_[2][i]);
-    }
-    this->surfaceData_->fnc_.insert(this->surfaceData_->fnc_.end(), M, this->thresholdValue_);
+    this->surfaceData_->surfacePoints_[0].push_back(this->surfaceData_->leftovers_[0][i]);
+    this->surfaceData_->surfacePoints_[1].push_back(this->surfaceData_->leftovers_[1][i]);
+    this->surfaceData_->surfacePoints_[2].push_back(this->surfaceData_->leftovers_[2][i]);
   }
+  this->surfaceData_->fnc_.insert(this->surfaceData_->fnc_.end(), M, this->thresholdValue_);
 
   // size of surfaceData_->surfacePoints_ entries tripled with this code
   for (int i = 0; i < N; i++)

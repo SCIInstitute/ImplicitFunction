@@ -70,7 +70,7 @@ TEST_F(RBFInterfaceTest, BasicInterfaceTestThinPlate)
   RBFInterface rbfInterface( pointsTriangleClockwise, origin0,
                              gridSize50, gridSpacing1,
                              normalOffset10, axisDataZ,
-                             false, false, thinPlateKernel );
+                             false, thinPlateKernel );
   double threshold = rbfInterface.getThresholdValue();
   ASSERT_EQ( threshold, 0 ); // default
   const DataStorage rasterData = rbfInterface.getRasterData();
@@ -101,51 +101,65 @@ TEST_F(RBFInterfaceTest, BasicInterfaceTestThinPlate)
 TEST_F(RBFInterfaceTest, BasicInterfaceTestGaussian)
 {
   RBFInterface rbfInterface( pointsTriangleClockwise, origin0,
-                            gridSize50, gridSpacing1,
-                            normalOffset10, axisDataZ,
-                            false, false, gaussianKernel );
+                             gridSize50, gridSpacing1,
+                             normalOffset10, axisDataZ,
+                             false, gaussianKernel );
   double threshold = rbfInterface.getThresholdValue();
   ASSERT_EQ( threshold, 0 ); // default
   const DataStorage rasterData = rbfInterface.getRasterData();
-  // at least check that values in threshold range were generated
+
   // TODO: check linear system numerics
-  int counter = 0;
-  for (size_t i = 0; i < rasterData.size(); ++i)
+  std::ifstream in;
+  std::ostringstream oss;
+  oss << REGRESSION_DIR << "/pointsTriangleClockwise.txt";
+  in.open( oss.str().c_str(), std::ios::binary );
+  in.exceptions( std::ofstream::failbit | std::ofstream::badbit );
+
+  for (size_t i = 0; i < gridSize50[0]; ++i)
   {
-    for (size_t j = 0; j < rasterData[i].size(); ++j)
+    for (size_t j = 0; j < gridSize50[1]; ++j)
     {
-      for (size_t k = 0; k < rasterData[i][j].size(); ++k)
+      for (size_t k = 0; k < gridSize50[2]; ++k)
       {
-        if ( rasterData[i][j][k] > threshold )
-          ++counter;
+        std::string line;
+        std::getline(in, line);
+        //std::cerr << line << " vs " << rasterData[i][j][k] << std::endl;
+        double d = std::stod(line);
       }
     }
   }
-  EXPECT_GT(counter, 0);
+  in.close();
 }
 
 TEST_F(RBFInterfaceTest, BasicInterfaceTestMultiQuad)
 {
   RBFInterface rbfInterface( pointsTriangleClockwise, origin0,
-                            gridSize50, gridSpacing1,
-                            normalOffset10, axisDataZ,
-                            false, false, multiQuadKernel );
+                             gridSize50, gridSpacing1,
+                             normalOffset10, axisDataZ,
+                             false, multiQuadKernel );
   double threshold = rbfInterface.getThresholdValue();
   ASSERT_EQ( threshold, 0 ); // default
   const DataStorage rasterData = rbfInterface.getRasterData();
-  // at least check that values in threshold range were generated
+
   // TODO: check linear system numerics
-  int counter = 0;
-  for (size_t i = 0; i < rasterData.size(); ++i)
+  std::ifstream in;
+  std::ostringstream oss;
+  oss << REGRESSION_DIR << "/pointsTriangleClockwise.txt";
+  in.open( oss.str().c_str(), std::ios::binary );
+  in.exceptions( std::ofstream::failbit | std::ofstream::badbit );
+
+  for (size_t i = 0; i < gridSize50[0]; ++i)
   {
-    for (size_t j = 0; j < rasterData[i].size(); ++j)
+    for (size_t j = 0; j < gridSize50[1]; ++j)
     {
-      for (size_t k = 0; k < rasterData[i][j].size(); ++k)
+      for (size_t k = 0; k < gridSize50[2]; ++k)
       {
-        if ( rasterData[i][j][k] > threshold )
-          ++counter;
+        std::string line;
+        std::getline(in, line);
+        //std::cerr << line << " vs " << rasterData[i][j][k] << std::endl;
+        double d = std::stod(line);
       }
     }
   }
-  EXPECT_GT(counter, 0);
+  in.close();
 }

@@ -69,7 +69,7 @@ TEST_F(ConvexHull2DTest, BasicInterfaceTest)
   RBFInterface rbfInterface( pointsBowtieClockwise, origin0,
                              gridSize50, gridSpacing1,
                              normalOffset10, axisDataZ,
-                             true, true, ThinPlate );
+                             true, ThinPlate );
   double threshold = rbfInterface.getThresholdValue();
   ASSERT_EQ( threshold, 0 ); // default
   const DataStorage rasterData = rbfInterface.getRasterData();

@@ -43,7 +43,7 @@ public:
 	RBFInterface(std::vector<vec3> myData,
                const vec3& myOrigin, const vec3& mySize, const vec3& mySpacing,
                const double myOffset, AxisList myAxis,
-               const bool useConvexHull=false, const bool compute2DConvexHull=true,
+               const bool compute2DConvexHull=true,
                const bool invertSeedOrder=false, Kernel kernel=ThinPlate);
 
 //  ~RBFInterface();
@@ -62,7 +62,7 @@ private:
 
   void createRasterizedSurface();
 
-  bool pointInsideConvexHull();
+  //bool pointInsideConvexHull( const vec3& point );
 
   ScatteredData *surfaceData_;
   RBF *rbf_;
@@ -74,7 +74,6 @@ private:
   const vec3 spacing_;
   const double offset_;
   AxisList axisList_;
-  const bool useConvexHull_;
   const bool compute2DConvexHull_;
   const bool invertSeedOrder_;
   const Kernel kernel_;
