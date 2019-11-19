@@ -34,6 +34,8 @@
 
 #include <tetgen.h>
 
+#include <ctime>
+
 //const double RBFInterface::EPSILON = 1.0e-3;
 const double RBFInterface::SMALL_EPSILON = 1.0e-6;
 
@@ -52,6 +54,8 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
   invertSeedOrder_(invertSeedOrder),
   kernel_(kernel)
 {
+  time_t tstart, tend;
+  tstart = time(0);
   if ( this->invertSeedOrder_ )
   {
     // inplace
@@ -79,6 +83,8 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
   {
     create2DSurface();
   }
+  tend = time(0);
+  cout << "RBF Interface constructor took " << difftime(tend, tstart) << " second(s)." << endl;
 }
 
 //RBFInterface::~RBFInterface()
