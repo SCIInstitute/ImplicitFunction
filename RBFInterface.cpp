@@ -342,7 +342,7 @@ void RBFInterface::create2DSurface()
   createRasterizedSurface();
 
   tend = time(0);
-  std::cout << "Create2DSurface took " << difftime(tend, tstart) << " second(s) << std::endl;
+  std::cout << "Create2DSurface took " << difftime(tend, tstart) << " second(s)" << std::endl;
 }
 
 void RBFInterface::createRasterizedSurface()
@@ -402,7 +402,7 @@ void RBFInterface::createRasterizedSurface()
 
   //delete this->rbf_;
   tend = time(0);
-  std::cout << "createRasterizedSurface took " << difftime(tend, tstart) << " second(s) << std::endl;
+  std::cout << "createRasterizedSurface took " << difftime(tend, tstart) << " second(s)" << std::endl;
 }
 
 // TODO: move this and findNormalAxis to new class?
@@ -454,7 +454,7 @@ void RBFInterface::augmentNormalData()
     this->surfaceData_->fnc_.push_back(NORMAL_OUT);
   }
   tend = time(0);
-  std::cout << "augmentNormalData took " << difftime(tend, tstart) << " second(s) << std::endl;
+  std::cout << "augmentNormalData took " << difftime(tend, tstart) << " second(s)" << std::endl;
 }
 
 vec3 RBFInterface::findNormalAxis(const int n)
@@ -518,7 +518,7 @@ vec3 RBFInterface::findNormalAxis(const int n)
       break;
   }
   tend = time(0);
-  std::cout << "findNormalAxis took " << difftime(tend, tstart) << " second(s) << std::endl;
+  std::cout << "findNormalAxis took " << difftime(tend, tstart) << " second(s)" << std::endl;
 
   return ret;
 }
