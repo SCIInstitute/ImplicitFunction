@@ -54,8 +54,8 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
   invertSeedOrder_(invertSeedOrder),
   kernel_(kernel)
 {
-  time_t tstart, tend;
-  tstart = time(0);
+  time_t tstart1, tend1;
+  tstart1 = time(0);
   if ( this->invertSeedOrder_ )
   {
     // inplace
@@ -83,8 +83,8 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
   {
     create2DSurface();
   }
-  tend = time(0);
-  std::cout << "RBF Interface constructor took " << difftime(tend, tstart) << " second(s)." << std::endl;
+  tend1 = time(0);
+  std::cout << "RBF Interface constructor took " << difftime(tend1, tstart1) << " second(s)." << std::endl;
 }
 
 //RBFInterface::~RBFInterface()
@@ -96,8 +96,8 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
 void RBFInterface::create3DSurface()
 {
   // TODO: debug print
-  time_t tstart, tend;
-  tstart = time(0);
+  time_t tstart2, tend2;
+  tstart2 = time(0);
 
   std::cerr << "Calling Tetgen..." << std::endl;
   tetgenio in, out;
@@ -312,8 +312,8 @@ for (int i = 0; i < normalsPerVertex.size(); ++i)
   delete [] listOfIntsPerVertex;
   delete [] normalsPerFace;
 
-  tend = time(0);
-  std::cout << "Create3DSurface took " << difftime(tend, tstart) << " second(s)." << std::endl;
+  tend2 = time(0);
+  std::cout << "Create3DSurface took " << difftime(tend2, tstart2) << " second(s)." << std::endl;
 }
 
 //bool RBFInterface::pointInsideConvexHull( const vec3& point )
@@ -325,8 +325,8 @@ for (int i = 0; i < normalsPerVertex.size(); ++i)
 // driver
 void RBFInterface::create2DSurface()
 {
-  time_t tstart, tend;
-  tstart = time(0);
+  time_t tstart3, tend3;
+  tstart3 = time(0);
 
   // TODO: initialize in constructor?
   this->surfaceData_ = new ScatteredData(this->points_x_, this->points_y_, this->points_z_, this->threshold_, this->axisList_);
@@ -341,14 +341,14 @@ void RBFInterface::create2DSurface()
 
   createRasterizedSurface();
 
-  tend = time(0);
-  std::cout << "Create2DSurface took " << difftime(tend, tstart) << " second(s)" << std::endl;
+  tend3 = time(0);
+  std::cout << "Create2DSurface took " << difftime(tend3, tstart3) << " second(s)" << std::endl;
 }
 
 void RBFInterface::createRasterizedSurface()
 {
-  time_t tstart, tend;
-  tstart = time(0);
+  time_t tstart4, tend4;
+  tstart4 = time(0);
 
   // TODO: make local?
   this->rbf_ = new RBF(this->surfaceData_, kernel_);
@@ -401,15 +401,15 @@ void RBFInterface::createRasterizedSurface()
   }
 
   //delete this->rbf_;
-  tend = time(0);
-  std::cout << "createRasterizedSurface took " << difftime(tend, tstart) << " second(s)" << std::endl;
+  tend4 = time(0);
+  std::cout << "createRasterizedSurface took " << difftime(tend4, tstart4) << " second(s)" << std::endl;
 }
 
 // TODO: move this and findNormalAxis to new class?
 void RBFInterface::augmentNormalData()
 {
-  time_t tstart, tend;
-  tstart = time(0);
+  time_t tstart5, tend5;
+  tstart5 = time(0);
 
   const size_t DIM_3D = 3;
   const int NORMAL_IN = 10, NORMAL_OUT = -10;
@@ -453,14 +453,14 @@ void RBFInterface::augmentNormalData()
     // normals pointing outward
     this->surfaceData_->fnc_.push_back(NORMAL_OUT);
   }
-  tend = time(0);
-  std::cout << "augmentNormalData took " << difftime(tend, tstart) << " second(s)" << std::endl;
+  tend5 = time(0);
+  std::cout << "augmentNormalData took " << difftime(tend5, tstart5) << " second(s)" << std::endl;
 }
 
 vec3 RBFInterface::findNormalAxis(const int n)
 {
-  time_t tstart, tend;
-  tstart = time(0);
+  time_t tstart6, tend6;
+  tstart6 = time(0);
 
   //printf("here\n");
   const int TOT = this->surfaceData_->origSize_;
@@ -517,8 +517,8 @@ vec3 RBFInterface::findNormalAxis(const int n)
       ret[1] = ret_y = tangent[0];
       break;
   }
-  tend = time(0);
-  std::cout << "findNormalAxis took " << difftime(tend, tstart) << " second(s)" << std::endl;
+  tend6 = time(0);
+  std::cout << "findNormalAxis took " << difftime(tend6, tstart6) << " second(s)" << std::endl;
 
   return ret;
 }
