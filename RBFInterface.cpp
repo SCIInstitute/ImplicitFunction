@@ -96,6 +96,9 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
 void RBFInterface::create3DSurface()
 {
   // TODO: debug print
+  time_t tstart, tend;
+  tstart = time(0);
+
   std::cerr << "Calling Tetgen..." << std::endl;
   tetgenio in, out;
   in.numberofpoints = static_cast<int>( this->points_x_.size() );
@@ -308,6 +311,9 @@ for (int i = 0; i < normalsPerVertex.size(); ++i)
 
   delete [] listOfIntsPerVertex;
   delete [] normalsPerFace;
+
+  tend = time(0);
+  std::cout << "Create3DSurface took " << difftime(tend, tstart) << " second(s)." << std::endl;
 }
 
 //bool RBFInterface::pointInsideConvexHull( const vec3& point )
@@ -319,6 +325,9 @@ for (int i = 0; i < normalsPerVertex.size(); ++i)
 // driver
 void RBFInterface::create2DSurface()
 {
+  time_t tstart, tend;
+  tstart = time(0);
+
   // TODO: initialize in constructor?
   this->surfaceData_ = new ScatteredData(this->points_x_, this->points_y_, this->points_z_, this->threshold_, this->axisList_);
 
@@ -331,10 +340,16 @@ void RBFInterface::create2DSurface()
   augmentNormalData();
 
   createRasterizedSurface();
+
+  tend = time(0);
+  std::cout << "Create2DSurface took " << difftime(tend, tstart) << " second(s) << std::endl;
 }
 
 void RBFInterface::createRasterizedSurface()
 {
+  time_t tstart, tend;
+  tstart = time(0);
+
   // TODO: make local?
   this->rbf_ = new RBF(this->surfaceData_, kernel_);
   this->rbf_->setDataReduction(All);
@@ -386,11 +401,16 @@ void RBFInterface::createRasterizedSurface()
   }
 
   //delete this->rbf_;
+  tend = time(0);
+  std::cout << "createRasterizedSurface took " << difftime(tend, tstart) << " second(s) << std::endl;
 }
 
 // TODO: move this and findNormalAxis to new class?
 void RBFInterface::augmentNormalData()
 {
+  time_t tstart, tend;
+  tstart = time(0);
+
   const size_t DIM_3D = 3;
   const int NORMAL_IN = 10, NORMAL_OUT = -10;
   const size_t N = this->surfaceData_->origSize_;
@@ -433,10 +453,15 @@ void RBFInterface::augmentNormalData()
     // normals pointing outward
     this->surfaceData_->fnc_.push_back(NORMAL_OUT);
   }
+  tend = time(0);
+  std::cout << "augmentNormalData took " << difftime(tend, tstart) << " second(s) << std::endl;
 }
 
 vec3 RBFInterface::findNormalAxis(const int n)
 {
+  time_t tstart, tend;
+  tstart = time(0);
+
   //printf("here\n");
   const int TOT = this->surfaceData_->origSize_;
   int prev = (n-1) >= 0 ? n-1 : TOT-1; // wrap
@@ -492,5 +517,8 @@ vec3 RBFInterface::findNormalAxis(const int n)
       ret[1] = ret_y = tangent[0];
       break;
   }
+  tend = time(0);
+  std::cout << "findNormalAxis took " << difftime(tend, tstart) << " second(s) << std::endl;
+
   return ret;
 }
