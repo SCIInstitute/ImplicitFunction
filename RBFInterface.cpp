@@ -34,7 +34,7 @@
 
 #include <tetgen.h>
 
-//#include <ctime>
+#include <ctime>
 
 //const double RBFInterface::EPSILON = 1.0e-3;
 const double RBFInterface::SMALL_EPSILON = 1.0e-6;
