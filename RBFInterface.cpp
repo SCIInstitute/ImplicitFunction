@@ -84,7 +84,7 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
     create2DSurface();
   }
   tend = time(0);
-  cout << "RBF Interface constructor took " << difftime(tend, tstart) << " second(s)." << endl;
+  std::cout << "RBF Interface constructor took " << difftime(tend, tstart) << " second(s)." << std::endl;
 }
 
 //RBFInterface::~RBFInterface()
