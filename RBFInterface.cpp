@@ -34,7 +34,7 @@
 
 #include <tetgen.h>
 
-#include <ctime>
+//#include <ctime>
 
 //const double RBFInterface::EPSILON = 1.0e-3;
 const double RBFInterface::SMALL_EPSILON = 1.0e-6;
@@ -54,8 +54,8 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
   invertSeedOrder_(invertSeedOrder),
   kernel_(kernel)
 {
-  time_t tstart, tend;
-  tstart = time(0);
+  //time_t tstart, tend;
+  //tstart = time(0);
   if ( this->invertSeedOrder_ )
   {
     // inplace
@@ -83,8 +83,8 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
   {
     create2DSurface();
   }
-  tend = time(0);
-  cout << "RBF Interface constructor took " << difftime(tend, tstart) << " second(s)." << endl;
+  //tend = time(0);
+  //cout << "RBF Interface constructor took " << difftime(tend, tstart) << " second(s)." << endl;
 }
 
 //RBFInterface::~RBFInterface()
@@ -449,7 +449,7 @@ vec3 RBFInterface::findNormalAxis(const int n)
   {
     prev = (prev-1) >= 0 ? prev-1 : TOT-1; // wrap
   }
-  
+
   while(fabs(this->surfaceData_->surfacePoints_[myAxis][next] - this->surfaceData_->surfacePoints_[myAxis][n]) > SMALL_EPSILON)
   {
     next = (next+1) < TOT ? next+1 : 0; // wrap
