@@ -34,6 +34,7 @@
 
 #include <cmath>
 #include <cstdio>
+#include <ctime>
 
 // STL Includes
 #include <vector>
@@ -83,6 +84,8 @@ void RBF::setDataReduction(DataReduction myDataReduction)
 
 void RBF::computeFunction()
 {
+  time_t tstart1, tend1;
+  tstart1 = time(0);
   // TODO: memory leak?
   data_ = new ScatteredData;
   switch(this->dataReduction_)
@@ -155,10 +158,14 @@ void RBF::computeFunction()
       delete [] added;
       break;
   }
+  tend1 = time(0);
+  std::cout << "Compute Function " << difftime(tend1, tstart1) << " second(s)." << std::endl;
 }
 
 void RBF::computeFunctionForData()
 {
+  time_t tstart2, tend2;
+  tstart2 = time(0);
   switch(this->acceleration_)
   {
     case FastMultipole:
@@ -206,12 +213,17 @@ void RBF::computeFunctionForData()
       Eigen::VectorXd::Map(&this->coeff_[0], x.size()) = x;
       printf("Done\n"); fflush(stdout);
 
+      tend2 = time(0);
+      std::cout << "Compute Function From Data " << difftime(tend2, tstart2) << " second(s)." << std::endl;
       break;
   }
 }
 
 double RBF::computeValue(const vec3& x)
 {
+  time_t tstart3, tend3;
+  tstart3 = time(0);
+
   switch(this->acceleration_)
   {
     case FastMultipole:
@@ -224,10 +236,15 @@ double RBF::computeValue(const vec3& x)
         sum += this->coeff_[i]*computeKernel(i, x);
       return sum;
   }
+  tend3 = time(0);
+  std::cout << "Compute Value " << difftime(tend3, tstart3) << "second(s)." << std::endl;
 }
 
 void RBF::computeErrorForData(vector<pair<double, int> > &error)
 {
+  time_t tstart4, tend4;
+  tstart4 = time(0);
+
   const int N = this->completeData_->fnc_.size();
   error.clear();
   for (int i = 0; i < N; i++)
@@ -238,10 +255,15 @@ void RBF::computeErrorForData(vector<pair<double, int> > &error)
     double err = this->completeData_->fnc_[i]-computeValue(x);
     error.push_back( std::make_pair(err, i) );
   }
+  tend4 = time(0);
+  std::cout << "Compute Error For Data" << difftime(tend4, tstart4) << "second(s)." << std::endl;
 }
 
 double RBF::computeKernel(int i, int j)
 {
+  time_t tstart5, tend5;
+  tstart5 = time(0);
+
   double r = sqrt( (this->data_->surfacePoints_[0][i] - this->data_->surfacePoints_[0][j]) *
                    (this->data_->surfacePoints_[0][i] - this->data_->surfacePoints_[0][j]) +  // x
                    (this->data_->surfacePoints_[1][i] - this->data_->surfacePoints_[1][j]) *
@@ -250,19 +272,29 @@ double RBF::computeKernel(int i, int j)
                    (this->data_->surfacePoints_[2][i] - this->data_->surfacePoints_[2][j]) ); // z
 
   return computeRadialFunction(r);
+  tend5 = time(0);
+  std::cout << "Compute Kernel with ints" << difftime(tend5, tstart5) << "second(s)." << std::endl;
 }
 
 double RBF::computeKernel(int i, const vec3& b)
 {
+  time_t tstart6, tstart6;
+  tstart6 = time(0);
+
   double r = sqrt( (this->data_->surfacePoints_[0][i] - b[0])*(this->data_->surfacePoints_[0][i] - b[0]) +  // x
                    (this->data_->surfacePoints_[1][i] - b[1])*(this->data_->surfacePoints_[1][i] - b[1]) +  // y
                    (this->data_->surfacePoints_[2][i] - b[2])*(this->data_->surfacePoints_[2][i] - b[2]) ); // z
 
   return computeRadialFunction(r);
+  tend6 = time(0);
+  std::cout << "Compute Kernel with int and vector" << difftime(tend6, tstart6) << "second(s)." << std::endl;
 }
 
 double RBF::computeRadialFunction(double r)
 {
+time_t tstart7, tend7;
+tstart7 = time(0);
+
   const double C = 0.1;
   const double SCALE = 0.01;
 
@@ -282,12 +314,18 @@ double RBF::computeRadialFunction(double r)
       break;
   }
   return 0;
+
+  tend6 = time(0);
+  std::cout << "Compute Radial Function" << difftime(tend7, tstart7) << "second(s)." << std::endl;
 }
 
 //FMM Codes
 
 void RBF::fmmBuildTree()
 {
+  time_t tstart8, tend8;
+  tstart8 = time(0);
+
   vector<int> myIndices;
   const int N = this->data_->surfacePoints_[0].size();
 
@@ -302,10 +340,15 @@ void RBF::fmmBuildTree()
   fmmBuildTree(myIndices, fmm_->tree);
   //printf("Tree Built\n");
   //fmmPrintTree(fmm_->tree, 0);
+  tend8 = time(0);
+  std::cout << "fmm Build Tree took " << difftime(tend8, tstart8) << " second(s)." << std::endl;
 }
 
 void RBF::fmmPrintTree(BHNode *myNode, int stack)
 {
+  time_t tstart9, tend9;
+  tstart9 = time(0);
+
   if (stack > 4)
     return;
 
@@ -321,35 +364,41 @@ void RBF::fmmPrintTree(BHNode *myNode, int stack)
     if (myNode->nodes[i] != nullptr)
       fmmPrintTree(myNode->nodes[i], stack+1);
   }
+  tend9 = time(0);
+  std::cout << "fmm Print Tree took " << difftime(tend9, tstart9) << " second(s)." << std::endl;
+
 }
 
 void RBF::fmmBuildTree(vector<int> &myPoints, BHNode *myNode)
 {
+  time_t tstart10; tend10;
+  tstart10 = time(0);
+
   const double SMALL_EPSILON = 1.0e-6;
   //printf("[%lf %lf %lf] [%lf %lf %lf] %d\n", myNode->box_.min_[0], myNode->box_.min_[1], myNode->box_.min_[2], myNode->box_.max_[0], myNode->box_.max_[1], myNode->box_.max_[2], myPoints.size());
   vector<int> children[8];
   const int N = myPoints.size();
-  
+
   myNode->index_ = fmm_->numOfNodes;
   fmm_->numOfNodes += 1;
   fmm_->nodePointer.push_back(myNode);
-  
+
   myNode->mass_ = N;
   myNode->leaf_ = (N <= 1) ? true : false;
   myNode->center_ = vec3::zero;
-  
+
   myNode->coeff_ = 1; //REPLACE
   //add all the coefficients
-  
+
   for (int i = 0; i < N; i++)
     myNode->pts_.push_back( myPoints[i] );
-  
+
   for (int i = 0; i < N; i++)
   {
     vec3 location(this->data_->surfacePoints_[0][myPoints[i]], this->data_->surfacePoints_[1][myPoints[i]], this->data_->surfacePoints_[2][myPoints[i]]);
     myNode->center_ = myNode->center_ + (location/N);
   }
-  
+
   if (N == 1)
   {
     for (int i = 0; i < 8; i++)
@@ -377,9 +426,9 @@ void RBF::fmmBuildTree(vector<int> &myPoints, BHNode *myNode)
       octant += 2;
     if (this->data_->surfacePoints_[2][myPoints[i]] > mid[2])
       octant += 4;
-    
+
     //printf("%d %d %d %lf %lf %lf\n", i,octant, myPoints[i], this->data_->surfacePoints_[0][myPoints[i]],this->data_->surfacePoints_[1][myPoints[i]], this->data_->surfacePoints_[2][myPoints[i]]);
-    
+
     children[octant].push_back(myPoints[i]);
   }
 
@@ -411,6 +460,8 @@ void RBF::fmmBuildTree(vector<int> &myPoints, BHNode *myNode)
 
     fmmBuildTree(children[i], myNode->nodes[i]);
   }
+  tend10 = time(0);
+  std::cout << "fmm Build Tree with inputs took " << difftime(tend10, tstart10) << " second(s)." << std::endl;
 }
 
 double RBF::fmmComputeValue(const vec3& x)
@@ -422,6 +473,9 @@ double RBF::fmmComputeValue(const vec3& x)
 
 double RBF::fmmComputeValueRecurse(const vec3& x, BHNode *myNode)
 {
+  time_t tstart11, tend11;
+  tstart11 = time(0);
+
   double val = 0;
 
   // TODO: div by zero?
@@ -447,12 +501,15 @@ double RBF::fmmComputeValueRecurse(const vec3& x, BHNode *myNode)
       val += this->coeff_[myNode->pts_[i]] * computeKernel(myNode->pts_[i], x);
     }
   }
+  tend11 = time(0);
+  std::cout << "fmm Compute Value Recurse took " << difftime(tend10, tstart10) << " second(s)." << std::endl;
   return val;
+
 }
 
 double RBF::fmmComputeKernel(const vec3& b, BHNode *myNode)
 {
   double r = length(myNode->center_ - b);
-  
+
   return computeRadialFunction(r);
 }
