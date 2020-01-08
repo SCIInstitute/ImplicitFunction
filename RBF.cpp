@@ -278,7 +278,7 @@ double RBF::computeKernel(int i, int j)
 
 double RBF::computeKernel(int i, const vec3& b)
 {
-  time_t tstart6, tstart6;
+  time_t tstart6, tend6;
   tstart6 = time(0);
 
   double r = sqrt( (this->data_->surfacePoints_[0][i] - b[0])*(this->data_->surfacePoints_[0][i] - b[0]) +  // x
@@ -315,7 +315,7 @@ tstart7 = time(0);
   }
   return 0;
 
-  tend6 = time(0);
+  tend7 = time(0);
   std::cout << "Compute Radial Function" << difftime(tend7, tstart7) << "second(s)." << std::endl;
 }
 
