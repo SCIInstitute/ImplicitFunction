@@ -371,7 +371,7 @@ void RBF::fmmPrintTree(BHNode *myNode, int stack)
 
 void RBF::fmmBuildTree(vector<int> &myPoints, BHNode *myNode)
 {
-  time_t tstart10; tend10;
+  time_t tstart10, tend10;
   tstart10 = time(0);
 
   const double SMALL_EPSILON = 1.0e-6;
