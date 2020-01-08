@@ -502,7 +502,7 @@ double RBF::fmmComputeValueRecurse(const vec3& x, BHNode *myNode)
     }
   }
   tend11 = time(0);
-  std::cout << "fmm Compute Value Recurse took " << difftime(tend10, tstart10) << " second(s)." << std::endl;
+  std::cout << "fmm Compute Value Recurse took " << difftime(tend11, tstart11) << " second(s)." << std::endl;
   return val;
 
 }
