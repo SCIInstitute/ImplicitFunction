@@ -371,6 +371,8 @@ void RBFInterface::createRasterizedSurface()
     }
   }
 
+  time_t tstart_loop, tend_loop;
+  tstart_loop = time(0);
   for (int i = 0; i < this->size_[0]; i++)
   {
     //vec3 location = this->origin_ + this->spacing_[0] * i * vec3::unitX;
@@ -399,6 +401,8 @@ void RBFInterface::createRasterizedSurface()
       }
     }
   }
+  tend_loop = time(0);
+  std::cout << difftime(tend_loop, tstart_loop);
 
   //delete this->rbf_;
   tend4 = time(0);

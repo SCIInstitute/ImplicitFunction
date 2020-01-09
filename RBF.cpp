@@ -234,10 +234,10 @@ double RBF::computeValue(const vec3& x)
       double sum = 0;
       for(int i = 0; i < this->coeff_.size(); i++)
         sum += this->coeff_[i]*computeKernel(i, x);
+      tend3 = time(0);
+      std::cout << "Compute Value took " << difftime(tend3, tstart3) << "second(s)." << std::endl;
       return sum;
   }
-  tend3 = time(0);
-  std::cout << "Compute Value " << difftime(tend3, tstart3) << "second(s)." << std::endl;
 }
 
 void RBF::computeErrorForData(vector<pair<double, int> > &error)
@@ -271,9 +271,9 @@ double RBF::computeKernel(int i, int j)
                    (this->data_->surfacePoints_[2][i] - this->data_->surfacePoints_[2][j]) *
                    (this->data_->surfacePoints_[2][i] - this->data_->surfacePoints_[2][j]) ); // z
 
-  return computeRadialFunction(r);
   tend5 = time(0);
   std::cout << "Compute Kernel with ints" << difftime(tend5, tstart5) << "second(s)." << std::endl;
+  return computeRadialFunction(r);
 }
 
 double RBF::computeKernel(int i, const vec3& b)
@@ -302,21 +302,26 @@ tstart7 = time(0);
   {
     case Gaussian:
       r = r * SCALE;
+      tend7 = time(0);
+      std::cout << "Compute Radial Function took " << difftime(tend7, tstart7) << "second(s)." << std::endl;
       return 1.0/sqrt(r*r + C*C);
       break;
     case ThinPlate:
+      tend7 = time(0);
+      std::cout << "Compute Radial Function took " << difftime(tend7, tstart7) << "second(s)." << std::endl;
       return r*r*log(r+C);
       break;
     case MultiQuadratic:
+      tend7 = time(0);
+      std::cout << "Compute Radial Function took " << difftime(tend7, tstart7) << "second(s)." << std::endl;
       return sqrt(r*r + C*C);
     default:
+      tend7 = time(0);
+      std::cout << "Compute Radial Function took " << difftime(tend7, tstart7) << "second(s)." << std::endl;
       return r;
       break;
   }
   return 0;
-
-  tend7 = time(0);
-  std::cout << "Compute Radial Function" << difftime(tend7, tstart7) << "second(s)." << std::endl;
 }
 
 //FMM Codes
