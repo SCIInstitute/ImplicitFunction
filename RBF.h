@@ -59,7 +59,7 @@ private:
 	Acceleration acceleration_;
 	DataReduction dataReduction_;
 
-	FMM *fmm_;
+	std::unique_ptr<FMM> fmm_;
 
 	void computeFunctionForData(); // throws std::runtime_error
 	void computeErrorForData(std::vector<std::pair<double, int> > &error);
