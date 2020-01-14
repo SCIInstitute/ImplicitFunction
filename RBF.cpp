@@ -61,8 +61,7 @@ void RBF::setAcceleration(Acceleration myAcceleration)
   switch(this->acceleration_)
   {
     case FastMultipole:
-      // TODO: memory leak?
-      fmm_ = new FMM();
+      fmm_.reset(new FMM);
       break;
     default:
       break;
@@ -88,9 +87,8 @@ void RBF::computeFunction()
       break;
 
     case Random:
-      bool *added;
       const int N = this->completeData_->fnc_.size();
-      added = new bool[N];
+      std::vector<bool> added(N);
       printf("%d\n", N);
 
       for (int i = 0; i < N; i++)
@@ -144,7 +142,6 @@ void RBF::computeFunction()
         }
       }
       //printf("Total no. of data_ point: %d\n",  this->data_->fnc_.size()); fflush(stdout);
-      delete [] added;
       break;
   }
 }
