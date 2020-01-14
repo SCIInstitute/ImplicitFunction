@@ -49,4 +49,8 @@ target_link_libraries(ImplicitFunction_Tests
   ${GTEST_MAIN_LIBRARY}
 )
 
+IF(UNIX)
+  TARGET_LINK_LIBRARIES(ImplicitFunction_Tests -lpthread -lm)
+ENDIF()
+
 ADD_TEST("ImplicitFunction_Tests" ${ImplicitFunction_BINARY_DIR}/ImplicitFunction_Tests)
