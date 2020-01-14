@@ -48,7 +48,7 @@ script:
   - tar xzf $HOME/deps/3.2.10.tar.gz
   # build ImplicitFunction library
   - cmake -DBUILD_TESTING:BOOL=ON -DENABLE_COVERAGE:BOOL=ON -DTravisCI_BUILD:BOOL=ON
-          -DGTEST_INCLUDE_DIR:PATH=`pwd`/googletest-release-1.10.0/include
+          -DGTEST_INCLUDE_DIR:PATH=`pwd`/googletest-release-1.10.0/googletest/include
           -DGTEST_LIBRARY:FILEPATH=`pwd`/googletest-release-1.10.0/build/libgtest.a
           -DGTEST_MAIN_LIBRARY:FILEPATH=`pwd`/googletest-release-1.10.0/build/libgtest_main.a
           -DTetgen_DIR:PATH=`pwd`/tetgen1.4.3
