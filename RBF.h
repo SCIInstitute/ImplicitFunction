@@ -43,8 +43,7 @@ enum DataReduction { All, Random };
 class RBF
 {
 public:
-	RBF(ScatteredData *myData, Kernel myKernel);
-  ~RBF();
+	RBF(const ScatteredData *myData, Kernel myKernel);
 
 	void setAcceleration(Acceleration myAcceleration);
 	void setDataReduction(DataReduction myDataReduction);
@@ -53,7 +52,8 @@ public:
 	double computeValue(const vec3& x);
 
 private:
-	ScatteredData *data_, *completeData_;
+	const ScatteredData* completeData_;
+	std::unique_ptr<ScatteredData> data_;
 	Kernel kernel_;
 	std::vector<double> coeff_;
 	Acceleration acceleration_;

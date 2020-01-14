@@ -37,7 +37,7 @@
 //const double RBFInterface::EPSILON = 1.0e-3;
 const double RBFInterface::SMALL_EPSILON = 1.0e-6;
 
-RBFInterface::RBFInterface(std::vector<vec3> myData,
+RBFInterface::RBFInterface(const std::vector<vec3>& myData,
                            const vec3& myOrigin, const vec3& mySize, const vec3& mySpacing,
                            const double myOffset, AxisList myAxis,
                            const bool compute2DConvexHull,
@@ -52,20 +52,22 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
   invertSeedOrder_(invertSeedOrder),
   kernel_(kernel)
 {
-  if ( this->invertSeedOrder_ )
+  //TODO: need reversed range concept
+  auto reversed = [](const std::vector<vec3>& v)
   {
-    // inplace
-    std::reverse( myData.begin(), myData.end() );
-  }
+    std::vector<vec3> vR(v);
+    std::reverse( vR.begin(), vR.end() );
+    return vR;
+  };
 
-  for (int i = 0; i < myData.size(); i++)
+  for (const auto& point : this->invertSeedOrder_ ? reversed(myData) : myData)
   {
 //    std::cerr << "point: " << myData[i][0] << ", " << myData[i][1] << ", " << myData[i][2] << std::endl;
     // TODO: would be better to skip this step...
     // Input point components:
-    this->points_x_.push_back(myData[i][0]); // X component
-    this->points_y_.push_back(myData[i][1]); // Y component
-    this->points_z_.push_back(myData[i][2]); // Z component
+    this->points_x_.push_back(point[0]); // X component
+    this->points_y_.push_back(point[1]); // Y component
+    this->points_z_.push_back(point[2]); // Z component
     this->threshold_.push_back(this->thresholdValue_);
   }
 
@@ -80,12 +82,6 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
     create2DSurface();
   }
 }
-
-//RBFInterface::~RBFInterface()
-//{
-//std::cerr << "RBFInterface::~RBFInterface()" << std::endl;
-//  delete this->surfaceData_;
-//}
 
 void RBFInterface::create3DSurface()
 {
@@ -140,7 +136,7 @@ void RBFInterface::create3DSurface()
   }
 #endif
 
-  IndexList* listOfIntsPerVertex = new IndexList[NUMBER_POINTS];
+  std::vector<IndexList> listOfIntsPerVertex(NUMBER_POINTS);
   for (size_t i = 0; i < NUMBER_TRI_FACES; ++i)
   {
     for (size_t j = 0; j < NUMBER_TRI_POINTS; ++j)
@@ -168,7 +164,7 @@ void RBFInterface::create3DSurface()
   //  Ny = UzVx - UxVz
   //  Nz = UxVy - UyVx
 
-  vec3* normalsPerFace = new vec3[NUMBER_TRI_FACES];
+  std::vector<vec3> normalsPerFace(NUMBER_TRI_FACES);
   for (size_t i = 0; i < NUMBER_TRI_FACES; ++i)
   {
     //const size_t i1 = out.trifacelist[i*3+2];
@@ -194,7 +190,7 @@ std::cerr << "normalsPerFace[" << i << "]=" << normalsPerFace[i] << ", len=" << 
   }
 
   // TODO: initialize in constructor?
-  this->surfaceData_ = new ScatteredData(this->points_x_, this->points_y_, this->points_z_, this->threshold_, this->axisList_);
+  this->surfaceData_.reset(new ScatteredData(this->points_x_, this->points_y_, this->points_z_, this->threshold_, this->axisList_));
 
   // TODO: this code mirrors the 2D convex hull method...refactor?
   // TODO: difficult to keep the ScatteredData point and function vectors in sync...
@@ -299,9 +295,6 @@ for (int i = 0; i < normalsPerVertex.size(); ++i)
   }
 
   createRasterizedSurface();
-
-  delete [] listOfIntsPerVertex;
-  delete [] normalsPerFace;
 }
 
 //bool RBFInterface::pointInsideConvexHull( const vec3& point )
@@ -314,7 +307,7 @@ for (int i = 0; i < normalsPerVertex.size(); ++i)
 void RBFInterface::create2DSurface()
 {
   // TODO: initialize in constructor?
-  this->surfaceData_ = new ScatteredData(this->points_x_, this->points_y_, this->points_z_, this->threshold_, this->axisList_);
+  this->surfaceData_.reset(new ScatteredData(this->points_x_, this->points_y_, this->points_z_, this->threshold_, this->axisList_));
 
   //this->surfaceData_->axisInformation_ = myAxis;
   this->surfaceData_->compute2DHull();
@@ -329,12 +322,11 @@ void RBFInterface::create2DSurface()
 
 void RBFInterface::createRasterizedSurface()
 {
-  // TODO: make local?
-  this->rbf_ = new RBF(this->surfaceData_, kernel_);
-  this->rbf_->setDataReduction(All);
+  RBF rbf(getSurfaceData(), kernel_);
+  rbf.setDataReduction(All);
 
   // Construct RBFs
-  this->rbf_->computeFunction();  // TODO: throws exception if internal code used...
+  rbf.computeFunction();  // TODO: throws exception if internal code used...
 
   // Fill the values into the vector.
   // In the first loop, we initialize the matrix with all values set to -100.
@@ -371,15 +363,13 @@ void RBFInterface::createRasterizedSurface()
         //std::cout<<"Computing Val ... "<<std::endl;
         //double myVal = mySurface->computeValue(location);
 
-        double myVal = this->rbf_->computeValue(location);
+        double myVal = rbf.computeValue(location);
 
         //printf("Interpolant: %lf %lf %lf %lf\n", location[0], location[1], location[2], myVal); fflush(stdout);
         this->rasterData_[i][j][k] = myVal;
       }
     }
   }
-
-  //delete this->rbf_;
 }
 
 // TODO: move this and findNormalAxis to new class?
@@ -443,7 +433,7 @@ vec3 RBFInterface::findNormalAxis(const int n)
   {
     prev = (prev-1) >= 0 ? prev-1 : TOT-1; // wrap
   }
-  
+
   while(fabs(this->surfaceData_->surfacePoints_[myAxis][next] - this->surfaceData_->surfacePoints_[myAxis][n]) > SMALL_EPSILON)
   {
     next = (next+1) < TOT ? next+1 : 0; // wrap

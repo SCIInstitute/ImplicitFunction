@@ -47,19 +47,12 @@ using std::pair;
 const double RBF::EPSILON = 1.0e-2;
 
 
-RBF::RBF(ScatteredData *myData, Kernel myKernel) :
+RBF::RBF(const ScatteredData *myData, Kernel myKernel) :
   completeData_(myData),
   kernel_(myKernel),
   acceleration_(None),
   dataReduction_(All)
 {
-}
-
-RBF::~RBF()
-{
-// if ( this->data_ != nullptr ) delete this->data_;
-// if ( this->fmm_ != nullptr ) delete this->fmm_;
-// this->completeData_ = 0;
 }
 
 void RBF::setAcceleration(Acceleration myAcceleration)
@@ -83,8 +76,7 @@ void RBF::setDataReduction(DataReduction myDataReduction)
 
 void RBF::computeFunction()
 {
-  // TODO: memory leak?
-  data_ = new ScatteredData;
+  data_.reset(new ScatteredData);
   switch(this->dataReduction_)
   {
     case All:
