@@ -33,118 +33,99 @@
 #include "RBFInterface.h"
 #include "vec3.h"
 
+typedef std::vector< std::string > ViewModeList;
+
 class Seg3DIntegrationTest : public ::testing::Test
 {
 protected:
   virtual void SetUp()
   {
-    pointsTriangleClockwise.push_back( vec3(9.02381, 36.8638, 10.0) );
-    pointsTriangleClockwise.push_back( vec3(34.8002, 36.8638, 10.0) );
-    pointsTriangleClockwise.push_back( vec3(20.2824, 14.4397, 10.0) );
-    gridSize50[0] = 50.0; gridSize50[1] = 50.0; gridSize50[2] = 50.0;
+    //pointsTriangleClockwise.push_back( vec3(9.02381, 36.8638, 10.0) );
+
     gridSpacing1[0] = 1.0; gridSpacing1[1] = 1.0; gridSpacing1[2] = 1.0;
-    normalOffset10 = 10;
     axisDataZ.insert(axisDataZ.begin(), 3, axis_t::Z);
-    thinPlateKernel = ThinPlate;
-    gaussianKernel = Gaussian;
-    multiQuadKernel = MultiQuadratic;
   }
 
-  // virtual void TearDown() {}
-  std::vector<vec3> pointsTriangleClockwise; // triangle
   vec3 origin0; // (0, 0, 0)
-  vec3 gridSize50; // (50, 50, 50)
+  vec3 gridSize50_ {50, 50, 50};
   vec3 gridSpacing1; // (1, 1, 1)
-  double normalOffset10;
+  double normalOffset_ {10};
   std::vector<axis_t> axisDataZ; // #axis entries min 3
-  Kernel thinPlateKernel;
-  Kernel gaussianKernel;
-  Kernel multiQuadKernel;
+  bool compute2DConvexHull_, invertSeedOrder_;
+  Kernel kernel_;
+
+  std::vector<vec3> modelPointData;
+  ViewModeList view_modes_;
+
+  vec3 modelOrigin_;//(origin.x(), origin.y(), origin.z());
+  vec3 modelGridSize_; //(srcGridTransform.get_nx(), srcGridTransform.get_ny(), srcGridTransform.get_nz());
+  vec3 modelGridSpacing_; //(srcGridTransform.spacing_x(), srcGridTransform.spacing_y(), srcGridTransform.spacing_z());
+
+//TODO: loop over kernels
+/*
+Kernel kernel = ThinPlate;
+if (this->actionInternal_->kernel_ == "gaussian")
+{
+  kernel = Gaussian;
+}
+else if (this->actionInternal_->kernel_ == "multi_quadratic")
+{
+  kernel = MultiQuadratic;
+}
+*/
 };
 
 TEST_F(Seg3DIntegrationTest, ImplicitModel)
 {
-  FAIL() << "todo";
-  #if 0
-  DataLayerHandle srcDataLayer = boost::dynamic_pointer_cast<DataLayer>(this->actionInternal_->srcLayer_);
-  DataLayerHandle dstDataLayer = boost::dynamic_pointer_cast<DataLayer>(this->actionInternal_->dstLayer_);
-  GridTransform srcGridTransform = srcDataLayer->get_grid_transform();
-
-  std::vector<vec3> modelPointData;
-  for ( auto &vertex : this->actionInternal_->vertices_ )
-  {
-    modelPointData.push_back( vec3(vertex.x(), vertex.y(), vertex.z()) );
-  }
-
   std::vector<axis_t> axisData;
-  for ( auto &mode : this->actionInternal_->view_modes_ )
+  for ( const auto& mode : view_modes_ )
   {
-    if ( mode == Viewer::SAGITTAL_C ) // X
+    if ( mode == "sagittal" ) // X
     {
       axisData.push_back(axis_t::X);
     }
-    else if (mode == Viewer::CORONAL_C ) // Y
+    else if (mode == "coronal" ) // Y
     {
       axisData.push_back(axis_t::Y);
     }
-    else if ( mode == Viewer::AXIAL_C ) // Z
+    else if ( mode == "axial" ) // Z
     {
       axisData.push_back(axis_t::Z);
     }
     else
     {
-      std::ostringstream oss;
-      oss << "Invalid viewer mode " << mode;
-      this->report_error( oss.str() );
-      return;
+      FAIL() << "Invalid viewer mode " << mode;
     }
   }
 
-  // origin and size from source data layer
-  Point origin = srcGridTransform.get_origin();
-  vec3 modelOrigin(origin.x(), origin.y(), origin.z());
-  vec3 modelGridSize(srcGridTransform.get_nx(), srcGridTransform.get_ny(), srcGridTransform.get_nz());
-  vec3 modelGridSpacing(srcGridTransform.spacing_x(), srcGridTransform.spacing_y(), srcGridTransform.spacing_z());
+  RBFInterface modelAlgo( modelPointData, modelOrigin_, modelGridSize_, modelGridSpacing_,
+                        normalOffset_, axisData,
+                        compute2DConvexHull_,
+                        invertSeedOrder_, kernel_ );
 
-  // From RBF class. ThinPlate is the default kernel.
-  Kernel kernel = ThinPlate;
-  if (this->actionInternal_->kernel_ == "gaussian")
+  auto thresholdValue = modelAlgo.getThresholdValue();
+
+  EXPECT_EQ(1.0, thresholdValue);
+
+  const auto rasterData = modelAlgo.getRasterData();
+
+  EXPECT_EQ(rasterData.size(), 100);
+
+  //TODO: convert to move semantics for seg3d datablock usage
+  #if 0
+  for (size_t i = 0; i < dstDataBlock->get_nx(); ++i)
   {
-    kernel = Gaussian;
-  }
-  else if (this->actionInternal_->kernel_ == "multi_quadratic")
-  {
-    kernel = MultiQuadratic;
-  }
-
-    RBFInterface modelAlgo( modelPointData, modelOrigin, modelGridSize, modelGridSpacing,
-                          this->actionInternal_->normalOffset_, axisData,
-                          this->actionInternal_->compute2DConvexHull_,
-                          this->actionInternal_->invertSeedOrder_, kernel );
-
-    this->actionInternal_->thresholdValue_ = modelAlgo.getThresholdValue();
-
-    Core::DataBlockHandle dstDataBlock = Core::StdDataBlock::New( srcGridTransform, Core::DataType::DOUBLE_E );
-    if ( ! dstDataBlock )
+    for (size_t j = 0; j < dstDataBlock->get_ny(); ++j)
     {
-      this->report_error( "Could not allocate enough memory." );
-      return;
-    }
-
-    const DataStorage rasterData = modelAlgo.getRasterData();
-    for (size_t i = 0; i < dstDataBlock->get_nx(); ++i)
-    {
-      for (size_t j = 0; j < dstDataBlock->get_ny(); ++j)
+      for (size_t k = 0; k < dstDataBlock->get_nz(); ++k)
       {
-        for (size_t k = 0; k < dstDataBlock->get_nz(); ++k)
-        {
-          dstDataBlock->set_data_at( i, j, k, rasterData[i][j][k] );
-        }
+        dstDataBlock->set_data_at( i, j, k, rasterData[i][j][k] );
       }
     }
-    dstDataBlock->update_histogram();
+  }
+  #endif
 
-#endif
+  FAIL() << "todo";
 
   #if 0
   RBFInterface rbfInterface( pointsTriangleClockwise, origin0,
