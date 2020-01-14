@@ -24,6 +24,9 @@
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 
+#ifndef TWODCONVEXHULL
+#define TWODCONVEXHULL 1
+
 #include <iostream>
 #include <stack>
 #include <vector>
@@ -31,20 +34,14 @@
 
 #include "vec3.h"
 
-#ifndef TWODCONVEXHULL
-#define TWODCONVEXHULL 1
-
-using std::vector;
-using std::stack;
- 
 struct Point
 {
   double x, y;
   int index;
 };
- 
+
 // A utility function to find next to top in a stack
-Point nextToTop(stack<Point> &S)
+Point nextToTop(std::stack<Point> &S)
 {
   Point p = S.top();
   S.pop();
@@ -52,14 +49,14 @@ Point nextToTop(stack<Point> &S)
   S.push(p);
   return res;
 }
- 
+
 void swap(Point &p1, Point &p2)
 {
   Point temp = p1;
   p1 = p2;
   p2 = temp;
 }
- 
+
 double distSq(const Point& p1, const Point& p2)
 {
   return (p1.x - p2.x) * (p1.x - p2.x) +
@@ -101,8 +98,9 @@ int compare(const void *vp1, const void *vp2)
 
 // Prints convex hull of a set of n points.
 // TODO: points gets overwritten...
-stack<Point> convexHull(Point points[], const int n)
+std::stack<Point> convexHull(std::vector<Point>& points)
 {
+  const int n = points.size();
   // Find the bottommost point
   int ymin = points[0].y, min = 0;
   for (int i = 1; i < n; i++)
@@ -116,7 +114,7 @@ stack<Point> convexHull(Point points[], const int n)
   }
 
   // Place the bottom-most point at first position
-  swap(points[0], points[min]);
+  std::swap(points[0], points[min]);
 
   // Sort n-1 points with respect to the first point.
   Point p0;
@@ -143,7 +141,7 @@ stack<Point> convexHull(Point points[], const int n)
     m++;  // Update size of modified array
   }
 
-  stack<Point> S;
+  std::stack<Point> S;
   if (m < 3) return S;
 
   S.push(points[0]);
@@ -165,9 +163,9 @@ stack<Point> convexHull(Point points[], const int n)
 }
 
 // dim refers to the dimension that needs to be ignored
-vector<int> getConvexHull(const vector<vec3> &inPoints, const int dim)
+std::vector<int> getConvexHull(const std::vector<vec3> &inPoints, const int dim)
 {
-  Point *myPoints = new Point[inPoints.size()];
+  std::vector<Point> myPoints(inPoints.size());
   for(int i = 0; i < inPoints.size(); i++)
   {
     int index = 0;
@@ -182,19 +180,17 @@ vector<int> getConvexHull(const vector<vec3> &inPoints, const int dim)
   }
 
   // TODO: myPoints gets overwritten...
-  stack<Point> myStack = convexHull(myPoints, inPoints.size());
+  auto myStack = convexHull(myPoints);
 
-  vector<int> ret;
+  std::vector<int> ret;
   while (! myStack.empty() )
   {
     Point p = myStack.top();
     ret.push_back(p.index);
     myStack.pop();
   }
-  delete [] myPoints;
 
   return ret;
 }
 
 #endif
-
