@@ -118,6 +118,7 @@ void RBFInterface::create3DSurface()
   const size_t NUMBER_TRI_POINTS = 3;
 
 #ifndef NDEBUG
+#ifdef VERBOSE
   // trifaces == convex hull
   std::cerr << "# tri faces=" << NUMBER_TRI_FACES << std::endl;
   for (size_t i = 0; i < out.numberoftrifaces; ++i)
@@ -135,6 +136,7 @@ void RBFInterface::create3DSurface()
                                            << out.pointlist[i*NUMBER_TRI_POINTS+2] << std::endl;
   }
 #endif
+#endif
 
   std::vector<IndexList> listOfIntsPerVertex(NUMBER_POINTS);
   for (size_t i = 0; i < NUMBER_TRI_FACES; ++i)
@@ -147,6 +149,7 @@ void RBFInterface::create3DSurface()
   }
 
 #ifndef NDEBUG
+#ifdef VERBOSE
   for (int i = 0; i < NUMBER_POINTS; ++i)
   {
     std::cerr << i << ": ";
@@ -156,6 +159,7 @@ void RBFInterface::create3DSurface()
     }
     std::cerr << std::endl;
   }
+#endif
 #endif
 
   // normal calculation on face
@@ -186,7 +190,9 @@ void RBFInterface::create3DSurface()
            ( u.x() * v.y() ) - ( u.y() * v.x() )
           );
     normalsPerFace[i] = normalize(n, SMALL_EPSILON);
-std::cerr << "normalsPerFace[" << i << "]=" << normalsPerFace[i] << ", len=" << length(normalsPerFace[i]) << std::endl;
+    #ifdef VERBOSE
+    std::cerr << "normalsPerFace[" << i << "]=" << normalsPerFace[i] << ", len=" << length(normalsPerFace[i]) << std::endl;
+    #endif
   }
 
   // TODO: initialize in constructor?
@@ -212,7 +218,9 @@ std::cerr << "normalsPerFace[" << i << "]=" << normalsPerFace[i] << ", len=" << 
     // indices of points not in convex hull
     if ( listOfIntsPerVertex[i].size() == 0 )
     {
-std::cerr << "Point " << i << " in leftovers." << std::endl;
+#ifdef VERBOSE
+      std::cerr << "Point " << i << " in leftovers." << std::endl;
+#endif
       this->surfaceData_->leftovers_[0].push_back( out.pointlist[i*NUMBER_TRI_POINTS] );
       this->surfaceData_->leftovers_[1].push_back( out.pointlist[i*NUMBER_TRI_POINTS+1] );
       this->surfaceData_->leftovers_[2].push_back( out.pointlist[i*NUMBER_TRI_POINTS+2] );
@@ -226,7 +234,9 @@ std::cerr << "Point " << i << " in leftovers." << std::endl;
   {
     if ( listOfIntsPerVertex[i].size() == 0 ) continue;
 
-std::cerr << "Point " << i << " in surface points." << std::endl;
+#ifdef VERBOSE
+    std::cerr << "Point " << i << " in surface points." << std::endl;
+#endif
     this->surfaceData_->surfacePoints_[0].push_back( out.pointlist[i*NUMBER_TRI_POINTS] );
     this->surfaceData_->surfacePoints_[1].push_back( out.pointlist[i*NUMBER_TRI_POINTS+1] );
     this->surfaceData_->surfacePoints_[2].push_back( out.pointlist[i*NUMBER_TRI_POINTS+2] );
@@ -246,10 +256,12 @@ std::cerr << "Point " << i << " in surface points." << std::endl;
 std::cerr << "#points=" << this->surfaceData_->surfacePoints_[0].size() << ", "
           << "#leftovers=" << this->surfaceData_->leftovers_[0].size() << std::endl;
 
+#ifdef VERBOSE
 for (int i = 0; i < normalsPerVertex.size(); ++i)
 {
   std::cerr << "normalsPerVertex[" << i << "]=" << normalsPerVertex[i] << ", len=" << length(normalsPerVertex[i]) << std::endl;
 }
+#endif
 
   // iterate through list of points not on hull, add to list as zero points
   for (size_t i = 0; i < M; ++i)

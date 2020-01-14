@@ -200,6 +200,7 @@ void RBF::computeFunctionForData()
 
 double RBF::computeValue(const vec3& x)
 {
+  //std::cout << "coeff size: " << this->coeff_.size() << std::endl;
   switch(this->acceleration_)
   {
     case FastMultipole:
@@ -302,7 +303,7 @@ void RBF::fmmPrintTree(BHNode *myNode, int stack)
     printf(" ");
   }
 
-  printf("%d %d %d\n", myNode, myNode->index_, myNode->pts_.size());
+  //printf("%d %d %d\n", myNode, myNode->index_, myNode->pts_.size());
 
   for (int i = 0; i < 8; i++)
   {
