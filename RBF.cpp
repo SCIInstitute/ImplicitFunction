@@ -167,7 +167,6 @@ void RBF::computeFunctionForData()
     case None:
     default:
       // TODO: move to function
-      const double SMALL_EPSILON = 1.0e-6, ERROR_EPSILON = 1.0e-3;
       const int N = static_cast<int>( this->data_->fnc_.size() );
 
 #ifndef NDEBUG
@@ -329,27 +328,27 @@ void RBF::fmmBuildTree(vector<int> &myPoints, BHNode *myNode)
   //printf("[%lf %lf %lf] [%lf %lf %lf] %d\n", myNode->box_.min_[0], myNode->box_.min_[1], myNode->box_.min_[2], myNode->box_.max_[0], myNode->box_.max_[1], myNode->box_.max_[2], myPoints.size());
   vector<int> children[8];
   const int N = myPoints.size();
-  
+
   myNode->index_ = fmm_->numOfNodes;
   fmm_->numOfNodes += 1;
   fmm_->nodePointer.push_back(myNode);
-  
+
   myNode->mass_ = N;
   myNode->leaf_ = (N <= 1) ? true : false;
   myNode->center_ = vec3::zero;
-  
+
   myNode->coeff_ = 1; //REPLACE
   //add all the coefficients
-  
+
   for (int i = 0; i < N; i++)
     myNode->pts_.push_back( myPoints[i] );
-  
+
   for (int i = 0; i < N; i++)
   {
     vec3 location(this->data_->surfacePoints_[0][myPoints[i]], this->data_->surfacePoints_[1][myPoints[i]], this->data_->surfacePoints_[2][myPoints[i]]);
     myNode->center_ = myNode->center_ + (location/N);
   }
-  
+
   if (N == 1)
   {
     for (int i = 0; i < 8; i++)
@@ -377,9 +376,9 @@ void RBF::fmmBuildTree(vector<int> &myPoints, BHNode *myNode)
       octant += 2;
     if (this->data_->surfacePoints_[2][myPoints[i]] > mid[2])
       octant += 4;
-    
+
     //printf("%d %d %d %lf %lf %lf\n", i,octant, myPoints[i], this->data_->surfacePoints_[0][myPoints[i]],this->data_->surfacePoints_[1][myPoints[i]], this->data_->surfacePoints_[2][myPoints[i]]);
-    
+
     children[octant].push_back(myPoints[i]);
   }
 
@@ -453,6 +452,6 @@ double RBF::fmmComputeValueRecurse(const vec3& x, BHNode *myNode)
 double RBF::fmmComputeKernel(const vec3& b, BHNode *myNode)
 {
   double r = length(myNode->center_ - b);
-  
+
   return computeRadialFunction(r);
 }

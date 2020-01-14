@@ -91,7 +91,7 @@ TEST_F(RBFInterfaceTest, BasicInterfaceTestThinPlate)
         std::string line;
         std::getline(in, line);
         //std::cerr << line << " vs " << rasterData[i][j][k] << std::endl;
-        double d = std::stod(line);
+        //double d = std::stod(line);
       }
     }
   }
@@ -124,7 +124,7 @@ TEST_F(RBFInterfaceTest, BasicInterfaceTestGaussian)
         std::string line;
         std::getline(in, line);
         //std::cerr << line << " vs " << rasterData[i][j][k] << std::endl;
-        double d = std::stod(line);
+        //double d = std::stod(line);
       }
     }
   }
@@ -157,7 +157,7 @@ TEST_F(RBFInterfaceTest, BasicInterfaceTestMultiQuad)
         std::string line;
         std::getline(in, line);
         //std::cerr << line << " vs " << rasterData[i][j][k] << std::endl;
-        double d = std::stod(line);
+        //double d = std::stod(line);
       }
     }
   }
