@@ -27,6 +27,7 @@ set(ImplicitFunction_Tests_SRCS
   RBFInterfaceTests.cpp
   ScatteredDataTests.cpp
   Vec3Tests.cpp
+  Seg3DIntegrationTest.cpp
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${ImplicitFunction_BINARY_DIR})
