@@ -47,3 +47,5 @@ target_link_libraries(ImplicitFunction_Tests
   ${GTEST_LIBRARY}
   ${GTEST_MAIN_LIBRARY}
 )
+
+ADD_TEST("ImplicitFunction_Tests" ${ImplicitFunction_BINARY_DIR}/ImplicitFunction_Tests)
