@@ -40,76 +40,82 @@ class Seg3DIntegrationTest : public ::testing::Test
 protected:
   virtual void SetUp()
   {
-    //pointsTriangleClockwise.push_back( vec3(9.02381, 36.8638, 10.0) );
+    view_modes_.assign(modelPointData.size(), "axial");
 
-    gridSpacing1[0] = 1.0; gridSpacing1[1] = 1.0; gridSpacing1[2] = 1.0;
-    axisDataZ.insert(axisDataZ.begin(), 3, axis_t::Z);
+    for ( const auto& mode : view_modes_ )
+    {
+      if ( mode == "sagittal" ) // X
+      {
+        axisData_.push_back(axis_t::X);
+      }
+      else if (mode == "coronal" ) // Y
+      {
+        axisData_.push_back(axis_t::Y);
+      }
+      else if ( mode == "axial" ) // Z
+      {
+        axisData_.push_back(axis_t::Z);
+      }
+      else
+      {
+        throw "Invalid viewer mode";
+      }
+    }
   }
 
-  vec3 origin0; // (0, 0, 0)
-  vec3 gridSize50_ {50, 50, 50};
-  vec3 gridSpacing1; // (1, 1, 1)
-  double normalOffset_ {10};
-  std::vector<axis_t> axisDataZ; // #axis entries min 3
-  bool compute2DConvexHull_, invertSeedOrder_;
-  Kernel kernel_;
+  //TODO: loop this [0,20]
+  double normalOffset_ {2.0};
+  //TODO: loop over these bools
+  bool compute2DConvexHull_ {false}, invertSeedOrder_ {false};
+  //TODO: loop over kernels
+  //enum Kernel { Gaussian, ThinPlate, MultiQuadratic };
+  Kernel kernel_ {ThinPlate};
 
-  std::vector<vec3> modelPointData;
+  std::vector<vec3> modelPointData = {
+    {329.27408562074709, -3.1975149796730840, 477.29595999999998 }
+    , {312.11090641613799, -17.909120331180826, 477.29595999999998 }
+    , {311.62052986743487, -40.630377485176155, 477.29595999999998 }
+    , {324.86069668241902, -53.707360019849709, 477.29595999999998 }
+    , {326.65874402766383, -46.515019625779246, 477.29595999999998 }
+    , {324.69723783285133, -25.918772133668394, 477.29595999999998 }
+    , {311.78398871700256, -39.486141513392205, 478.19439699999998 }
+    , {313.09165951354419, -19.380280866331621, 478.19439699999998 }
+    , {330.58175641728877, -4.6686755148238497, 478.19439699999998 }
+    , {325.35107323112214, -25.264923006934715, 478.19439699999998 }
+    , {326.65874402766383, -44.880396808945051, 478.19439699999998 }
+    , {323.71648473544508, -53.543897738166287, 478.19439699999998 }
+    , {329.92792101901790, -5.8129114866077956, 479.09283399999998 }
+    , {313.90895376138275, -21.341828246532643, 479.09283399999998 }
+    , {313.58203606224731, -36.707282724774082, 479.09283399999998 }
+    , {323.71648473544508, -49.784265259447636, 479.09283399999998 }
+    , {326.82220287723152, -43.409236273794278, 479.09283399999998 }
+    , {324.86069668241902, -25.918772133668394, 479.09283399999998 }
+  };
+
   ViewModeList view_modes_;
+  std::vector<axis_t> axisData_;
 
-  vec3 modelOrigin_;//(origin.x(), origin.y(), origin.z());
-  vec3 modelGridSize_; //(srcGridTransform.get_nx(), srcGridTransform.get_ny(), srcGridTransform.get_nz());
-  vec3 modelGridSpacing_; //(srcGridTransform.spacing_x(), srcGridTransform.spacing_y(), srcGridTransform.spacing_z());
-
-//TODO: loop over kernels
-/*
-Kernel kernel = ThinPlate;
-if (this->actionInternal_->kernel_ == "gaussian")
-{
-  kernel = Gaussian;
-}
-else if (this->actionInternal_->kernel_ == "multi_quadratic")
-{
-  kernel = MultiQuadratic;
-}
-*/
+  vec3 modelOrigin_ {229.25999999999999, -126.41900000000000, 405.42099999999999 };
+  vec3 modelGridSize_ {160.00000000000000, 232.00000000000000, 160.00000000000000 };
+  vec3 modelGridSpacing_ {1.0000000000000000, 0.89843700000000004, 0.89843700000000004 };
 };
 
 TEST_F(Seg3DIntegrationTest, ImplicitModel)
 {
-  std::vector<axis_t> axisData;
-  for ( const auto& mode : view_modes_ )
-  {
-    if ( mode == "sagittal" ) // X
-    {
-      axisData.push_back(axis_t::X);
-    }
-    else if (mode == "coronal" ) // Y
-    {
-      axisData.push_back(axis_t::Y);
-    }
-    else if ( mode == "axial" ) // Z
-    {
-      axisData.push_back(axis_t::Z);
-    }
-    else
-    {
-      FAIL() << "Invalid viewer mode " << mode;
-    }
-  }
-
-  RBFInterface modelAlgo( modelPointData, modelOrigin_, modelGridSize_, modelGridSpacing_,
-                        normalOffset_, axisData,
-                        compute2DConvexHull_,
-                        invertSeedOrder_, kernel_ );
+  RBFInterface modelAlgo( modelPointData,
+    modelOrigin_, modelGridSize_, modelGridSpacing_,
+    normalOffset_, axisData_,
+    compute2DConvexHull_, invertSeedOrder_, kernel_ );
 
   auto thresholdValue = modelAlgo.getThresholdValue();
 
-  EXPECT_EQ(1.0, thresholdValue);
+  EXPECT_EQ(0.0, thresholdValue);
 
   const auto rasterData = modelAlgo.getRasterData();
 
-  EXPECT_EQ(rasterData.size(), 100);
+  EXPECT_EQ(rasterData.size(), 160);
+  EXPECT_EQ(rasterData[0].size(), 232);
+  EXPECT_EQ(rasterData[0][0].size(), 160);
 
   //TODO: convert to move semantics for seg3d datablock usage
   #if 0
@@ -123,39 +129,5 @@ TEST_F(Seg3DIntegrationTest, ImplicitModel)
       }
     }
   }
-  #endif
-
-  FAIL() << "todo";
-
-  #if 0
-  RBFInterface rbfInterface( pointsTriangleClockwise, origin0,
-                             gridSize50, gridSpacing1,
-                             normalOffset10, axisDataZ,
-                             false, multiQuadKernel );
-  double threshold = rbfInterface.getThresholdValue();
-  ASSERT_EQ( threshold, 0 ); // default
-  const DataStorage rasterData = rbfInterface.getRasterData();
-
-  // TODO: check linear system numerics
-  std::ifstream in;
-  std::ostringstream oss;
-  oss << REGRESSION_DIR << "/pointsTriangleClockwise.txt";
-  in.open( oss.str().c_str(), std::ios::binary );
-  in.exceptions( std::ofstream::failbit | std::ofstream::badbit );
-
-  for (size_t i = 0; i < gridSize50[0]; ++i)
-  {
-    for (size_t j = 0; j < gridSize50[1]; ++j)
-    {
-      for (size_t k = 0; k < gridSize50[2]; ++k)
-      {
-        std::string line;
-        std::getline(in, line);
-        //std::cerr << line << " vs " << rasterData[i][j][k] << std::endl;
-        double d = std::stod(line);
-      }
-    }
-  }
-  in.close();
   #endif
 }
