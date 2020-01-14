@@ -1,11 +1,12 @@
-sudo: false
 language: cpp
+
 notifications:
-  email: false
+  slack: sciinstitute:lZnpQQXNd4Io5iGDPQDpJmI1
+
 compiler:
   - gcc
   - clang
-#before_cache:
+
 cache:
   directories:
     - $HOME/deps
@@ -18,9 +19,6 @@ before_install:
   - if [ ! -f $HOME/deps/3.2.10.tar.gz ]; then wget --quiet --directory-prefix=$HOME/deps http://bitbucket.org/eigen/eigen/get/3.2.10.tar.gz; fi
   - pip install --user cpp-coveralls
   - ls $HOME/deps
-install:
-  # C++11 support required
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
 addons:
   apt:
     sources:
@@ -29,10 +27,6 @@ addons:
     packages:
     - cmake
     - cmake-data
-    - gcc-4.8
-    - g++-4.8
-    - clang
-#before_script:
 script:
   # build Tetgen dependency
   - mkdir build
@@ -61,8 +55,7 @@ script:
           -DEIGEN3_INSTALL_DIR:PATH=`pwd`/eigen-eigen-b9cd8366d4e8 ..
   - make -j4
   - ./ImplicitFunction_Tests
-#after_failure:
+
 after_success:
   - cd $TRAVIS_BUILD_DIR
   - coveralls --exclude build --exclude Tests --gcov-options '\-lp'
-#after_script:
