@@ -44,19 +44,14 @@ protected:
 
     func10.insert(func10.begin(), 10, 0);
     axisInfo10.insert(axisInfo10.begin(), 10, axis_t::Z);
-    data = new ScatteredData( xCoords10, yCoords10, zCoords10, func10, axisInfo10 );
+    data.reset(new ScatteredData( xCoords10, yCoords10, zCoords10, func10, axisInfo10 ));
   }
 
-  virtual void TearDown()
-  {
-    delete data;
-  }
-
-  ScatteredData *data;
+  std::unique_ptr<ScatteredData> data;
 };
 
 TEST_F(RBFTest, BasicSetup)
 {
   // TODO: need to expose getters to test RBF state
-  RBF rbf(data, ThinPlate);
+  RBF rbf(data.get(), ThinPlate);
 }

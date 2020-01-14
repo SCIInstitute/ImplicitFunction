@@ -102,7 +102,7 @@ void ETSP::MST()
 
     graph[toAdd].push_back(i+j-toAdd);
     graph[i+j-toAdd].push_back(toAdd);
-	
+
   }
 
 }
@@ -119,14 +119,14 @@ vector<int> ETSP::match()
       bestMatch.push_back(i);
     }
   }
-  
+
   //for(int i=0; i<oddNodes.size(); i++)
   //  printf("%d ",oddNodes[i]);
   //printf("\n");
   if(oddNodes.size()>0)
   {
     double best=1e10;
-    do 
+    do
     {
        double curr = 0;
        for(int i=0; i<oddNodes.size(); i+=2)
@@ -154,7 +154,6 @@ void ETSP::orderFromMST()
 {
   vector<bool> visited;
   visited.resize(data.size(),false);
-  int curr=0;
   inverse_mapped_order.resize(data.size());
   traverse(0, visited);
   /*for(int i=0; i<order.size(); i++)
@@ -205,4 +204,3 @@ void ETSP::orderFromMatch()
   //  printf("%d ",order[i]);
   //printf("\n");
 }
-

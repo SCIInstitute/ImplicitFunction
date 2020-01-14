@@ -23,10 +23,11 @@
 set(ImplicitFunction_Tests_SRCS
   ConvexHull2DTests.cpp
   ConvexHull3DTests.cpp
-#  RBFTests.cpp
+  RBFTests.cpp
   RBFInterfaceTests.cpp
   ScatteredDataTests.cpp
   Vec3Tests.cpp
+  Seg3DIntegrationTest.cpp
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${ImplicitFunction_BINARY_DIR})
@@ -47,3 +48,9 @@ target_link_libraries(ImplicitFunction_Tests
   ${GTEST_LIBRARY}
   ${GTEST_MAIN_LIBRARY}
 )
+
+IF(UNIX)
+  TARGET_LINK_LIBRARIES(ImplicitFunction_Tests -lpthread -lm)
+ENDIF()
+
+ADD_TEST("ImplicitFunction_Tests" ${ImplicitFunction_BINARY_DIR}/ImplicitFunction_Tests)
