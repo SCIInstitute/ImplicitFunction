@@ -45,10 +45,10 @@ public:
                const double myOffset, AxisList myAxis,
                const bool compute2DConvexHull=true,
                const bool invertSeedOrder=false, Kernel kernel=ThinPlate);
-							 
+
 	double getThresholdValue() const { return thresholdValue_; }
   const DataStorage getRasterData() const { return rasterData_; }
-  const ScatteredData* getSurfaceData() const { return this->surfaceData_; }
+  const ScatteredData* getSurfaceData() const { return this->surfaceData_.get(); }
 
 private:
   // 2D calculation
@@ -58,7 +58,7 @@ private:
   vec3 findNormalAxis(const int n);
   void createRasterizedSurface();
 
-  ScatteredData *surfaceData_;
+  std::unique_ptr<ScatteredData> surfaceData_;
   DataStorage rasterData_;
 
   const double thresholdValue_;

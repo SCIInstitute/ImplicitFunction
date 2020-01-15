@@ -190,7 +190,7 @@ void RBFInterface::create3DSurface()
   }
 
   // TODO: initialize in constructor?
-  this->surfaceData_ = new ScatteredData(this->points_x_, this->points_y_, this->points_z_, this->threshold_, this->axisList_);
+  this->surfaceData_.reset(new ScatteredData(this->points_x_, this->points_y_, this->points_z_, this->threshold_, this->axisList_));
 
   // TODO: this code mirrors the 2D convex hull method...refactor?
   // TODO: difficult to keep the ScatteredData point and function vectors in sync...
@@ -301,7 +301,7 @@ for (int i = 0; i < normalsPerVertex.size(); ++i)
 void RBFInterface::create2DSurface()
 {
   // TODO: initialize in constructor?
-  this->surfaceData_ = new ScatteredData(this->points_x_, this->points_y_, this->points_z_, this->threshold_, this->axisList_);
+  this->surfaceData_.reset(new ScatteredData(this->points_x_, this->points_y_, this->points_z_, this->threshold_, this->axisList_));
   this->surfaceData_->compute2DHull();
   // TODO: this is bad - ScatteredData should set this to maintain correct internal state!!!
   this->surfaceData_->origSize_ = this->surfaceData_->surfacePoints_[0].size();
@@ -314,7 +314,7 @@ void RBFInterface::create2DSurface()
 
 void RBFInterface::createRasterizedSurface()
 {
-  RBF rbf(this->surfaceData_, kernel_);
+  RBF rbf(getSurfaceData(), kernel_);
   rbf.setDataReduction(All);
 
   // Construct RBFs
