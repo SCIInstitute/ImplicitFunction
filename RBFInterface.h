@@ -45,9 +45,7 @@ public:
                const double myOffset, AxisList myAxis,
                const bool compute2DConvexHull=true,
                const bool invertSeedOrder=false, Kernel kernel=ThinPlate);
-
-//  ~RBFInterface();
-
+							 
 	double getThresholdValue() const { return thresholdValue_; }
   const DataStorage getRasterData() const { return rasterData_; }
   const ScatteredData* getSurfaceData() const { return this->surfaceData_; }
@@ -56,16 +54,11 @@ private:
   // 2D calculation
   void create2DSurface(); // propagates exceptions
   void create3DSurface();
-
   void augmentNormalData();
   vec3 findNormalAxis(const int n);
-
   void createRasterizedSurface();
 
-  //bool pointInsideConvexHull( const vec3& point );
-
   ScatteredData *surfaceData_;
-  RBF *rbf_;
   DataStorage rasterData_;
 
   const double thresholdValue_;
@@ -86,4 +79,4 @@ private:
   static const double SMALL_EPSILON;
 };
 
-#endif //_RBFInterface_H_ 
+#endif //_RBFInterface_H_
