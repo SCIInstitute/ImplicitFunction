@@ -340,8 +340,6 @@ void RBFInterface::createRasterizedSurface()
     {
       for (int k = 0; k < this->size_[2]; k++)
       {
-        // TODO: shadowing variables in outer scopes!!!
-
         vec3 location = this->origin_ + this->spacing_[0] * i * vec3::unitX + this->spacing_[1] * j * vec3::unitY + this->spacing_[2] * k * vec3::unitZ;
         double myVal = rbf.computeValue(location);
         this->rasterData_[i][j][k] = myVal;
