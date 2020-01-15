@@ -35,6 +35,7 @@
 // STL Includes
 #include <vector>
 #include <utility>
+#include <memory>
 
 enum Kernel { Gaussian, ThinPlate, MultiQuadratic };
 enum Acceleration { None, FastMultipole };
