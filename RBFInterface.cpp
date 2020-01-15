@@ -134,7 +134,7 @@ void RBFInterface::create3DSurface()
 #endif
 #endif
 
-  IndexList* listOfIntsPerVertex = new IndexList[NUMBER_POINTS];
+  std::vector<IndexList> listOfIntsPerVertex(NUMBER_POINTS);
   for (size_t i = 0; i < NUMBER_TRI_FACES; ++i)
   {
     for (size_t j = 0; j < NUMBER_TRI_POINTS; ++j)
@@ -164,7 +164,7 @@ void RBFInterface::create3DSurface()
   //  Ny = UzVx - UxVz
   //  Nz = UxVy - UyVx
 
-  vec3* normalsPerFace = new vec3[NUMBER_TRI_FACES];
+  std::vector<vec3> normalsPerFace(NUMBER_TRI_FACES);
   for (size_t i = 0; i < NUMBER_TRI_FACES; ++i)
   {
     const size_t i1 = out.trifacelist[i*3];
@@ -246,10 +246,11 @@ void RBFInterface::create3DSurface()
   }
 
   this->surfaceData_->origSize_ = this->surfaceData_->surfacePoints_[0].size();
+
+#ifdef VERBOSE
 std::cerr << "#points=" << this->surfaceData_->surfacePoints_[0].size() << ", "
           << "#leftovers=" << this->surfaceData_->leftovers_[0].size() << std::endl;
 
-#ifdef VERBOSE
 for (int i = 0; i < normalsPerVertex.size(); ++i)
 {
   std::cerr << "normalsPerVertex[" << i << "]=" << normalsPerVertex[i] << ", len=" << length(normalsPerVertex[i]) << std::endl;
@@ -294,9 +295,6 @@ for (int i = 0; i < normalsPerVertex.size(); ++i)
   }
 
   createRasterizedSurface();
-
-  delete [] listOfIntsPerVertex;
-  delete [] normalsPerFace;
 }
 
 // driver
