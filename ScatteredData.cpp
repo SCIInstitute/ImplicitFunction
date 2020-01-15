@@ -328,14 +328,9 @@ void ScatteredData::compute2DHull()
   for(int i = 0; i < this->surfacePoints_[0].size(); i++)
   	printf("%d %lf %lf %lf\n", i, this->surfacePoints_[0][i], this->surfacePoints_[1][i], this->surfacePoints_[2][i]);
 
-//  for (int i = 0; i < this->convexHullData_.size(); i++)
-//    printf("%d %lf %lf %lf\n", i, this->convexHullData_[i][0], this->convexHullData_[i][1], this->convexHullData_[i][2]);
-
   printf("Points inside convex hull\n");
   for (int i = 0; i < this->leftovers_[0].size(); i++)
     printf("%d %lf %lf %lf\n", i, this->leftovers_[0][i], this->leftovers_[1][i], this->leftovers_[2][i]);
-
-//  this->origSize_ = this->inputData_.size();
 
   // TODO: this gets overwritten in RBFInterface???
   this->origSize_ = this->convexHullData_.size();

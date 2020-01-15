@@ -75,32 +75,40 @@ bool vec3::operator==(const vec3 &a) const
 
 bool vec3::operator<=(const vec3 &a) const
 {
-  return ((this->x_ <= a.x_) &&
-          (this->y_ <= a.y_) &&
-          (this->z_ <= a.z_));
+  return *this < a || *this == a;
 }
 
 bool vec3::operator>=(const vec3 &a) const
 {
-  return ((this->x_ >= a.x_) &&
-          (this->y_ >= a.y_) &&
-          (this->z_ >= a.z_));
+  return *this > a || *this == a;
 }
 
 bool vec3::operator<(const vec3 &a) const
 {
-  return ((this->x_ < a.x_) &&
-          (this->y_ < a.y_) &&
-          (this->z_ < a.z_));
+  if (x_ < a.x_)
+    return true;
+  if (x_ > a.x_)
+    return false;
+
+  // equal x
+  if (y_ < a.y_)
+    return true;
+  if (y_ > a.y_)
+    return false;
+
+  // equal x and y
+  if (z_ < a.z_)
+    return true;
+  if (z_ > a.z_)
+    return false;
+
+  return false;
 }
 
 bool vec3::operator>(const vec3 &a) const
 {
-  return ((this->x_ > a.x_) &&
-          (this->y_ > a.y_) &&
-          (this->z_ > a.z_));
+  return a < *this;
 }
-
 
 vec3& vec3::operator=(const vec3 &a)
 {
@@ -308,4 +316,3 @@ double angleBetween(const vec3 &a, const vec3 &b, float epsilon)
 {
   return acos( dot(a,b) / ( ( L2(a)*L2(b) ) + epsilon ) );
 }
-

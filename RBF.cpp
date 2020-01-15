@@ -209,15 +209,15 @@ double RBF::computeValue(const vec3& x)
     default:
       // TODO: move to function
 
-      auto valIter = computeValueMemoizerMap_.find(x);
-      if (valIter != computeValueMemoizerMap_.end())
-        return valIter->second;
+      // auto valIter = computeValueMemoizerMap_.find(x);
+      // if (valIter != computeValueMemoizerMap_.end())
+      //   return valIter->second;
 
       double sum = 0;
       for(int i = 0; i < this->coeff_.size(); i++)
         sum += this->coeff_[i]*computeKernel(i, x);
 
-      computeValueMemoizerMap_[x] = sum;
+      //computeValueMemoizerMap_[x] = sum;
 
       return sum;
   }
