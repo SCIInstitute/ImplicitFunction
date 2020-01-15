@@ -200,7 +200,6 @@ void RBF::computeFunctionForData()
 
 double RBF::computeValue(const vec3& x)
 {
-  //std::cout << "coeff size: " << this->coeff_.size() << std::endl;
   switch(this->acceleration_)
   {
     case FastMultipole:
@@ -243,6 +242,7 @@ double RBF::computeKernel(int i, int j)
 
 double RBF::computeKernel(int i, const vec3& b)
 {
+  //TODO: optimize this function
   double r = sqrt( (this->data_.surfacePoints_[0][i] - b[0])*(this->data_.surfacePoints_[0][i] - b[0]) +  // x
                    (this->data_.surfacePoints_[1][i] - b[1])*(this->data_.surfacePoints_[1][i] - b[1]) +  // y
                    (this->data_.surfacePoints_[2][i] - b[2])*(this->data_.surfacePoints_[2][i] - b[2]) ); // z
@@ -252,6 +252,7 @@ double RBF::computeKernel(int i, const vec3& b)
 
 double RBF::computeRadialFunction(double r)
 {
+  //TODO: optimize this function
   const double C = 0.1;
   const double SCALE = 0.01;
 
