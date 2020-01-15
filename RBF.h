@@ -36,6 +36,7 @@
 #include <vector>
 #include <utility>
 #include <memory>
+#include <map>
 
 enum Kernel { Gaussian, ThinPlate, MultiQuadratic };
 enum Acceleration { None, FastMultipole };
@@ -75,6 +76,8 @@ private:
 	std::vector<double> coeff_;
 	Acceleration acceleration_;
 	DataReduction dataReduction_;
+
+	std::map<vec3, double> computeValueMemoizerMap_;
 
 	std::unique_ptr<FMM> fmm_;
 

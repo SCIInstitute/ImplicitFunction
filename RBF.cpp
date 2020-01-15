@@ -75,6 +75,7 @@ void RBF::setDataReduction(DataReduction myDataReduction)
 
 void RBF::computeFunction()
 {
+  computeValueMemoizerMap_.clear();
   data_ = ScatteredData();
   switch(this->dataReduction_)
   {
@@ -207,9 +208,17 @@ double RBF::computeValue(const vec3& x)
     case None:
     default:
       // TODO: move to function
+
+      auto valIter = computeValueMemoizerMap_.find(x);
+      if (valIter != computeValueMemoizerMap_.end())
+        return valIter->second;
+
       double sum = 0;
       for(int i = 0; i < this->coeff_.size(); i++)
         sum += this->coeff_[i]*computeKernel(i, x);
+
+      computeValueMemoizerMap_[x] = sum;
+
       return sum;
   }
 }
@@ -243,9 +252,12 @@ double RBF::computeKernel(int i, int j)
 double RBF::computeKernel(int i, const vec3& b)
 {
   //TODO: optimize this function
-  double r = sqrt( (this->data_.surfacePoints_[0][i] - b[0])*(this->data_.surfacePoints_[0][i] - b[0]) +  // x
-                   (this->data_.surfacePoints_[1][i] - b[1])*(this->data_.surfacePoints_[1][i] - b[1]) +  // y
-                   (this->data_.surfacePoints_[2][i] - b[2])*(this->data_.surfacePoints_[2][i] - b[2]) ); // z
+  auto point = data_.surfacePoint(i);
+  double bx = b[0], by = b[1], bz = b[2];
+  double r = sqrt( (point.x() - bx)*(point.x() - bx) +  // x
+                   (point.y() - by)*(point.y() - by) +  // y
+                   (point.z() - bz)*(point.z() - bz) ); // z
+
 
   return computeRadialFunction(r);
 }
@@ -253,8 +265,8 @@ double RBF::computeKernel(int i, const vec3& b)
 double RBF::computeRadialFunction(double r)
 {
   //TODO: optimize this function
-  const double C = 0.1;
-  const double SCALE = 0.01;
+  static const double C = 0.1;
+  static const double SCALE = 0.01;
 
   switch(kernel_)
   {
@@ -262,7 +274,7 @@ double RBF::computeRadialFunction(double r)
       r = r * SCALE;
       return 1.0/sqrt(r*r + C*C);
       break;
-    case ThinPlate:
+   case ThinPlate:
       return r*r*log(r+C);
       break;
     case MultiQuadratic:
@@ -290,8 +302,6 @@ void RBF::fmmBuildTree()
   vec3 corner(100, 100, 100);
   fmm_->tree->box_.max_ = corner;
   fmmBuildTree(myIndices, fmm_->tree);
-  //printf("Tree Built\n");
-  //fmmPrintTree(fmm_->tree, 0);
 }
 
 void RBF::fmmPrintTree(BHNode *myNode, int stack)
@@ -304,8 +314,6 @@ void RBF::fmmPrintTree(BHNode *myNode, int stack)
     printf(" ");
   }
 
-  //printf("%d %d %d\n", myNode, myNode->index_, myNode->pts_.size());
-
   for (int i = 0; i < 8; i++)
   {
     if (myNode->nodes[i] != nullptr)
@@ -316,7 +324,6 @@ void RBF::fmmPrintTree(BHNode *myNode, int stack)
 void RBF::fmmBuildTree(vector<int> &myPoints, BHNode *myNode)
 {
   const double SMALL_EPSILON = 1.0e-6;
-  //printf("[%lf %lf %lf] [%lf %lf %lf] %d\n", myNode->box_.min_[0], myNode->box_.min_[1], myNode->box_.min_[2], myNode->box_.max_[0], myNode->box_.max_[1], myNode->box_.max_[2], myPoints.size());
   vector<int> children[8];
   const int N = myPoints.size();
 

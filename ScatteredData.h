@@ -60,19 +60,20 @@ public:
   //
   // TODO: make surfacePoints_ and leftovers_ vector of vec3??
   // cohesive data structure would be better...
-  std::vector<double> surfacePoints_[3], leftovers_[3], fnc_;
+  std::vector<double> leftovers_[3], fnc_;
   std::vector<axis_t> axisInformation_, updatedAxisInformation_;
 
-//  void computeOrdering();
 	void compute2DHull();
 	int origSize_;
-//	vec3 centroid_;
-//static int myAxis;
+
+  vec3 surfacePoint(size_t i) const;
 
 private:
   void SDsort();
 	void SDmultisort();
-
+public: //TODO: private
+  std::vector<double> surfacePoints_[3];
+private:
   std::vector<vec3> inputData_, convexHullData_;
 };
 
@@ -81,7 +82,7 @@ struct vec3Sorter
   axis_t axisToSort;
   int myAxis;
   bool operator() (const vec3& a, const vec3& b)
-  { 
+  {
     if (axisToSort == X) myAxis = 0;
     if (axisToSort == Y) myAxis = 1;
     if (axisToSort == Z) myAxis = 2;
