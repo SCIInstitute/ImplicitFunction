@@ -342,11 +342,11 @@ void RBFInterface::create2DSurface()
 void RBFInterface::createRasterizedSurface()
 {
   // TODO: make local?
-  this->rbf_ = new RBF(this->surfaceData_, kernel_);
-  this->rbf_->setDataReduction(All);
+  RBF rbf(this->surfaceData_, kernel_);
+  rbf.setDataReduction(All);
 
   // Construct RBFs
-  this->rbf_->computeFunction();  // TODO: throws exception if internal code used...
+  rbf.computeFunction();  // TODO: throws exception if internal code used...
 
   // Fill the values into the vector.
   // In the first loop, we initialize the matrix with all values set to -100.
@@ -383,15 +383,13 @@ void RBFInterface::createRasterizedSurface()
         //std::cout<<"Computing Val ... "<<std::endl;
         //double myVal = mySurface->computeValue(location);
 
-        double myVal = this->rbf_->computeValue(location);
+        double myVal = rbf.computeValue(location);
 
         //printf("Interpolant: %lf %lf %lf %lf\n", location[0], location[1], location[2], myVal); fflush(stdout);
         this->rasterData_[i][j][k] = myVal;
       }
     }
   }
-
-  //delete this->rbf_;
 }
 
 // TODO: move this and findNormalAxis to new class?
@@ -455,7 +453,7 @@ vec3 RBFInterface::findNormalAxis(const int n)
   {
     prev = (prev-1) >= 0 ? prev-1 : TOT-1; // wrap
   }
-  
+
   while(fabs(this->surfaceData_->surfacePoints_[myAxis][next] - this->surfaceData_->surfacePoints_[myAxis][n]) > SMALL_EPSILON)
   {
     next = (next+1) < TOT ? next+1 : 0; // wrap
