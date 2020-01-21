@@ -66,13 +66,16 @@ public:
 	void compute2DHull();
 	int origSize_;
 
+  void updateSurfacePointsList();
   vec3 surfacePoint(size_t i) const;
+  vec3 surfacePoint2(size_t i) const;
 
 private:
   void SDsort();
 	void SDmultisort();
 public: //TODO: private
   std::vector<double> surfacePoints_[3];
+  std::vector<vec3> surfacePointsCombined_;
 private:
   std::vector<vec3> inputData_, convexHullData_;
 };

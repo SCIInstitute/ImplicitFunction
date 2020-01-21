@@ -29,6 +29,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <execution>
 
 #include "RBFInterface.h"
 #include "vec3.h"
@@ -117,6 +118,10 @@ TEST_F(Seg3DIntegrationTest, ImplicitModel)
   EXPECT_EQ(rasterData[0].size(), 232);
   EXPECT_EQ(rasterData[0][0].size(), 160);
 
+  std::cout << "RBF::computeValueTime: " << RBF::computeValueTime / 1000000.0 << " sec" << std::endl;
+  std::cout << "RBF::computeKernelTime: " << RBF::computeKernelTime / 1000000.0 << " sec" << std::endl;
+  std::cout << "RBF::computeRadialFunctionOnSquaredDistanceTime: " << RBF::computeRadialFunctionOnSquaredDistanceTime / 1000000.0 << " sec" << std::endl;
+
   //TODO: convert to move semantics for seg3d datablock usage
   #if 0
   for (size_t i = 0; i < dstDataBlock->get_nx(); ++i)
@@ -130,4 +135,20 @@ TEST_F(Seg3DIntegrationTest, ImplicitModel)
     }
   }
   #endif
+}
+
+TEST(ParallelForEachTest, Test1)
+{
+  int a[] = {0,1};
+  std::vector<int> v = {0,1};
+
+  std::cout << "Before: " << v[0] << "," << v[1] << std::endl;
+
+  std::for_each(std::execution::par, std::begin(a), std::end(a), [&](int i) { v += 1; });
+
+  std::cout << "After: " << v[0] << "," << v[1] << std::endl;
+
+
+
+  FAIL() << "todo";
 }

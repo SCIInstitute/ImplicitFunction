@@ -338,5 +338,20 @@ void ScatteredData::compute2DHull()
 
 vec3 ScatteredData::surfacePoint(size_t i) const
 {
-  return { surfacePoints_[0][i], surfacePoints_[1][i], surfacePoints_[2][i] };
+  return { surfacePoints_[X][i], surfacePoints_[Y][i], surfacePoints_[Z][i] };
+}
+
+vec3 ScatteredData::surfacePoint2(size_t i) const
+{
+  return surfacePointsCombined_[i];
+}
+
+void ScatteredData::updateSurfacePointsList()
+{
+  surfacePointsCombined_.clear();
+  surfacePointsCombined_.reserve(surfacePoints_[X].size());
+  for (size_t i = 0; i < surfacePoints_[X].size(); ++i)
+  {
+    surfacePointsCombined_.emplace_back(surfacePoints_[X][i], surfacePoints_[Y][i], surfacePoints_[Z][i]);
+  }
 }

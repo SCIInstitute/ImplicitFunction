@@ -145,6 +145,8 @@ void RBF::computeFunction()
       //printf("Total no. of data_ point: %d\n",  this->data_->fnc_.size()); fflush(stdout);
       break;
   }
+
+  data_.updateSurfacePointsList();
 }
 
 void RBF::computeFunctionForData()
@@ -199,8 +201,13 @@ void RBF::computeFunctionForData()
   }
 }
 
+size_t RBF::computeValueTime{0};
+size_t RBF::computeKernelTime{0};
+size_t RBF::computeRadialFunctionOnSquaredDistanceTime{0};
+
 double RBF::computeValue(const vec3& x)
 {
+  //ScopedCumulativeTimer sct("computeValue", computeValueTime);
   switch(this->acceleration_)
   {
     case FastMultipole:
@@ -239,31 +246,33 @@ void RBF::computeErrorForData(vector<pair<double, int> > &error)
 
 double RBF::computeKernel(int i, int j)
 {
-  double r = sqrt( (this->data_.surfacePoints_[0][i] - this->data_.surfacePoints_[0][j]) *
+  double r2 = (this->data_.surfacePoints_[0][i] - this->data_.surfacePoints_[0][j]) *
                    (this->data_.surfacePoints_[0][i] - this->data_.surfacePoints_[0][j]) +  // x
                    (this->data_.surfacePoints_[1][i] - this->data_.surfacePoints_[1][j]) *
                    (this->data_.surfacePoints_[1][i] - this->data_.surfacePoints_[1][j]) +  // y
                    (this->data_.surfacePoints_[2][i] - this->data_.surfacePoints_[2][j]) *
-                   (this->data_.surfacePoints_[2][i] - this->data_.surfacePoints_[2][j]) ); // z
+                   (this->data_.surfacePoints_[2][i] - this->data_.surfacePoints_[2][j]); // z
 
-  return computeRadialFunction(r);
+  return computeRadialFunctionOnSquaredDistance(r2);
 }
 
 double RBF::computeKernel(int i, const vec3& b)
 {
+  //ScopedCumulativeTimer sct("computeKernel", computeKernelTime);
   //TODO: optimize this function
-  auto point = data_.surfacePoint(i);
-  double bx = b[0], by = b[1], bz = b[2];
-  double r = sqrt( (point.x() - bx)*(point.x() - bx) +  // x
-                   (point.y() - by)*(point.y() - by) +  // y
-                   (point.z() - bz)*(point.z() - bz) ); // z
-
-
-  return computeRadialFunction(r);
+  auto point = data_.surfacePoint2(i);
+//  auto diff = point - b;  //definitely slower than manual x,y,z access
+  auto xDiff = point[0] - b[0];
+  auto yDiff = point[1] - b[1];
+  auto zDiff = point[2] - b[2];
+  double r2 = xDiff * xDiff + yDiff * yDiff + zDiff * zDiff;
+  //double r2 = lengthSquared(diff);
+  return computeRadialFunctionOnSquaredDistance(r2);
 }
 
-double RBF::computeRadialFunction(double r)
+double RBF::computeRadialFunctionOnSquaredDistance(double r2)
 {
+  //ScopedCumulativeTimer sct("computeRadialFunctionOnSquaredDistance", computeRadialFunctionOnSquaredDistanceTime);
   //TODO: optimize this function
   static const double C = 0.1;
   static const double SCALE = 0.01;
@@ -271,16 +280,15 @@ double RBF::computeRadialFunction(double r)
   switch(kernel_)
   {
     case Gaussian:
-      r = r * SCALE;
-      return 1.0/sqrt(r*r + C*C);
+      return 1.0/sqrt(r2 * SCALE * SCALE + C*C);
       break;
-   case ThinPlate:
-      return r*r*log(r+C);
+  case ThinPlate:
+      return r2*log(sqrt(r2)+C);
       break;
     case MultiQuadratic:
-      return sqrt(r*r + C*C);
+      return sqrt(r2 + C*C);
     default:
-      return r;
+      return sqrt(r2);
       break;
   }
   return 0;
@@ -451,5 +459,5 @@ double RBF::fmmComputeKernel(const vec3& b, BHNode *myNode)
 {
   double r = length(myNode->center_ - b);
 
-  return computeRadialFunction(r);
+  return computeRadialFunctionOnSquaredDistance(r * r);
 }

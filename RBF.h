@@ -58,6 +58,23 @@ private:
 	std::chrono::high_resolution_clock::time_point start;
 };
 
+struct ScopedCumulativeTimer
+{
+	explicit ScopedCumulativeTimer(const char* message, size_t& counter) : message_(message), counter_(counter)
+	{
+		start = std::chrono::high_resolution_clock::now();
+	}
+	~ScopedCumulativeTimer()
+	{
+		auto end = std::chrono::high_resolution_clock::now();
+		counter_ += std::chrono::duration_cast<std::chrono::microseconds>( end - start ).count();
+	}
+private:
+	std::string message_;
+	size_t& counter_;
+	std::chrono::high_resolution_clock::time_point start;
+};
+
 class RBF
 {
 public:
@@ -68,6 +85,8 @@ public:
 
 	void computeFunction();
 	double computeValue(const vec3& x);
+
+	static size_t computeValueTime, computeKernelTime, computeRadialFunctionOnSquaredDistanceTime;
 
 private:
 	const ScatteredData* completeData_;
@@ -86,7 +105,7 @@ private:
 
 	double computeKernel(int i, int j);
 	double computeKernel(int i, const vec3& b);
-	double computeRadialFunction(double r);
+	double computeRadialFunctionOnSquaredDistance(double r2);
 
 	void fmmBuildTree();
 	void fmmPrintTree(BHNode* myNode, int stack);

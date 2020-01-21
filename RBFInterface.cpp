@@ -334,13 +334,21 @@ void RBFInterface::createRasterizedSurface()
     }
   }
 
+// std::cout << "...... Sizes: " << size_[0] << "," << size_[1] << "," << size_[2] << std::endl;
+// std::cout << "...... Spacings: " << spacing_[0] << "," << spacing_[1] << "," << spacing_[2] << std::endl;
+// std::cout << "...... Units: " << vec3::unitX << "," << vec3::unitY << "," << vec3::unitZ << std::endl;
+
   for (int i = 0; i < this->size_[0]; i++)
   {
     for (int j = 0; j < this->size_[1]; j++)
     {
       for (int k = 0; k < this->size_[2]; k++)
       {
-        vec3 location = this->origin_ + this->spacing_[0] * i * vec3::unitX + this->spacing_[1] * j * vec3::unitY + this->spacing_[2] * k * vec3::unitZ;
+        vec3 location = this->origin_
+          + this->spacing_[0] * i * vec3::unitX
+          + this->spacing_[1] * j * vec3::unitY
+          + this->spacing_[2] * k * vec3::unitZ;
+
         double myVal = rbf.computeValue(location);
         this->rasterData_[i][j][k] = myVal;
       }

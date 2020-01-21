@@ -42,25 +42,19 @@ vec3 vec3::unitY(0,1,0);
 vec3 vec3::unitZ(0,0,1);
 const double vec3::PI = 3.14159265;
 
-vec3::vec3() : x_(0), y_(0), z_(0)
+vec3::vec3() : data_{0,0,0}
 {
 }
 
-// default constructor
-vec3::vec3(double x, double  y, double z) : x_(x), y_(y), z_(z)
-{
-}
-
-// copy constructor
-vec3::vec3(const vec3 &x) : x_(x.x_), y_(x.y_), z_(x.z_)
+vec3::vec3(double x, double  y, double z) : data_{x,y,z}
 {
 }
 
 bool vec3::operator!=(const vec3 &a) const
 {
-  if(this->x_ != a.x_ ||
-     this->y_ != a.y_ ||
-     this->z_ != a.z_)
+  if(this->x() != a.x() ||
+     this->y() != a.y() ||
+     this->z() != a.z())
     return true;
   else
     return false;
@@ -68,9 +62,9 @@ bool vec3::operator!=(const vec3 &a) const
 
 bool vec3::operator==(const vec3 &a) const
 {
-  return(this->x_ == a.x_ &&
-         this->y_ == a.y_ &&
-         this->z_ == a.z_);
+  return(this->x() == a.x() &&
+         this->y() == a.y() &&
+         this->z() == a.z());
 }
 
 bool vec3::operator<=(const vec3 &a) const
@@ -85,21 +79,21 @@ bool vec3::operator>=(const vec3 &a) const
 
 bool vec3::operator<(const vec3 &a) const
 {
-  if (x_ < a.x_)
+  if (x() < a.x())
     return true;
-  if (x_ > a.x_)
+  if (x() > a.x())
     return false;
 
   // equal x
-  if (y_ < a.y_)
+  if (y() < a.y())
     return true;
-  if (y_ > a.y_)
+  if (y() > a.y())
     return false;
 
   // equal x and y
-  if (z_ < a.z_)
+  if (z() < a.z())
     return true;
-  if (z_ > a.z_)
+  if (z() > a.z())
     return false;
 
   return false;
@@ -112,27 +106,27 @@ bool vec3::operator>(const vec3 &a) const
 
 vec3& vec3::operator=(const vec3 &a)
 {
-  this->x_ = a.x_;
-  this->y_ = a.y_;
-  this->z_ = a.z_;
+  this->x() = a.x();
+  this->y() = a.y();
+  this->z() = a.z();
 
   return *this;
 }
 
 vec3& vec3::operator+=(const vec3 &a)
 {
-  this->x_ += a.x_;
-  this->y_ += a.y_;
-  this->z_ += a.z_;
+  this->x() += a.x();
+  this->y() += a.y();
+  this->z() += a.z();
 
   return *this;
 }
 
 vec3& vec3::operator*=(double c)
 {
-  this->x_ *= c;
-  this->y_ *= c;
-  this->z_ *= c;
+  this->x() *= c;
+  this->y() *= c;
+  this->z() *= c;
 
   return *this;
 }
@@ -140,43 +134,31 @@ vec3& vec3::operator*=(double c)
 vec3& vec3::operator/=(double c)
 {
   // TODO: throw exception if c == 0
-  this->x_ /= c;
-  this->y_ /= c;
-  this->z_ /= c;
+  this->x() /= c;
+  this->y() /= c;
+  this->z() /= c;
   return *this;
 }
 
 double& vec3::operator[](const size_t idx)
 {
-  switch(idx)
-  {
-    case 0: return this->x_;
-    case 1: return this->y_;
-    case 2: return this->z_;
-    default: throw -1;  // bad index
-  }
+  return data_[idx];
 }
 
 // TODO: Restructure this class so this lookup is FASTER
 double vec3::operator[](const size_t idx) const
 {
-  switch(idx)
-  {
-    case 0: return this->x_;
-    case 1: return this->y_;
-    case 2: return this->z_;
-    default: throw -1;  // bad index
-  }
+  return data_[idx];
 }
 
 double vec3::dot(const vec3 &b) const
 {
-  return this->x_*b.x_ + this->y_*b.y_ + this->z_*b.z_;
+  return this->x()*b.x() + this->y()*b.y() + this->z()*b.z();
 }
 
 vec3 vec3::cross(const vec3 &b)
 {
-  return vec3(this->y_*b.z_ - this->z_*b.y_, this->z_*b.x_ - this->x_*b.z_, this->x_*b.y_ - this->y_*b.x_);
+  return vec3(this->y()*b.z() - this->z()*b.y(), this->z()*b.x() - this->x()*b.z(), this->x()*b.y() - this->y()*b.x());
 }
 
 vec3 cross(const vec3 &a, const vec3 &b)
@@ -192,6 +174,11 @@ double dot(const vec3 &a, const vec3 &b)
 double length(const vec3 &a)
 {
   return sqrt(a.x()*a.x() + a.y()*a.y() + a.z()*a.z());
+}
+
+double lengthSquared(const vec3 &a)
+{
+  return a.x()*a.x() + a.y()*a.y() + a.z()*a.z();
 }
 
 double distance(const vec3 &a, const vec3 &b)
@@ -289,22 +276,22 @@ double clamp(double value, double min, double max)
 std::string vec3::toString() const
 {
   std::stringstream ss;
-  ss << "[" << std::setprecision(5) << this->x() << ", " << this->y_ << ", " << this->z_ << "]";
+  ss << "[" << std::setprecision(5) << this->x() << ", " << this->y() << ", " << this->z() << "]";
   return ss.str();
 }
 
 vec3 vec3::min(const vec3 &a, const vec3 &b)
 {
-  return vec3((a.x_ < b.x_) ? a.x_ : b.x_,
-              (a.y_ < b.y_) ? a.y_ : b.y_,
-              (a.z_ < b.z_) ? a.z_ : b.z_);
+  return vec3((a.x() < b.x()) ? a.x() : b.x(),
+              (a.y() < b.y()) ? a.y() : b.y(),
+              (a.z() < b.z()) ? a.z() : b.z());
 }
 
 vec3 vec3::max(const vec3 &a, const vec3 &b)
 {
-  return vec3((a.x_ > b.x_) ? a.x_ : b.x_,
-              (a.y_ > b.y_) ? a.y_ : b.y_,
-              (a.z_ > b.z_) ? a.z_ : b.z_);
+  return vec3((a.x() > b.x()) ? a.x() : b.x(),
+              (a.y() > b.y()) ? a.y() : b.y(),
+              (a.z() > b.z()) ? a.z() : b.z());
 }
 
 double angleBetween(const vec3 &a, const vec3 &b)

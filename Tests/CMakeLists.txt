@@ -39,6 +39,8 @@ include_directories(
 
 add_executable(ImplicitFunction_Tests ${ImplicitFunction_Tests_SRCS})
 
+set_property(TARGET ImplicitFunction_Tests PROPERTY CXX_STANDARD 17)
+
 target_compile_definitions(ImplicitFunction_Tests
   PUBLIC -DREGRESSION_DIR="${CMAKE_CURRENT_SOURCE_DIR}/regression")
 
