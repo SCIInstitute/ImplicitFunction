@@ -36,6 +36,7 @@
 #include <vector>
 #include <utility>
 #include <chrono>
+#include <memory>
 
 enum Kernel { Gaussian, ThinPlate, MultiQuadratic };
 enum Acceleration { None, FastMultipole };
