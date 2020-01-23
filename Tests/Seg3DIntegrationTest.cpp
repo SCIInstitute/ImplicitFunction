@@ -29,6 +29,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <iomanip>
 
 #include "RBFInterface.h"
 #include "vec3.h"
@@ -116,6 +117,14 @@ TEST_F(Seg3DIntegrationTest, ImplicitModel)
   EXPECT_EQ(rasterData.size(), 160);
   EXPECT_EQ(rasterData[0].size(), 232);
   EXPECT_EQ(rasterData[0][0].size(), 160);
+
+  EXPECT_DOUBLE_EQ(rasterData[0][0][0], -2743.834849059873);
+  EXPECT_DOUBLE_EQ(rasterData[3][12][80], -1905.153106673912);
+  EXPECT_DOUBLE_EQ(rasterData[7][31][92], -1509.377905517729);
+  EXPECT_DOUBLE_EQ(rasterData[39][57][39], -618.7883437372802);
+  EXPECT_DOUBLE_EQ(rasterData[79][115][79], -14.0055888087536);
+  EXPECT_DOUBLE_EQ(rasterData[119][173][119], -629.4075862714308);
+  EXPECT_DOUBLE_EQ(rasterData[159][231][159], -2888.992839187384);
 
   //TODO: convert to move semantics for seg3d datablock usage
   #if 0
