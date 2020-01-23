@@ -182,6 +182,7 @@ void RBF::computeFunctionForData()
       //Eigen::BiCGSTAB< Eigen::SparseMatrix<double> > solver;
       Eigen::BiCGSTAB< Eigen::MatrixXd > solver;
       solver.setTolerance(1.0e-10);
+      solver.setMaxIterations(5000);
       solver.compute(A);
       x = solver.solve(b);
 
