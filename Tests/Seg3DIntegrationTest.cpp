@@ -118,13 +118,13 @@ TEST_F(Seg3DIntegrationTest, ImplicitModel)
   EXPECT_EQ(rasterData[0].size(), 232);
   EXPECT_EQ(rasterData[0][0].size(), 160);
 
-  EXPECT_DOUBLE_EQ(rasterData[0][0][0], -2743.834849059873);
-  EXPECT_DOUBLE_EQ(rasterData[3][12][80], -1905.153106673912);
-  EXPECT_DOUBLE_EQ(rasterData[7][31][92], -1509.377905517729);
-  EXPECT_DOUBLE_EQ(rasterData[39][57][39], -618.7883437372802);
-  EXPECT_DOUBLE_EQ(rasterData[79][115][79], -14.0055888087536);
-  EXPECT_DOUBLE_EQ(rasterData[119][173][119], -629.4075862714308);
-  EXPECT_DOUBLE_EQ(rasterData[159][231][159], -2888.992839187384);
+  EXPECT_NEAR(rasterData[0][0][0], -2701.018664769188, 1.0e-16);
+  EXPECT_NEAR(rasterData[3][12][80], -1880.7781485604355, 1.0e-16);
+  EXPECT_NEAR(rasterData[7][31][92], -1491.0771375730401, 1.0e-16);
+  EXPECT_NEAR(rasterData[39][57][39], -604.78687230695505, 1.0e-16);
+  EXPECT_NEAR(rasterData[79][115][79], -14.501352507455977, 1.0e-16);
+  EXPECT_NEAR(rasterData[119][173][119], -631.7780323674524, 1.0e-16);
+  EXPECT_NEAR(rasterData[159][231][159], -2885.3566775373765, 1.0e-16);
 
   //TODO: convert to move semantics for seg3d datablock usage
   #if 0
