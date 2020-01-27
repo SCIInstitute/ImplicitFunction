@@ -47,19 +47,12 @@ using std::pair;
 const double RBF::EPSILON = 1.0e-2;
 
 
-RBF::RBF(ScatteredData *myData, Kernel myKernel) :
+RBF::RBF(const ScatteredData *myData, Kernel myKernel) :
   completeData_(myData),
   kernel_(myKernel),
   acceleration_(None),
   dataReduction_(All)
 {
-}
-
-RBF::~RBF()
-{
-// if ( this->data_ != nullptr ) delete this->data_;
-// if ( this->fmm_ != nullptr ) delete this->fmm_;
-// this->completeData_ = 0;
 }
 
 void RBF::setAcceleration(Acceleration myAcceleration)
@@ -68,8 +61,7 @@ void RBF::setAcceleration(Acceleration myAcceleration)
   switch(this->acceleration_)
   {
     case FastMultipole:
-      // TODO: memory leak?
-      fmm_ = new FMM();
+      fmm_.reset(new FMM);
       break;
     default:
       break;
@@ -83,12 +75,11 @@ void RBF::setDataReduction(DataReduction myDataReduction)
 
 void RBF::computeFunction()
 {
-  // TODO: memory leak?
-  data_ = new ScatteredData;
+  data_ = ScatteredData();
   switch(this->dataReduction_)
   {
     case All:
-      data_->setData(this->completeData_->surfacePoints_[0],
+      data_.setData(this->completeData_->surfacePoints_[0],
                      this->completeData_->surfacePoints_[1],
                      this->completeData_->surfacePoints_[2],
                      this->completeData_->fnc_);
@@ -96,9 +87,8 @@ void RBF::computeFunction()
       break;
 
     case Random:
-      bool *added;
       const int N = this->completeData_->fnc_.size();
-      added = new bool[N];
+      std::vector<bool> added(N);
       printf("%d\n", N);
 
       for (int i = 0; i < N; i++)
@@ -114,10 +104,10 @@ void RBF::computeFunction()
           continue;
         }
         added[j] = true;
-        this->data_->surfacePoints_[0].push_back(this->completeData_->surfacePoints_[0][j]);
-        this->data_->surfacePoints_[1].push_back(this->completeData_->surfacePoints_[1][j]);
-        this->data_->surfacePoints_[2].push_back(this->completeData_->surfacePoints_[2][j]);
-        this->data_->fnc_.push_back(this->completeData_->fnc_[j]);
+        this->data_.surfacePoints_[0].push_back(this->completeData_->surfacePoints_[0][j]);
+        this->data_.surfacePoints_[1].push_back(this->completeData_->surfacePoints_[1][j]);
+        this->data_.surfacePoints_[2].push_back(this->completeData_->surfacePoints_[2][j]);
+        this->data_.fnc_.push_back(this->completeData_->fnc_[j]);
         //printf("%d %lf %lf %lf %lf\n", j, this->completeData_->surfacePoints_[0][j],this->completeData_->surfacePoints_[1][j],this->completeData_->surfacePoints_[2][j],this->completeData_->fnc_[j]);
       }
 
@@ -144,15 +134,14 @@ void RBF::computeFunction()
             int j = error[k].second;
             //printf("Adding data point %d\n", j);
             added[j] = true;
-            this->data_->surfacePoints_[0].push_back(this->completeData_->surfacePoints_[0][j]);
-            this->data_->surfacePoints_[1].push_back(this->completeData_->surfacePoints_[1][j]);
-            this->data_->surfacePoints_[2].push_back(this->completeData_->surfacePoints_[2][j]);
-            this->data_->fnc_.push_back(this->completeData_->fnc_[j]);
+            this->data_.surfacePoints_[0].push_back(this->completeData_->surfacePoints_[0][j]);
+            this->data_.surfacePoints_[1].push_back(this->completeData_->surfacePoints_[1][j]);
+            this->data_.surfacePoints_[2].push_back(this->completeData_->surfacePoints_[2][j]);
+            this->data_.fnc_.push_back(this->completeData_->fnc_[j]);
           }
         }
       }
       //printf("Total no. of data_ point: %d\n",  this->data_->fnc_.size()); fflush(stdout);
-      delete [] added;
       break;
   }
 }
@@ -167,13 +156,13 @@ void RBF::computeFunctionForData()
     case None:
     default:
       // TODO: move to function
-      const int N = static_cast<int>( this->data_->fnc_.size() );
+      const int N = static_cast<int>( this->data_.fnc_.size() );
 
 #ifndef NDEBUG
       printf("Solving linear equations: \n"); fflush(stdout);
 #endif
 
-      Eigen::VectorXd b = Eigen::VectorXd::Map(&this->data_->fnc_[0], N);
+      Eigen::VectorXd b = Eigen::VectorXd::Map(&this->data_.fnc_[0], N);
       Eigen::VectorXd x(N);
       //Eigen::SparseMatrix< double > A(N, N);
       Eigen::MatrixXd A(N, N);
@@ -193,6 +182,7 @@ void RBF::computeFunctionForData()
       //Eigen::BiCGSTAB< Eigen::SparseMatrix<double> > solver;
       Eigen::BiCGSTAB< Eigen::MatrixXd > solver;
       solver.setTolerance(1.0e-10);
+      solver.setMaxIterations(5000);
       solver.compute(A);
       x = solver.solve(b);
 
@@ -241,27 +231,29 @@ void RBF::computeErrorForData(vector<pair<double, int> > &error)
 
 double RBF::computeKernel(int i, int j)
 {
-  double r = sqrt( (this->data_->surfacePoints_[0][i] - this->data_->surfacePoints_[0][j]) *
-                   (this->data_->surfacePoints_[0][i] - this->data_->surfacePoints_[0][j]) +  // x
-                   (this->data_->surfacePoints_[1][i] - this->data_->surfacePoints_[1][j]) *
-                   (this->data_->surfacePoints_[1][i] - this->data_->surfacePoints_[1][j]) +  // y
-                   (this->data_->surfacePoints_[2][i] - this->data_->surfacePoints_[2][j]) *
-                   (this->data_->surfacePoints_[2][i] - this->data_->surfacePoints_[2][j]) ); // z
+  double r = sqrt( (this->data_.surfacePoints_[0][i] - this->data_.surfacePoints_[0][j]) *
+                   (this->data_.surfacePoints_[0][i] - this->data_.surfacePoints_[0][j]) +  // x
+                   (this->data_.surfacePoints_[1][i] - this->data_.surfacePoints_[1][j]) *
+                   (this->data_.surfacePoints_[1][i] - this->data_.surfacePoints_[1][j]) +  // y
+                   (this->data_.surfacePoints_[2][i] - this->data_.surfacePoints_[2][j]) *
+                   (this->data_.surfacePoints_[2][i] - this->data_.surfacePoints_[2][j]) ); // z
 
   return computeRadialFunction(r);
 }
 
 double RBF::computeKernel(int i, const vec3& b)
 {
-  double r = sqrt( (this->data_->surfacePoints_[0][i] - b[0])*(this->data_->surfacePoints_[0][i] - b[0]) +  // x
-                   (this->data_->surfacePoints_[1][i] - b[1])*(this->data_->surfacePoints_[1][i] - b[1]) +  // y
-                   (this->data_->surfacePoints_[2][i] - b[2])*(this->data_->surfacePoints_[2][i] - b[2]) ); // z
+  //TODO: optimize this function
+  double r = sqrt( (this->data_.surfacePoints_[0][i] - b[0])*(this->data_.surfacePoints_[0][i] - b[0]) +  // x
+                   (this->data_.surfacePoints_[1][i] - b[1])*(this->data_.surfacePoints_[1][i] - b[1]) +  // y
+                   (this->data_.surfacePoints_[2][i] - b[2])*(this->data_.surfacePoints_[2][i] - b[2]) ); // z
 
   return computeRadialFunction(r);
 }
 
 double RBF::computeRadialFunction(double r)
 {
+  //TODO: optimize this function
   const double C = 0.1;
   const double SCALE = 0.01;
 
@@ -288,7 +280,7 @@ double RBF::computeRadialFunction(double r)
 void RBF::fmmBuildTree()
 {
   vector<int> myIndices;
-  const int N = this->data_->surfacePoints_[0].size();
+  const int N = this->data_.surfacePoints_[0].size();
 
   for (int i = 0; i < N; i++)
     myIndices.push_back(i);
@@ -313,7 +305,7 @@ void RBF::fmmPrintTree(BHNode *myNode, int stack)
     printf(" ");
   }
 
-  printf("%d %d %d\n", myNode, myNode->index_, myNode->pts_.size());
+  //printf("%d %d %d\n", myNode, myNode->index_, myNode->pts_.size());
 
   for (int i = 0; i < 8; i++)
   {
@@ -345,7 +337,7 @@ void RBF::fmmBuildTree(vector<int> &myPoints, BHNode *myNode)
 
   for (int i = 0; i < N; i++)
   {
-    vec3 location(this->data_->surfacePoints_[0][myPoints[i]], this->data_->surfacePoints_[1][myPoints[i]], this->data_->surfacePoints_[2][myPoints[i]]);
+    vec3 location(this->data_.surfacePoints_[0][myPoints[i]], this->data_.surfacePoints_[1][myPoints[i]], this->data_.surfacePoints_[2][myPoints[i]]);
     myNode->center_ = myNode->center_ + (location/N);
   }
 
@@ -370,14 +362,14 @@ void RBF::fmmBuildTree(vector<int> &myPoints, BHNode *myNode)
   {
     int octant = 0;
     //FIND OCTANTS
-    if (this->data_->surfacePoints_[0][myPoints[i]] > mid[0])
+    if (this->data_.surfacePoints_[0][myPoints[i]] > mid[0])
       octant += 1;
-    if (this->data_->surfacePoints_[1][myPoints[i]] > mid[1])
+    if (this->data_.surfacePoints_[1][myPoints[i]] > mid[1])
       octant += 2;
-    if (this->data_->surfacePoints_[2][myPoints[i]] > mid[2])
+    if (this->data_.surfacePoints_[2][myPoints[i]] > mid[2])
       octant += 4;
 
-    //printf("%d %d %d %lf %lf %lf\n", i,octant, myPoints[i], this->data_->surfacePoints_[0][myPoints[i]],this->data_->surfacePoints_[1][myPoints[i]], this->data_->surfacePoints_[2][myPoints[i]]);
+    //printf("%d %d %d %lf %lf %lf\n", i,octant, myPoints[i], this->data_.surfacePoints_[0][myPoints[i]],this->data_.surfacePoints_[1][myPoints[i]], this->data_.surfacePoints_[2][myPoints[i]]);
 
     children[octant].push_back(myPoints[i]);
   }

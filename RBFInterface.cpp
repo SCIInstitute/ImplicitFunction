@@ -34,7 +34,6 @@
 
 #include <tetgen.h>
 
-//const double RBFInterface::EPSILON = 1.0e-3;
 const double RBFInterface::SMALL_EPSILON = 1.0e-6;
 
 RBFInterface::RBFInterface(std::vector<vec3> myData,
@@ -60,7 +59,6 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
 
   for (int i = 0; i < myData.size(); i++)
   {
-//    std::cerr << "point: " << myData[i][0] << ", " << myData[i][1] << ", " << myData[i][2] << std::endl;
     // TODO: would be better to skip this step...
     // Input point components:
     this->points_x_.push_back(myData[i][0]); // X component
@@ -80,12 +78,6 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
     create2DSurface();
   }
 }
-
-//RBFInterface::~RBFInterface()
-//{
-//std::cerr << "RBFInterface::~RBFInterface()" << std::endl;
-//  delete this->surfaceData_;
-//}
 
 void RBFInterface::create3DSurface()
 {
@@ -122,6 +114,7 @@ void RBFInterface::create3DSurface()
   const size_t NUMBER_TRI_POINTS = 3;
 
 #ifndef NDEBUG
+#ifdef VERBOSE
   // trifaces == convex hull
   std::cerr << "# tri faces=" << NUMBER_TRI_FACES << std::endl;
   for (size_t i = 0; i < out.numberoftrifaces; ++i)
@@ -139,8 +132,9 @@ void RBFInterface::create3DSurface()
                                            << out.pointlist[i*NUMBER_TRI_POINTS+2] << std::endl;
   }
 #endif
+#endif
 
-  IndexList* listOfIntsPerVertex = new IndexList[NUMBER_POINTS];
+  std::vector<IndexList> listOfIntsPerVertex(NUMBER_POINTS);
   for (size_t i = 0; i < NUMBER_TRI_FACES; ++i)
   {
     for (size_t j = 0; j < NUMBER_TRI_POINTS; ++j)
@@ -151,6 +145,7 @@ void RBFInterface::create3DSurface()
   }
 
 #ifndef NDEBUG
+#ifdef VERBOSE
   for (int i = 0; i < NUMBER_POINTS; ++i)
   {
     std::cerr << i << ": ";
@@ -161,6 +156,7 @@ void RBFInterface::create3DSurface()
     std::cerr << std::endl;
   }
 #endif
+#endif
 
   // normal calculation on face
   // For triangle p1, p2, p3 and vectors U = p2 - p1, V = p3 - p1, then normal N = UxV:
@@ -168,13 +164,11 @@ void RBFInterface::create3DSurface()
   //  Ny = UzVx - UxVz
   //  Nz = UxVy - UyVx
 
-  vec3* normalsPerFace = new vec3[NUMBER_TRI_FACES];
+  std::vector<vec3> normalsPerFace(NUMBER_TRI_FACES);
   for (size_t i = 0; i < NUMBER_TRI_FACES; ++i)
   {
-    //const size_t i1 = out.trifacelist[i*3+2];
     const size_t i1 = out.trifacelist[i*3];
     const size_t i2 = out.trifacelist[i*3+1];
-    //const size_t i3 = out.trifacelist[i*3];
     const size_t i3 = out.trifacelist[i*3+2];
 
     vec3 p1( out.pointlist[i1*NUMBER_TRI_POINTS], out.pointlist[i1*NUMBER_TRI_POINTS+1], out.pointlist[i1*NUMBER_TRI_POINTS+2] );
@@ -190,11 +184,13 @@ void RBFInterface::create3DSurface()
            ( u.x() * v.y() ) - ( u.y() * v.x() )
           );
     normalsPerFace[i] = normalize(n, SMALL_EPSILON);
-std::cerr << "normalsPerFace[" << i << "]=" << normalsPerFace[i] << ", len=" << length(normalsPerFace[i]) << std::endl;
+    #ifdef VERBOSE
+    std::cerr << "normalsPerFace[" << i << "]=" << normalsPerFace[i] << ", len=" << length(normalsPerFace[i]) << std::endl;
+    #endif
   }
 
   // TODO: initialize in constructor?
-  this->surfaceData_ = new ScatteredData(this->points_x_, this->points_y_, this->points_z_, this->threshold_, this->axisList_);
+  this->surfaceData_.reset(new ScatteredData(this->points_x_, this->points_y_, this->points_z_, this->threshold_, this->axisList_));
 
   // TODO: this code mirrors the 2D convex hull method...refactor?
   // TODO: difficult to keep the ScatteredData point and function vectors in sync...
@@ -216,7 +212,9 @@ std::cerr << "normalsPerFace[" << i << "]=" << normalsPerFace[i] << ", len=" << 
     // indices of points not in convex hull
     if ( listOfIntsPerVertex[i].size() == 0 )
     {
-std::cerr << "Point " << i << " in leftovers." << std::endl;
+#ifdef VERBOSE
+      std::cerr << "Point " << i << " in leftovers." << std::endl;
+#endif
       this->surfaceData_->leftovers_[0].push_back( out.pointlist[i*NUMBER_TRI_POINTS] );
       this->surfaceData_->leftovers_[1].push_back( out.pointlist[i*NUMBER_TRI_POINTS+1] );
       this->surfaceData_->leftovers_[2].push_back( out.pointlist[i*NUMBER_TRI_POINTS+2] );
@@ -230,7 +228,9 @@ std::cerr << "Point " << i << " in leftovers." << std::endl;
   {
     if ( listOfIntsPerVertex[i].size() == 0 ) continue;
 
-std::cerr << "Point " << i << " in surface points." << std::endl;
+#ifdef VERBOSE
+    std::cerr << "Point " << i << " in surface points." << std::endl;
+#endif
     this->surfaceData_->surfacePoints_[0].push_back( out.pointlist[i*NUMBER_TRI_POINTS] );
     this->surfaceData_->surfacePoints_[1].push_back( out.pointlist[i*NUMBER_TRI_POINTS+1] );
     this->surfaceData_->surfacePoints_[2].push_back( out.pointlist[i*NUMBER_TRI_POINTS+2] );
@@ -242,11 +242,12 @@ std::cerr << "Point " << i << " in surface points." << std::endl;
       tmpVec += normalsPerFace[ listOfIntsPerVertex[i][j] ];
     }
 
-//    normalsPerVertex.push_back( normalize(tmpVec/3, SMALL_EPSILON) );
     normalsPerVertex.push_back( normalize(tmpVec, SMALL_EPSILON) );
   }
 
   this->surfaceData_->origSize_ = this->surfaceData_->surfacePoints_[0].size();
+
+#ifdef VERBOSE
 std::cerr << "#points=" << this->surfaceData_->surfacePoints_[0].size() << ", "
           << "#leftovers=" << this->surfaceData_->leftovers_[0].size() << std::endl;
 
@@ -254,6 +255,7 @@ for (int i = 0; i < normalsPerVertex.size(); ++i)
 {
   std::cerr << "normalsPerVertex[" << i << "]=" << normalsPerVertex[i] << ", len=" << length(normalsPerVertex[i]) << std::endl;
 }
+#endif
 
   // iterate through list of points not on hull, add to list as zero points
   for (size_t i = 0; i < M; ++i)
@@ -270,21 +272,15 @@ for (int i = 0; i < normalsPerVertex.size(); ++i)
 
   for (size_t i = 0; i < N; i++)
   {
-//    vec3 point;
     for (size_t j = 0; j < DIM_3D; j++)
     {
       // TODO: check endpoint of normal from this->surfaceData_->surfacePoints_[j][i] + this->offset_ * normalsPerVertex[i][j] for inside c hull
       // generated printed warning
       this->surfaceData_->surfacePoints_[j].push_back(this->surfaceData_->surfacePoints_[j][i] + this->offset_ * normalsPerVertex[i][j]);
-
-//std::cerr << j << ": " << this->surfaceData_->surfacePoints_[j][i] << ", " << this->surfaceData_->surfacePoints_[j][i] + this->offset_ * normalsPerVertex[i][j] << std::endl;
-//      point[j] = this->surfaceData_->surfacePoints_[j][i] + this->offset_ * normalsPerVertex[i][j];
-//      this->surfaceData_->surfacePoints_[j].push_back( point[j] );
     }
 
     // check endpoint of normal from this->surfaceData_->surfacePoints_[j][i] + this->offset_ * normalsPerVertex[i][j] for inside c hull
     // printed warning, member variable for testing...
-    //pointInsideConvexHull( point );
 
     // normals point inward
     this->surfaceData_->fnc_.push_back(NORMAL_IN);
@@ -299,24 +295,13 @@ for (int i = 0; i < normalsPerVertex.size(); ++i)
   }
 
   createRasterizedSurface();
-
-  delete [] listOfIntsPerVertex;
-  delete [] normalsPerFace;
 }
-
-//bool RBFInterface::pointInsideConvexHull( const vec3& point )
-//{
-////  std::cerr << point << std::endl;
-//  return false;
-//}
 
 // driver
 void RBFInterface::create2DSurface()
 {
   // TODO: initialize in constructor?
-  this->surfaceData_ = new ScatteredData(this->points_x_, this->points_y_, this->points_z_, this->threshold_, this->axisList_);
-
-  //this->surfaceData_->axisInformation_ = myAxis;
+  this->surfaceData_.reset(new ScatteredData(this->points_x_, this->points_y_, this->points_z_, this->threshold_, this->axisList_));
   this->surfaceData_->compute2DHull();
   // TODO: this is bad - ScatteredData should set this to maintain correct internal state!!!
   this->surfaceData_->origSize_ = this->surfaceData_->surfacePoints_[0].size();
@@ -329,12 +314,11 @@ void RBFInterface::create2DSurface()
 
 void RBFInterface::createRasterizedSurface()
 {
-  // TODO: make local?
-  this->rbf_ = new RBF(this->surfaceData_, kernel_);
-  this->rbf_->setDataReduction(All);
+  RBF rbf(getSurfaceData(), kernel_);
+  rbf.setDataReduction(All);
 
   // Construct RBFs
-  this->rbf_->computeFunction();  // TODO: throws exception if internal code used...
+  rbf.computeFunction();  // TODO: throws exception if internal code used...
 
   // Fill the values into the vector.
   // In the first loop, we initialize the matrix with all values set to -100.
@@ -352,34 +336,16 @@ void RBFInterface::createRasterizedSurface()
 
   for (int i = 0; i < this->size_[0]; i++)
   {
-    //vec3 location = this->origin_ + this->spacing_[0] * i * vec3::unitX;
-    //if (location[0]<myMin[0]||location[0]>myMax[0])
-    //  continue;
     for (int j = 0; j < this->size_[1]; j++)
     {
-      //location = this->origin_ + this->spacing_[1]*j*vec3::unitY;
-      //if (location[1]<myMin[1]||location[1]>myMax[1])
-      //  continue;
       for (int k = 0; k < this->size_[2]; k++)
       {
-        // TODO: shadowing variables in outer scopes!!!
-        //location = this->origin_ + this->spacing_[0]*i*vec3::unitX + this->spacing_[1]*j*vec3::unitY + this->spacing_[2]*k*vec3::unitZ;
         vec3 location = this->origin_ + this->spacing_[0] * i * vec3::unitX + this->spacing_[1] * j * vec3::unitY + this->spacing_[2] * k * vec3::unitZ;
-
-        //if (location[2]<myMin[2]||location[2]>myMax[2])
-        //  continue;
-        //std::cout<<"Computing Val ... "<<std::endl;
-        //double myVal = mySurface->computeValue(location);
-
-        double myVal = this->rbf_->computeValue(location);
-
-        //printf("Interpolant: %lf %lf %lf %lf\n", location[0], location[1], location[2], myVal); fflush(stdout);
+        double myVal = rbf.computeValue(location);
         this->rasterData_[i][j][k] = myVal;
       }
     }
   }
-
-  //delete this->rbf_;
 }
 
 // TODO: move this and findNormalAxis to new class?
@@ -404,24 +370,17 @@ void RBFInterface::augmentNormalData()
   {
     vec3 myNormal = findNormalAxis(i);
     myNormal = normalize(myNormal, SMALL_EPSILON);
-//std::cerr << "normal: [ " << myNormal << " ]" << std::endl;
-    //vec3 inNorm;
     for (int j = 0; j < DIM_3D; j++)
     {
       this->surfaceData_->surfacePoints_[j].push_back(this->surfaceData_->surfacePoints_[j][i] + this->offset_ * myNormal[j]);
-      //inNorm[j] = this->surfaceData_->surfacePoints_[j][i] + this->offset_ * myNormal[j];
-      //inNormals.push_back(inNorm);
     }
 
     // normals point inward
     this->surfaceData_->fnc_.push_back(NORMAL_IN);
 
-    //vec3 outNorm;
     for (int j = 0; j < DIM_3D; j++)
     {
       this->surfaceData_->surfacePoints_[j].push_back(this->surfaceData_->surfacePoints_[j][i] - this->offset_ * myNormal[j]);
-      //outNorm[j] = this->surfaceData_->surfacePoints_[j][i] - this->offset_ * myNormal[j];
-      //outNormals.push_back(outNorm);
     }
 
     // normals pointing outward
@@ -431,11 +390,9 @@ void RBFInterface::augmentNormalData()
 
 vec3 RBFInterface::findNormalAxis(const int n)
 {
-  //printf("here\n");
   const int TOT = this->surfaceData_->origSize_;
   int prev = (n-1) >= 0 ? n-1 : TOT-1; // wrap
   int next = (n+1) < TOT ? n+1 : 0; // wrap
-  //axis_t myAxis = this->surfaceData_->axisInformation_[n];
   axis_t myAxis = this->surfaceData_->updatedAxisInformation_[n];
 
   // TODO: why is this needed? AK 09/13/2016
@@ -443,12 +400,11 @@ vec3 RBFInterface::findNormalAxis(const int n)
   {
     prev = (prev-1) >= 0 ? prev-1 : TOT-1; // wrap
   }
-  
+
   while(fabs(this->surfaceData_->surfacePoints_[myAxis][next] - this->surfaceData_->surfacePoints_[myAxis][n]) > SMALL_EPSILON)
   {
     next = (next+1) < TOT ? next+1 : 0; // wrap
   }
-//  printf("Computing normals (2): prev=%d, n=%d, next=%d, TOT=%d\n", prev,n,next,TOT); fflush(stdout);
 
   // normals from points either on convex hull boundary or in complete dataset if convex hull not used...
 
@@ -463,7 +419,6 @@ vec3 RBFInterface::findNormalAxis(const int n)
          this->surfaceData_->surfacePoints_[1][next],
          this->surfaceData_->surfacePoints_[2][next]);
 
-  //vec3 tangent = b-c;
   vec3 tan1 = normalize(b-a, SMALL_EPSILON);
   vec3 tan2 = normalize(a-c, SMALL_EPSILON);
   vec3 tangent = (tan1 + tan2) / 2;

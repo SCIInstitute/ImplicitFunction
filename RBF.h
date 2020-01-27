@@ -35,16 +35,33 @@
 // STL Includes
 #include <vector>
 #include <utility>
+#include <chrono>
+#include <memory>
 
 enum Kernel { Gaussian, ThinPlate, MultiQuadratic };
 enum Acceleration { None, FastMultipole };
 enum DataReduction { All, Random };
 
+struct ScopedTimer
+{
+	explicit ScopedTimer(const char* message) : message_(message)
+	{
+		start = std::chrono::high_resolution_clock::now();
+	}
+	~ScopedTimer()
+	{
+		auto end = std::chrono::high_resolution_clock::now();
+		std::cout << message_ << " took " << std::chrono::duration_cast<std::chrono::milliseconds>( end - start ).count() << " ms." << std::endl;
+	}
+private:
+	std::string message_;
+	std::chrono::high_resolution_clock::time_point start;
+};
+
 class RBF
 {
 public:
-	RBF(ScatteredData *myData, Kernel myKernel);
-  ~RBF();
+	RBF(const ScatteredData *myData, Kernel myKernel);
 
 	void setAcceleration(Acceleration myAcceleration);
 	void setDataReduction(DataReduction myDataReduction);
@@ -53,13 +70,14 @@ public:
 	double computeValue(const vec3& x);
 
 private:
-	ScatteredData *data_, *completeData_;
+	const ScatteredData* completeData_;
+	ScatteredData data_;
 	Kernel kernel_;
 	std::vector<double> coeff_;
 	Acceleration acceleration_;
 	DataReduction dataReduction_;
 
-	FMM *fmm_;
+	std::unique_ptr<FMM> fmm_;
 
 	void computeFunctionForData(); // throws std::runtime_error
 	void computeErrorForData(std::vector<std::pair<double, int> > &error);
