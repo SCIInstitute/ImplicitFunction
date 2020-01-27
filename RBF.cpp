@@ -232,12 +232,6 @@ void RBF::computeErrorForData(vector<pair<double, int> > &error)
 
 double RBF::computeKernel(int i, int j)
 {
-  //auto point = data_.surfacePoint2(i);
-  //auto point2 = data_.surfacePoint2(j);
-  //auto xDiff = point[0] - point2[0];
-  //auto yDiff = point[1] - point2[1];
-  //auto zDiff = point[2] - pointt2[2];
-  //double r2 = xDiff * xDiff + yDiff *
   double r2 = (this->data_.surfacePoints_[0][i] - this->data_.surfacePoints_[0][j]) *
                    (this->data_.surfacePoints_[0][i] - this->data_.surfacePoints_[0][j]) +  // x
                    (this->data_.surfacePoints_[1][i] - this->data_.surfacePoints_[1][j]) *
