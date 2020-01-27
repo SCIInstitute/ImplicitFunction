@@ -30,6 +30,7 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <numeric>
 
 #include "RBFInterface.h"
 #include "vec3.h"
@@ -125,6 +126,45 @@ TEST_F(Seg3DIntegrationTest, ImplicitModel)
   EXPECT_NEAR(rasterData[79][115][79], -14.501352507455977, 1.0e-7);
   EXPECT_NEAR(rasterData[119][173][119], -631.7780323674524, 1.0e-7);
   EXPECT_NEAR(rasterData[159][231][159], -2885.3566775373765, 1.0e-7);
+
+  using V = std::vector<double>;
+  using VV = std::vector<V>;
+  using VVV = std::vector<VV>;
+
+  auto numPositiveInSlice = [](const VV& slice)
+  {
+    return std::accumulate(slice.begin(), slice.end(),0,
+      [](size_t acc, const V& v) {
+      return acc + std::count_if(
+        v.begin(),
+        v.end(),
+        [](double x) {return x > 0;} ); });
+  };
+
+  // for (auto i = 0; i < rasterData.size(); ++i)
+  // {
+  //   std::cout << "#positive[" << i << "]:" <<
+  //   numPositiveInSlice(rasterData[i])
+  //   << std::endl;
+  // }
+
+  EXPECT_EQ(0, numPositiveInSlice(rasterData[3]));
+  EXPECT_EQ(0, numPositiveInSlice(rasterData[80]));
+  EXPECT_EQ(954, numPositiveInSlice(rasterData[90]));
+  EXPECT_EQ(297, numPositiveInSlice(rasterData[100]));
+  EXPECT_EQ(0, numPositiveInSlice(rasterData[159]));
+
+  EXPECT_NEAR(rasterData[90][112][80], 1.297055274867603, 1.0e-7);
+
+  // for(auto i = 0; i < rasterData[90].size(); ++i)
+  //   for(auto j = 0; j < rasterData[90][i].size(); ++j)
+  //   {
+  //     if(rasterData[90][i][j] > 0)
+  //     {
+  //       std::cout << std::setprecision(16) << i << " " << j << " " << rasterData[90][i][j] << std::endl;
+  //       break;
+  //     }
+  //   }
 
   //TODO: convert to move semantics for seg3d datablock usage
   #if 0
