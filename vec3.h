@@ -46,12 +46,9 @@ class vec3
 public:
   vec3();
   vec3(double x, double y, double z);
-  vec3(const vec3 &x);
 
 private:
-  double x_;
-  double y_;
-  double z_;
+  double data_[3];
 
 public:
   bool operator!=(const vec3 &a) const;
@@ -71,14 +68,17 @@ public:
   double dot(const vec3 &b) const;
   vec3 cross(const vec3 &b);
 
-  const double x() const { return this->x_; }
-  void x( double b ) { this->x_ = b; }
+  const double x() const { return data_[0]; }
+  double& x() { return data_[0]; }
+  void x( double b ) { data_[0] = b; }
 
-  const double y() const { return this->y_; }
-  void y( double b ) { this->y_ = b; }
+  const double y() const { return data_[1]; }
+  double& y() { return data_[1]; }
+  void y( double b ) { data_[1] = b; }
 
-  const double z() const { return this->z_; }
-  void z( double b ) { this->z_ = b; }
+  const double z() const { return data_[2]; }
+  double& z() { return data_[2]; }
+  void z( double b ) { data_[2] = b; }
 
   static vec3 zero;
   static vec3 unitX;
@@ -96,6 +96,7 @@ vec3 cross(const vec3 &a, const vec3 &b);
 vec3 bisect(const vec3 &a, const vec3 &b);
 double dot(const vec3 &a, const vec3 &b);
 double length(const vec3 &a);
+double lengthSquared(const vec3 &a);
 double distance(const vec3 &a, const vec3 &b);
 double L1(const vec3 &a);
 double L2(const vec3 &a);
