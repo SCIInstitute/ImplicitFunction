@@ -141,13 +141,6 @@ TEST_F(Seg3DIntegrationTest, ImplicitModel)
         [](double x) {return x > 0;} ); });
   };
 
-  // for (auto i = 0; i < rasterData.size(); ++i)
-  // {
-  //   std::cout << "#positive[" << i << "]:" <<
-  //   numPositiveInSlice(rasterData[i])
-  //   << std::endl;
-  // }
-
   EXPECT_EQ(0, numPositiveInSlice(rasterData[3]));
   EXPECT_EQ(0, numPositiveInSlice(rasterData[80]));
   EXPECT_EQ(954, numPositiveInSlice(rasterData[90]));
@@ -155,6 +148,13 @@ TEST_F(Seg3DIntegrationTest, ImplicitModel)
   EXPECT_EQ(0, numPositiveInSlice(rasterData[159]));
 
   EXPECT_NEAR(rasterData[90][112][80], 1.297055274867603, 1.0e-7);
+
+  // for (auto i = 0; i < rasterData.size(); ++i)
+  // {
+  //   std::cout << "#positive[" << i << "]:" <<
+  //   numPositiveInSlice(rasterData[i])
+  //   << std::endl;
+  // }
 
   // for(auto i = 0; i < rasterData[90].size(); ++i)
   //   for(auto j = 0; j < rasterData[90][i].size(); ++j)

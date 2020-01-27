@@ -231,45 +231,47 @@ void RBF::computeErrorForData(vector<pair<double, int> > &error)
 
 double RBF::computeKernel(int i, int j)
 {
-  double r = sqrt( (this->data_.surfacePoints_[0][i] - this->data_.surfacePoints_[0][j]) *
+  double r2 = (this->data_.surfacePoints_[0][i] - this->data_.surfacePoints_[0][j]) *
                    (this->data_.surfacePoints_[0][i] - this->data_.surfacePoints_[0][j]) +  // x
                    (this->data_.surfacePoints_[1][i] - this->data_.surfacePoints_[1][j]) *
                    (this->data_.surfacePoints_[1][i] - this->data_.surfacePoints_[1][j]) +  // y
                    (this->data_.surfacePoints_[2][i] - this->data_.surfacePoints_[2][j]) *
-                   (this->data_.surfacePoints_[2][i] - this->data_.surfacePoints_[2][j]) ); // z
+                   (this->data_.surfacePoints_[2][i] - this->data_.surfacePoints_[2][j]); // z
 
-  return computeRadialFunction(r);
+  return computeRadialFunctionOnSquaredDistance(r2);
 }
 
 double RBF::computeKernel(int i, const vec3& b)
 {
   //TODO: optimize this function
-  double r = sqrt( (this->data_.surfacePoints_[0][i] - b[0])*(this->data_.surfacePoints_[0][i] - b[0]) +  // x
+  double r2 = (this->data_.surfacePoints_[0][i] - b[0])*(this->data_.surfacePoints_[0][i] - b[0]) +  // x
                    (this->data_.surfacePoints_[1][i] - b[1])*(this->data_.surfacePoints_[1][i] - b[1]) +  // y
-                   (this->data_.surfacePoints_[2][i] - b[2])*(this->data_.surfacePoints_[2][i] - b[2]) ); // z
+                   (this->data_.surfacePoints_[2][i] - b[2])*(this->data_.surfacePoints_[2][i] - b[2]) ; // z
 
-  return computeRadialFunction(r);
+  return computeRadialFunctionOnSquaredDistance(r2);
 }
 
-double RBF::computeRadialFunction(double r)
+double RBF::computeRadialFunctionOnSquaredDistance(double r2)
 {
   //TODO: optimize this function
-  const double C = 0.1;
-  const double SCALE = 0.01;
+  static constexpr double C = 0.1;
+  static constexpr double C2 = C*C;
+
+  static constexpr double SCALE = 0.01;
+  static constexpr double SCALE2 = SCALE*SCALE;
 
   switch(kernel_)
   {
     case Gaussian:
-      r = r * SCALE;
-      return 1.0/sqrt(r*r + C*C);
+      return 1.0/sqrt(r2 * SCALE2 + C2);
       break;
     case ThinPlate:
-      return r*r*log(r+C);
+      return r2 * log(sqrt(r2) + C);
       break;
     case MultiQuadratic:
-      return sqrt(r*r + C*C);
+      return sqrt(r2 + C2);
     default:
-      return r;
+      return sqrt(r2);
       break;
   }
   return 0;
@@ -445,5 +447,5 @@ double RBF::fmmComputeKernel(const vec3& b, BHNode *myNode)
 {
   double r = length(myNode->center_ - b);
 
-  return computeRadialFunction(r);
+  return computeRadialFunctionOnSquaredDistance(r*r);
 }

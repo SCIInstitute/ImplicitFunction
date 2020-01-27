@@ -84,7 +84,7 @@ private:
 
 	double computeKernel(int i, int j);
 	double computeKernel(int i, const vec3& b);
-	double computeRadialFunction(double r);
+	double computeRadialFunctionOnSquaredDistance(double r2);
 
 	void fmmBuildTree();
 	void fmmPrintTree(BHNode* myNode, int stack);
