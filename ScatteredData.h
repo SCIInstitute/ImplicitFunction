@@ -63,16 +63,17 @@ public:
   std::vector<double> surfacePoints_[3], leftovers_[3], fnc_;
   std::vector<axis_t> axisInformation_, updatedAxisInformation_;
 
-//  void computeOrdering();
 	void compute2DHull();
 	int origSize_;
-//	vec3 centroid_;
-//static int myAxis;
+
+  void updateSurfacePointsList();
+  vec3 surfacePoint(size_t i) const;
+  vec3 surfacePoint2(size_t i) const;
 
 private:
   void SDsort();
 	void SDmultisort();
-
+  std::vector<vec3> surfacePointsCombined_;
   std::vector<vec3> inputData_, convexHullData_;
 };
 
@@ -81,7 +82,7 @@ struct vec3Sorter
   axis_t axisToSort;
   int myAxis;
   bool operator() (const vec3& a, const vec3& b)
-  { 
+  {
     if (axisToSort == X) myAxis = 0;
     if (axisToSort == Y) myAxis = 1;
     if (axisToSort == Z) myAxis = 2;

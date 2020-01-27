@@ -144,6 +144,7 @@ void RBF::computeFunction()
       //printf("Total no. of data_ point: %d\n",  this->data_->fnc_.size()); fflush(stdout);
       break;
   }
+  //data_.updateSurfacePointsList();
 }
 
 void RBF::computeFunctionForData()
@@ -231,6 +232,12 @@ void RBF::computeErrorForData(vector<pair<double, int> > &error)
 
 double RBF::computeKernel(int i, int j)
 {
+  //auto point = data_.surfacePoint2(i);
+  //auto point2 = data_.surfacePoint2(j);
+  //auto xDiff = point[0] - point2[0];
+  //auto yDiff = point[1] - point2[1];
+  //auto zDiff = point[2] - pointt2[2];
+  //double r2 = xDiff * xDiff + yDiff *
   double r2 = (this->data_.surfacePoints_[0][i] - this->data_.surfacePoints_[0][j]) *
                    (this->data_.surfacePoints_[0][i] - this->data_.surfacePoints_[0][j]) +  // x
                    (this->data_.surfacePoints_[1][i] - this->data_.surfacePoints_[1][j]) *
@@ -243,10 +250,15 @@ double RBF::computeKernel(int i, int j)
 
 double RBF::computeKernel(int i, const vec3& b)
 {
-  //TODO: optimize this function
-  double r2 = (this->data_.surfacePoints_[0][i] - b[0])*(this->data_.surfacePoints_[0][i] - b[0]) +  // x
-                   (this->data_.surfacePoints_[1][i] - b[1])*(this->data_.surfacePoints_[1][i] - b[1]) +  // y
-                   (this->data_.surfacePoints_[2][i] - b[2])*(this->data_.surfacePoints_[2][i] - b[2]) ; // z
+  //auto point = data_.surfacePoint2(i);
+  auto pointX = this->data_.surfacePoints_[0][i];
+  auto pointY = this->data_.surfacePoints_[1][i];
+  auto pointZ = this->data_.surfacePoints_[2][i];
+
+  auto xDiff = pointX - b[0];
+  auto yDiff = pointY - b[1];
+  auto zDiff = pointZ - b[2];
+  double r2 = xDiff * xDiff + yDiff * yDiff + zDiff * zDiff;
 
   return computeRadialFunctionOnSquaredDistance(r2);
 }

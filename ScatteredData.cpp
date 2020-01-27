@@ -111,7 +111,7 @@ void ScatteredData::setData(const std::vector<double>& points_x,
 //      case X: myAxis = 0; break;
 //      case Y: myAxis = 1; break;
 //      case Z: myAxis = 2; break;
-//        
+//
 //    }
 //    ETSP reorder(inputData_, start, end, myAxis);
 //    for(int i=start; i<=end; i++)
@@ -204,7 +204,7 @@ void ScatteredData::compute2DHull()
   // TODO: debug print
   for (int i = 0; i < this->inputData_.size(); i++)
     printf("%d %lf %lf %lf\n", i, this->inputData_[i][0], this->inputData_[i][1], this->inputData_[i][2]);
-  
+
   int count = 0;
   //printf("%d %d\n", this->inputData_.size(), this->surfacePoints_[0].size()); fflush(stdout);
   while ( count != this->surfacePoints_[0].size() )
@@ -339,4 +339,24 @@ void ScatteredData::compute2DHull()
 
   // TODO: this gets overwritten in RBFInterface???
   this->origSize_ = this->convexHullData_.size();
+}
+
+vec3 ScatteredData::surfacePoint(size_t i) const
+{
+  return { surfacePoints_[X][i], surfacePoints_[Y][i], surfacePoints_[Z][i] };
+}
+
+vec3 ScatteredData::surfacePoint2(size_t i) const
+{
+  return surfacePointsCombined_[i];
+}
+
+void ScatteredData::updateSurfacePointsList()
+{
+  surfacePointsCombined_.clear();
+  surfacePointsCombined_.reserve(surfacePoints_[X].size());
+  for (size_t i = 0; i < surfacePoints_[X].size(); ++i)
+  {
+    surfacePointsCombined_.emplace_back(surfacePoints_[X][i], surfacePoints_[Y][i], surfacePoints_[Z][i]);
+  }
 }
