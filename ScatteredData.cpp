@@ -274,33 +274,24 @@ vec3 ScatteredData::surfacePoint(size_t i) const
   return { surfacePoints_[X][i], surfacePoints_[Y][i], surfacePoints_[Z][i] };
 }
 
-const vec3& ScatteredData::surfacePoint2(size_t i) const
-{
-  return surfacePointsCombined_[i];
-}
-
 void ScatteredData::updateSurfacePointsList()
 {
-  surfacePointsCombined_.clear();
-  surfacePointsCombined_.reserve(surfacePoints_[X].size());
   surfacePointsFlattened_.reserve(surfacePoints_[X].size() * 3);
   for (size_t i = 0; i < surfacePoints_[X].size(); ++i)
   {
-    surfacePointsCombined_.emplace_back(surfacePoints_[X][i], surfacePoints_[Y][i], surfacePoints_[Z][i]);
     surfacePointsFlattened_.push_back(surfacePoints_[X][i]);
     surfacePointsFlattened_.push_back(surfacePoints_[Y][i]);
     surfacePointsFlattened_.push_back(surfacePoints_[Z][i]);
   }
+  surfacePointsFlattenedPtr_ = &surfacePointsFlattened_[0];
 }
 
 double ScatteredData::squaredDistanceFrom(size_t i, const vec3& from) const
 {
-  const auto pointX = surfacePointsFlattened_[3*i];
-  const auto pointY = surfacePointsFlattened_[3*i + 1];
-  const auto pointZ = surfacePointsFlattened_[3*i + 2];
-  //auto pointX = this->data_.surfacePoints_[0][i];
-  //auto pointY = this->data_.surfacePoints_[1][i];
-  //auto pointZ = this->data_.surfacePoints_[2][i];
+  const auto baseIndex = 3*i;
+  const auto pointX = surfacePointsFlattened_[baseIndex];
+  const auto pointY = surfacePointsFlattened_[baseIndex + 1];
+  const auto pointZ = surfacePointsFlattened_[baseIndex + 2];
 
   auto xDiff = pointX - from[0];
   auto yDiff = pointY - from[1];

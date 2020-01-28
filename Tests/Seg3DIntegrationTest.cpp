@@ -129,7 +129,7 @@ TEST_F(Seg3DIntegrationTest, ImplicitModel)
 
   using V = std::vector<double>;
   using VV = std::vector<V>;
-  using VVV = std::vector<VV>;
+  //using VVV = std::vector<VV>;
 
   auto numPositiveInSlice = [](const VV& slice)
   {

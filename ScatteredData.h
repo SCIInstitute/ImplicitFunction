@@ -68,9 +68,9 @@ public:
 
   void updateSurfacePointsList();
   vec3 surfacePoint(size_t i) const;
-  const vec3& surfacePoint2(size_t i) const;
 
    std::vector<double> surfacePointsFlattened_;
+   double* surfacePointsFlattenedPtr_{nullptr};
 
    double squaredDistanceFrom(size_t i, const vec3& from) const;
 
