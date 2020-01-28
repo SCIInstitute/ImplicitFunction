@@ -108,7 +108,6 @@ void RBF::computeFunction()
         this->data_.surfacePoints_[1].push_back(this->completeData_->surfacePoints_[1][j]);
         this->data_.surfacePoints_[2].push_back(this->completeData_->surfacePoints_[2][j]);
         this->data_.fnc_.push_back(this->completeData_->fnc_[j]);
-        //printf("%d %lf %lf %lf %lf\n", j, this->completeData_->surfacePoints_[0][j],this->completeData_->surfacePoints_[1][j],this->completeData_->surfacePoints_[2][j],this->completeData_->fnc_[j]);
       }
 
       vector<pair<double, int> > error;
@@ -128,11 +127,9 @@ void RBF::computeFunction()
         }
         for (int k = 0; k < 5; k++)
         {
-          //printf("Error %d: %lf\n", k, error[k].first);
           if (error[k].first > EPSILON || error[k].first != error[k].first)
           {
             int j = error[k].second;
-            //printf("Adding data point %d\n", j);
             added[j] = true;
             this->data_.surfacePoints_[0].push_back(this->completeData_->surfacePoints_[0][j]);
             this->data_.surfacePoints_[1].push_back(this->completeData_->surfacePoints_[1][j]);
@@ -141,10 +138,9 @@ void RBF::computeFunction()
           }
         }
       }
-      //printf("Total no. of data_ point: %d\n",  this->data_->fnc_.size()); fflush(stdout);
       break;
   }
-  //data_.updateSurfacePointsList();
+  data_.updateSurfacePointsList();
 }
 
 void RBF::computeFunctionForData()
@@ -165,22 +161,15 @@ void RBF::computeFunctionForData()
 
       Eigen::VectorXd b = Eigen::VectorXd::Map(&this->data_.fnc_[0], N);
       Eigen::VectorXd x(N);
-      //Eigen::SparseMatrix< double > A(N, N);
       Eigen::MatrixXd A(N, N);
       for (int i = 0; i < N; i++)
       {
         for (int j = 0; j < N; j++)
         {
           double val = computeKernel(i, j);
-//#ifndef NDEBUG
-//            printf("%d %d ", i,j); fflush(stdout);
-//            printf("%lf\n", val); fflush(stdout);
-//#endif
-          //A.insert(i, j) = val;
           A(i, j) = val;
         }
       }
-      //Eigen::BiCGSTAB< Eigen::SparseMatrix<double> > solver;
       Eigen::BiCGSTAB< Eigen::MatrixXd > solver;
       solver.setTolerance(1.0e-10);
       solver.setMaxIterations(5000);
@@ -194,7 +183,9 @@ void RBF::computeFunctionForData()
 
       this->coeff_.resize(x.size());
       Eigen::VectorXd::Map(&this->coeff_[0], x.size()) = x;
-      printf("Done\n"); fflush(stdout);
+      printf("Done\n");
+      std::cout << "coeff_ size: " << coeff_.size() << std::endl;
+      fflush(stdout);
 
       break;
   }
@@ -244,17 +235,23 @@ double RBF::computeKernel(int i, int j)
 
 double RBF::computeKernel(int i, const vec3& b)
 {
-  //auto point = data_.surfacePoint2(i);
-  auto pointX = this->data_.surfacePoints_[0][i];
-  auto pointY = this->data_.surfacePoints_[1][i];
-  auto pointZ = this->data_.surfacePoints_[2][i];
+  // //const auto& point = data_.surfacePoint2(i);
+  // const auto pointX = //data_.surfacePointX(i);
+  //   data_.surfacePointsFlattened_[3*i];
+  // const auto pointY = //data_.surfacePointY(i);
+  //   data_.surfacePointsFlattened_[3*i + 1];
+  // const auto pointZ = //data_.surfacePointZ(i);
+  //   data_.surfacePointsFlattened_[3*i + 2];
+  // //auto pointX = this->data_.surfacePoints_[0][i];
+  // //auto pointY = this->data_.surfacePoints_[1][i];
+  // //auto pointZ = this->data_.surfacePoints_[2][i];
+  //
+  // auto xDiff = pointX - b[0];
+  // auto yDiff = pointY - b[1];
+  // auto zDiff = pointZ - b[2];
+  // double r2 = xDiff * xDiff + yDiff * yDiff + zDiff * zDiff;
 
-  auto xDiff = pointX - b[0];
-  auto yDiff = pointY - b[1];
-  auto zDiff = pointZ - b[2];
-  double r2 = xDiff * xDiff + yDiff * yDiff + zDiff * zDiff;
-
-  return computeRadialFunctionOnSquaredDistance(r2);
+  return computeRadialFunctionOnSquaredDistance(data_.squaredDistanceFrom(i, b));
 }
 
 double RBF::computeRadialFunctionOnSquaredDistance(double r2)
