@@ -72,17 +72,17 @@ TEST_F(ConvexHull2DTest, BasicInterfaceTest)
                              true, ThinPlate );
   double threshold = rbfInterface.getThresholdValue();
   ASSERT_EQ( threshold, 0 ); // default
-  const DataStorage rasterData = rbfInterface.getRasterData();
+  const auto rasterData = rbfInterface.getRasterData();
   // at least check that values in threshold range were generated
   // TODO: check linear system numerics
   int counter = 0;
-  for (size_t i = 0; i < rasterData.size(); ++i)
+  for (size_t i = 0; i < rasterData->size1(); ++i)
   {
-    for (size_t j = 0; j < rasterData[i].size(); ++j)
+    for (size_t j = 0; j < rasterData->size2(); ++j)
     {
-      for (size_t k = 0; k < rasterData[i][j].size(); ++k)
+      for (size_t k = 0; k < rasterData->size3(); ++k)
       {
-        if ( rasterData[i][j][k] > threshold )
+        if ( rasterData->get(i,j,k) > threshold )
           ++counter;
       }
     }

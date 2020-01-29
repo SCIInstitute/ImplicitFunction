@@ -73,7 +73,7 @@ TEST_F(RBFInterfaceTest, BasicInterfaceTestThinPlate)
                              false, thinPlateKernel );
   double threshold = rbfInterface.getThresholdValue();
   ASSERT_EQ( threshold, 0 ); // default
-  const DataStorage rasterData = rbfInterface.getRasterData();
+  const auto rasterData = rbfInterface.getRasterData();
 
   // TODO: check linear system numerics
   std::ifstream in;
@@ -106,7 +106,7 @@ TEST_F(RBFInterfaceTest, BasicInterfaceTestGaussian)
                              false, gaussianKernel );
   double threshold = rbfInterface.getThresholdValue();
   ASSERT_EQ( threshold, 0 ); // default
-  const DataStorage rasterData = rbfInterface.getRasterData();
+  const auto rasterData = rbfInterface.getRasterData();
 
   // TODO: check linear system numerics
   std::ifstream in;
@@ -139,7 +139,7 @@ TEST_F(RBFInterfaceTest, BasicInterfaceTestMultiQuad)
                              false, multiQuadKernel );
   double threshold = rbfInterface.getThresholdValue();
   ASSERT_EQ( threshold, 0 ); // default
-  const DataStorage rasterData = rbfInterface.getRasterData();
+  const auto rasterData = rbfInterface.getRasterData();
 
   // TODO: check linear system numerics
   std::ifstream in;

@@ -115,17 +115,17 @@ TEST_F(Seg3DIntegrationTest, ImplicitModel)
 
   const auto rasterData = modelAlgo.getRasterData();
 
-  EXPECT_EQ(rasterData.size(), 160);
-  EXPECT_EQ(rasterData[0].size(), 232);
-  EXPECT_EQ(rasterData[0][0].size(), 160);
+  EXPECT_EQ(rasterData->size1(), 160);
+  EXPECT_EQ(rasterData->size2(), 232);
+  EXPECT_EQ(rasterData->size3(), 160);
 
-  EXPECT_NEAR(rasterData[0][0][0], -2701.018664769188, 1.0e-7);
-  EXPECT_NEAR(rasterData[3][12][80], -1880.7781485604355, 1.0e-7);
-  EXPECT_NEAR(rasterData[7][31][92], -1491.0771375730401, 1.0e-7);
-  EXPECT_NEAR(rasterData[39][57][39], -604.78687230695505, 1.0e-7);
-  EXPECT_NEAR(rasterData[79][115][79], -14.501352507455977, 1.0e-7);
-  EXPECT_NEAR(rasterData[119][173][119], -631.7780323674524, 1.0e-7);
-  EXPECT_NEAR(rasterData[159][231][159], -2885.3566775373765, 1.0e-7);
+  EXPECT_NEAR(rasterData->get(0,0,0), -2701.018664769188, 1.0e-7);
+  EXPECT_NEAR(rasterData->get(3,12,80), -1880.7781485604355, 1.0e-7);
+  EXPECT_NEAR(rasterData->get(7,31,92), -1491.0771375730401, 1.0e-7);
+  EXPECT_NEAR(rasterData->get(39,57,39), -604.78687230695505, 1.0e-7);
+  EXPECT_NEAR(rasterData->get(79,115,79), -14.501352507455977, 1.0e-7);
+  EXPECT_NEAR(rasterData->get(119,173,119), -631.7780323674524, 1.0e-7);
+  EXPECT_NEAR(rasterData->get(159,231,159), -2885.3566775373765, 1.0e-7);
 
   using V = std::vector<double>;
   using VV = std::vector<V>;
@@ -141,13 +141,13 @@ TEST_F(Seg3DIntegrationTest, ImplicitModel)
         [](double x) {return x > 0;} ); });
   };
 
-  EXPECT_EQ(0, numPositiveInSlice(rasterData[3]));
-  EXPECT_EQ(0, numPositiveInSlice(rasterData[80]));
-  EXPECT_EQ(954, numPositiveInSlice(rasterData[90]));
-  EXPECT_EQ(297, numPositiveInSlice(rasterData[100]));
-  EXPECT_EQ(0, numPositiveInSlice(rasterData[159]));
+  EXPECT_EQ(0, numPositiveInSlice(rasterData->slice(3)));
+  EXPECT_EQ(0, numPositiveInSlice(rasterData->slice(80)));
+  EXPECT_EQ(954, numPositiveInSlice(rasterData->slice(90)));
+  EXPECT_EQ(297, numPositiveInSlice(rasterData->slice(100)));
+  EXPECT_EQ(0, numPositiveInSlice(rasterData->slice(159)));
 
-  EXPECT_NEAR(rasterData[90][112][80], 1.297055274867603, 1.0e-7);
+  EXPECT_NEAR(rasterData->get(90, 112, 80), 1.297055274867603, 1.0e-7);
 
   // for (auto i = 0; i < rasterData.size(); ++i)
   // {

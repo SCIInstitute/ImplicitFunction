@@ -324,15 +324,7 @@ void RBFInterface::createRasterizedSurface()
   // In the first loop, we initialize the matrix with all values set to -100.
   // In the second loop, we change the values from -100 to the correct rasterData_ if the point in the domain described above.
 
-  this->rasterData_.resize(static_cast<int>(this->size_[0]));
-  for (int i = 0; i < this->size_[0]; i++)
-  {
-    this->rasterData_[i].resize(static_cast<int>(this->size_[1]));
-    for (int j = 0; j < this->size_[1]; j++)
-    {
-      this->rasterData_[i][j].resize(static_cast<int>(this->size_[2]), -100);
-    }
-  }
+  rasterData_.reset(new DataStorage(static_cast<size_t>(this->size_[0]), static_cast<size_t>(this->size_[1]), static_cast<size_t>(this->size_[2])));
 
   const auto spacingX = this->spacing_[0] * vec3::unitX;
   const auto spacingY = this->spacing_[1] * vec3::unitY;
@@ -348,7 +340,7 @@ void RBFInterface::createRasterizedSurface()
       {
         const auto kSpacing = k * spacingZ;
         vec3 location = this->origin_ + iSpacing + jSpacing + kSpacing;
-        this->rasterData_[i][j][k] = rbf.computeValue(location);
+        rasterData_->set(i, j, k, rbf.computeValue(location));
       }
     }
   }
@@ -448,4 +440,32 @@ vec3 RBFInterface::findNormalAxis(const int n)
       break;
   }
   return ret;
+}
+
+DataStorage::DataStorage(size_t xDim, size_t yDim, size_t zDim) : xDim_(xDim), yDim_(yDim), zDim_(zDim)
+{
+  data_.resize(xDim_);
+   for (int i = 0; i < xDim_; i++)
+   {
+     data_[i].resize(yDim_);
+     for (int j = 0; j < yDim_; j++)
+     {
+       data_[i][j].resize(zDim_, -100);
+     }
+   }
+}
+
+void DataStorage::set(size_t i, size_t j, size_t k, double val)
+{
+  data_[i][j][k] = val;
+}
+
+double DataStorage::get(size_t i, size_t j, size_t k) const
+{
+  return data_[i][j][k];
+}
+
+const std::vector<std::vector<double>>& DataStorage::slice(size_t i) const
+{
+  return data_[i];
 }
