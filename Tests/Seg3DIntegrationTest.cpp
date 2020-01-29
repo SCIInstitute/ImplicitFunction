@@ -30,6 +30,7 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <numeric>
 
 #include "RBFInterface.h"
 #include "vec3.h"
@@ -71,6 +72,10 @@ protected:
   //TODO: loop over kernels
   //enum Kernel { Gaussian, ThinPlate, MultiQuadratic };
   Kernel kernel_ {ThinPlate};
+
+  std::vector<double> expected_data_{-2701.018664769188, -1880.7781485604355,
+    -1491.0771375730401, -604.78687230695505, -14.501352507455977,
+     -631.7780323674524, -2885.3566775373765, 1.297055274867603};
 
   std::vector<vec3> modelPointData = {
     {329.27408562074709, -3.1975149796730840, 477.29595999999998 }
@@ -118,13 +123,51 @@ TEST_F(Seg3DIntegrationTest, ImplicitModel)
   EXPECT_EQ(rasterData[0].size(), 232);
   EXPECT_EQ(rasterData[0][0].size(), 160);
 
-  EXPECT_NEAR(rasterData[0][0][0], -2701.018664769188, 1.0e-7);
-  EXPECT_NEAR(rasterData[3][12][80], -1880.7781485604355, 1.0e-7);
-  EXPECT_NEAR(rasterData[7][31][92], -1491.0771375730401, 1.0e-7);
-  EXPECT_NEAR(rasterData[39][57][39], -604.78687230695505, 1.0e-7);
-  EXPECT_NEAR(rasterData[79][115][79], -14.501352507455977, 1.0e-7);
-  EXPECT_NEAR(rasterData[119][173][119], -631.7780323674524, 1.0e-7);
-  EXPECT_NEAR(rasterData[159][231][159], -2885.3566775373765, 1.0e-7);
+  EXPECT_NEAR(rasterData[0][0][0], expected_data_[0] , 1.0e-7);
+  EXPECT_NEAR(rasterData[3][12][80], expected_data_[1], 1.0e-7);
+  EXPECT_NEAR(rasterData[7][31][92], expected_data_[2], 1.0e-7);
+  EXPECT_NEAR(rasterData[39][57][39], expected_data_[3], 1.0e-7);
+  EXPECT_NEAR(rasterData[79][115][79], expected_data_[4], 1.0e-7);
+  EXPECT_NEAR(rasterData[119][173][119], expected_data_[5], 1.0e-7);
+  EXPECT_NEAR(rasterData[159][231][159], expected_data_[6], 1.0e-7);
+  EXPECT_NEAR(rasterData[90][112][80], expected_data_[7], 1.0e-7);
+
+  using V = std::vector<double>;
+  using VV = std::vector<V>;
+  using VVV = std::vector<VV>;
+
+  auto numPositiveInSlice = [](const VV& slice)
+  {
+    return std::accumulate(slice.begin(), slice.end(),0,
+      [](size_t acc, const V& v) {
+      return acc + std::count_if(
+        v.begin(),
+        v.end(),
+        [](double x) {return x > 0;} ); });
+  };
+
+  EXPECT_EQ(0, numPositiveInSlice(rasterData[3]));
+  EXPECT_EQ(0, numPositiveInSlice(rasterData[80]));
+  EXPECT_EQ(954, numPositiveInSlice(rasterData[90]));
+  EXPECT_EQ(297, numPositiveInSlice(rasterData[100]));
+  EXPECT_EQ(0, numPositiveInSlice(rasterData[159]));
+
+  // for (auto i = 0; i < rasterData.size(); ++i)
+  // {
+  //   std::cout << "#positive[" << i << "]:" <<
+  //   numPositiveInSlice(rasterData[i])
+  //   << std::endl;
+  // }
+
+  // for(auto i = 0; i < rasterData[90].size(); ++i)
+  //   for(auto j = 0; j < rasterData[90][i].size(); ++j)
+  //   {
+  //     if(rasterData[90][i][j] > 0)
+  //     {
+  //       std::cout << std::setprecision(16) << i << " " << j << " " << rasterData[90][i][j] << std::endl;
+  //       break;
+  //     }
+  //   }
 
   //TODO: convert to move semantics for seg3d datablock usage
   #if 0

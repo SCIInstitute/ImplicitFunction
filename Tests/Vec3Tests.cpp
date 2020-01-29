@@ -117,7 +117,7 @@ TEST_F(Vec3Test, GreaterThanEq)
 TEST_F(Vec3Test, GreaterThan)
 {
   ASSERT_TRUE( sample3Vec > sample1Vec );
-  ASSERT_FALSE( sample2Vec > sample1Vec );
+  ASSERT_TRUE( sample2Vec > sample1Vec );
 }
 
 TEST_F(Vec3Test, LessThanEq)
@@ -128,6 +128,5 @@ TEST_F(Vec3Test, LessThanEq)
 TEST_F(Vec3Test, LessThan)
 {
   ASSERT_TRUE( sample1Vec < sample3Vec );
-  ASSERT_FALSE( sample1Vec < sample2Vec );
+  ASSERT_TRUE( sample1Vec < sample2Vec );
 }
-
