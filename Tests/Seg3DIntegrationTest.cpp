@@ -127,18 +127,11 @@ TEST_F(Seg3DIntegrationTest, ImplicitModel)
   EXPECT_NEAR(rasterData->get(119,173,119), -631.7780323674524, 1.0e-7);
   EXPECT_NEAR(rasterData->get(159,231,159), -2885.3566775373765, 1.0e-7);
 
-  using V = std::vector<double>;
-  using VV = std::vector<V>;
-  //using VVV = std::vector<VV>;
-
-  auto numPositiveInSlice = [](const VV& slice)
+  auto numPositiveInSlice = [](const DataStorage::Slice& slice)
   {
-    return std::accumulate(slice.begin(), slice.end(),0,
-      [](size_t acc, const V& v) {
-      return acc + std::count_if(
-        v.begin(),
-        v.end(),
-        [](double x) {return x > 0;} ); });
+    return std::count_if(
+        slice.first, slice.second,
+        [](double x) {return x > 0;});
   };
 
   EXPECT_EQ(0, numPositiveInSlice(rasterData->slice(3)));

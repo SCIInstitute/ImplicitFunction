@@ -444,28 +444,21 @@ vec3 RBFInterface::findNormalAxis(const int n)
 
 DataStorage::DataStorage(size_t xDim, size_t yDim, size_t zDim) : xDim_(xDim), yDim_(yDim), zDim_(zDim)
 {
-  data_.resize(xDim_);
-   for (int i = 0; i < xDim_; i++)
-   {
-     data_[i].resize(yDim_);
-     for (int j = 0; j < yDim_; j++)
-     {
-       data_[i][j].resize(zDim_, -100);
-     }
-   }
+  data_.resize(xDim_ * yDim_ * zDim_, -100);
 }
 
 void DataStorage::set(size_t i, size_t j, size_t k, double val)
 {
-  data_[i][j][k] = val;
+  data_[i * yDim_ * zDim_ + j * zDim_ + k] = val;
 }
 
 double DataStorage::get(size_t i, size_t j, size_t k) const
 {
-  return data_[i][j][k];
+  return data_[i * yDim_ * zDim_ + j * zDim_ + k];
 }
 
-const std::vector<std::vector<double>>& DataStorage::slice(size_t i) const
+DataStorage::Slice DataStorage::slice(size_t i) const
 {
-  return data_[i];
+  auto begin = data_.begin() + i * yDim_ * zDim_;
+  return { begin, begin + yDim_ * zDim_ };
 }

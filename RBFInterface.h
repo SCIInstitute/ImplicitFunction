@@ -42,11 +42,13 @@ public:
 	size_t size1() const { return xDim_; }
 	size_t size2() const { return yDim_; }
 	size_t size3() const { return zDim_; }
-	const std::vector<std::vector<double>>& slice(size_t i) const;
+
+	using Slice = std::pair<std::vector<double>::const_iterator, std::vector<double>::const_iterator>;
+
+	Slice slice(size_t i) const;
 private:
 	size_t xDim_, yDim_, zDim_;
-	//TODO
-	std::vector<std::vector<std::vector<double>>> data_;
+	std::vector<double> data_;
 };
 
 typedef std::vector<size_t> IndexList;
