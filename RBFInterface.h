@@ -42,6 +42,9 @@ public:
 	size_t size1() const { return xDim_; }
 	size_t size2() const { return yDim_; }
 	size_t size3() const { return zDim_; }
+	size_t totalSize() const { return size1() * size2() * size3(); }
+
+	double* beginRawPtr() { return &data_[0]; }
 
 	using Slice = std::pair<std::vector<double>::const_iterator, std::vector<double>::const_iterator>;
 

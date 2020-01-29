@@ -329,6 +329,8 @@ void RBFInterface::createRasterizedSurface()
   const auto spacingX = this->spacing_[0] * vec3::unitX;
   const auto spacingY = this->spacing_[1] * vec3::unitY;
   const auto spacingZ = this->spacing_[2] * vec3::unitZ;
+  std::vector<vec3> locations(rasterData_->totalSize());
+  auto locationsPtr = &locations[0];
 
   for (int i = 0; i < this->size_[0]; ++i)
   {
@@ -340,10 +342,16 @@ void RBFInterface::createRasterizedSurface()
       {
         const auto kSpacing = k * spacingZ;
         vec3 location = this->origin_ + iSpacing + jSpacing + kSpacing;
-        rasterData_->set(i, j, k, rbf.computeValue(location));
+        *locationsPtr++ = location;
       }
     }
   }
+
+  locationsPtr = &locations[0];
+  const auto locationsEnd = locationsPtr + locations.size();
+  auto dataPtr = rasterData_->beginRawPtr();
+  for (; locationsPtr != locationsEnd; ++locationsPtr)
+    *dataPtr++ = rbf.computeValue(*locationsPtr);
 }
 
 // TODO: move this and findNormalAxis to new class?
