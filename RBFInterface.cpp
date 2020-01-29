@@ -31,6 +31,7 @@
 #include <cstdio>
 #include <exception>
 #include <stdexcept>
+#include <thread>
 
 #include <tetgen.h>
 
@@ -312,6 +313,34 @@ void RBFInterface::create2DSurface()
   createRasterizedSurface();
 }
 
+//TODO: move elsewhere
+class Parallel
+{
+public:
+  using IndexedTask = std::function<void(int)>;
+  static void RunTasks(IndexedTask task, int numProcs = NumCores())
+  {
+    std::vector<std::thread> threads;
+
+    for (int i = 0; i < numProcs; ++i)
+    {
+      threads.emplace_back(std::bind(task, i));
+    }
+
+    for (auto& thread : threads)
+    {
+      if (thread.joinable())
+      {
+        thread.join();
+      }
+    }
+  }
+  static unsigned int NumCores()
+  {
+    return std::thread::hardware_concurrency();
+  }
+};
+
 void RBFInterface::createRasterizedSurface()
 {
   RBF rbf(getSurfaceData(), kernel_);
@@ -320,6 +349,7 @@ void RBFInterface::createRasterizedSurface()
   // Construct RBFs
   rbf.computeFunction();  // TODO: throws exception if internal code used...
 
+  //TODO: move/remove comment
   // Fill the values into the vector.
   // In the first loop, we initialize the matrix with all values set to -100.
   // In the second loop, we change the values from -100 to the correct rasterData_ if the point in the domain described above.
@@ -329,29 +359,35 @@ void RBFInterface::createRasterizedSurface()
   const auto spacingX = this->spacing_[0] * vec3::unitX;
   const auto spacingY = this->spacing_[1] * vec3::unitY;
   const auto spacingZ = this->spacing_[2] * vec3::unitZ;
-  std::vector<vec3> locations(rasterData_->totalSize());
-  auto locationsPtr = &locations[0];
 
-  for (int i = 0; i < this->size_[0]; ++i)
+  const auto dataBegin = rasterData_->beginRawPtr();
+  const auto dataSize = rasterData_->totalSize();
+
+  const auto numTasks = Parallel::NumCores();
+  const auto coreSize = dataSize / numTasks;
+  const auto leftover = dataSize - numTasks * coreSize;
+
+  const auto sizeY = rasterData_->size2();
+  const auto sizeZ = rasterData_->size3();
+  const auto sliceSize = sizeY * sizeZ;
+
+  auto computeRange = [&](int beginIndex, int rangeSize)
   {
-    const auto iSpacing = i * spacingX;
-    for (int j = 0; j < this->size_[1]; ++j)
-    {
-      const auto jSpacing = j * spacingY;
-      for (int k = 0; k < this->size_[2]; ++k)
-      {
-        const auto kSpacing = k * spacingZ;
-        vec3 location = this->origin_ + iSpacing + jSpacing + kSpacing;
-        *locationsPtr++ = location;
-      }
-    }
-  }
+    auto output = dataBegin + beginIndex;
 
-  locationsPtr = &locations[0];
-  const auto locationsEnd = locationsPtr + locations.size();
-  auto dataPtr = rasterData_->beginRawPtr();
-  for (; locationsPtr != locationsEnd; ++locationsPtr)
-    *dataPtr++ = rbf.computeValue(*locationsPtr);
+    for (size_t q = 0; q < rangeSize; ++q)
+    {
+      const size_t i = (beginIndex + q) / sliceSize;
+      const size_t j = (beginIndex + q) % sliceSize / sizeZ;
+      const size_t k = (beginIndex + q) % sizeZ;
+      const vec3 location = this->origin_ + i * spacingX + j * spacingY + k * spacingZ;
+      *output++ = rbf.computeValue(location);
+    }
+  };
+
+  Parallel::RunTasks([&](int core) { computeRange(core * coreSize, coreSize); }, numTasks);
+
+  computeRange(numTasks * coreSize, leftover);
 }
 
 // TODO: move this and findNormalAxis to new class?
