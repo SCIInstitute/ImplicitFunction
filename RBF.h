@@ -54,10 +54,10 @@ enum DataReduction { All, Random };
 // 		auto end = std::chrono::high_resolution_clock::now();
 // 		std::cout << message_ << " took " << std::chrono::duration_cast<std::chrono::milliseconds>( end - start ).count() << " ms." << std::endl;
 // 	}
-private:
-	std::string message_;
-	std::chrono::high_resolution_clock::time_point start;
-};
+// private:
+// 	std::string message_;
+// 	std::chrono::high_resolution_clock::time_point start;
+// };
 
 class RBF
 {
