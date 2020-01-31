@@ -71,7 +71,7 @@ protected:
   bool compute2DConvexHull_ {false}, invertSeedOrder_ {false};
   //TODO: loop over kernels
   //enum Kernel { Gaussian, ThinPlate, MultiQuadratic };
-  Kernel kernel_ {Gaussian};
+  Kernel kernel_ {MultiQuadratic};
 
   std::vector<vec3> modelPointData = {
     {329.27408562074709, -3.1975149796730840, 477.29595999999998 }
@@ -126,7 +126,7 @@ TEST_F(Seg3DIntegrationTest, ImplicitModel)
   std::cout << "[79][115][79]: " << rasterData->get(79,115,79) << std::endl;
   std::cout << "[119][173][119]: " << rasterData->get(119,173,119) << std::endl;
   std::cout << "[159][231][159]: " << rasterData->get(159,231,159) << std::endl;
-  std::cout << "[100][112][80]: " << rasterData->get(100, 112, 80) << std::endl;
+  std::cout << "[90][112][80]: " << rasterData->get(90, 112, 80) << std::endl;
 
   auto numPositiveInSlice = [](const DataStorage::Slice& slice)
   {
@@ -136,22 +136,41 @@ TEST_F(Seg3DIntegrationTest, ImplicitModel)
   };
 
   //--------------------------------------------------
-  //Gaussian
-  EXPECT_NEAR(rasterData->get(0,0,0), -6.088228683562647, 1.0e-7);
-  EXPECT_NEAR(rasterData->get(3,12,80), -7.841450767712104, 1.0e-7);
-  EXPECT_NEAR(rasterData->get(7,31,92), -8.845107364439173, 1.0e-7);
-  EXPECT_NEAR(rasterData->get(39,57,39), -11.672241228659, 1.0e-7);
-  EXPECT_NEAR(rasterData->get(79,115,79), -43.54634065142454, 1.0e-7);
-  EXPECT_NEAR(rasterData->get(119,173,119), -18.83816267389648, 1.0e-7);
-  EXPECT_NEAR(rasterData->get(159,231,159), -7.980820627281901, 1.0e-7);
+  //Multi-MultiQuadratic
+  EXPECT_NEAR(rasterData->get(0,0,0), -138.03842056288, 1.0e-7);
+  EXPECT_NEAR(rasterData->get(3,12,80), -120.1975973501492, 1.0e-7);
+  EXPECT_NEAR(rasterData->get(7,31,92), -108.6472217098063, 1.0e-7);
+  EXPECT_NEAR(rasterData->get(39,57,39), -66.54577644795557, 1.0e-7);
+  EXPECT_NEAR(rasterData->get(79,115,79), -5.690114151792855, 1.0e-7);
+  EXPECT_NEAR(rasterData->get(119,173,119), -74.63731054662696, 1.0e-7);
+  EXPECT_NEAR(rasterData->get(159,231,159), -149.1237695418455, 1.0e-7);
 
   EXPECT_EQ(0, numPositiveInSlice(rasterData->slice(3)));
-  EXPECT_EQ(0, numPositiveInSlice(rasterData->slice(74)));
-  EXPECT_EQ(1152, numPositiveInSlice(rasterData->slice(87)));
-  EXPECT_EQ(2796, numPositiveInSlice(rasterData->slice(114)));
+  EXPECT_EQ(0, numPositiveInSlice(rasterData->slice(79)));
+  EXPECT_EQ(1179, numPositiveInSlice(rasterData->slice(92)));
+  EXPECT_EQ(23, numPositiveInSlice(rasterData->slice(103)));
   EXPECT_EQ(0, numPositiveInSlice(rasterData->slice(159)));
 
-  EXPECT_NEAR(rasterData->get(100,112,80), 158.3325831263064, 1.0e-6);
+  EXPECT_NEAR(rasterData->get(90,112,80), 3.197701062733557, 1.0e-7);
+  //--------------------------------------------------
+
+  //--------------------------------------------------
+  //Gaussian
+  // EXPECT_NEAR(rasterData->get(0,0,0), -6.088228683562647, 1.0e-7);
+  // EXPECT_NEAR(rasterData->get(3,12,80), -7.841450767712104, 1.0e-7);
+  // EXPECT_NEAR(rasterData->get(7,31,92), -8.845107364439173, 1.0e-7);
+  // EXPECT_NEAR(rasterData->get(39,57,39), -11.672241228659, 1.0e-7);
+  // EXPECT_NEAR(rasterData->get(79,115,79), -43.54634065142454, 1.0e-7);
+  // EXPECT_NEAR(rasterData->get(119,173,119), -18.83816267389648, 1.0e-7);
+  // EXPECT_NEAR(rasterData->get(159,231,159), -7.980820627281901, 1.0e-7);
+  //
+  // EXPECT_EQ(0, numPositiveInSlice(rasterData->slice(3)));
+  // EXPECT_EQ(0, numPositiveInSlice(rasterData->slice(74)));
+  // EXPECT_EQ(1152, numPositiveInSlice(rasterData->slice(87)));
+  // EXPECT_EQ(2796, numPositiveInSlice(rasterData->slice(114)));
+  // EXPECT_EQ(0, numPositiveInSlice(rasterData->slice(159)));
+  //
+  // EXPECT_NEAR(rasterData->get(100,112,80), 158.3325831263064, 1.0e-6);
   //--------------------------------------------------
 
   //--------------------------------------------------
@@ -173,12 +192,12 @@ TEST_F(Seg3DIntegrationTest, ImplicitModel)
   // EXPECT_NEAR(rasterData->get(90, 112, 80), 1.297055274867603, 1.0e-7);
   //--------------------------------------------------
 
-  // for (auto i = 0; i < rasterData->size1(); ++i)
-  // {
-  //   std::cout << "#positive[" << i << "]:" <<
-  //   numPositiveInSlice(rasterData->slice(i))
-  //   << std::endl;
-  // }
+  for (auto i = 0; i < rasterData->size1(); ++i)
+  {
+    std::cout << "#positive[" << i << "]:" <<
+    numPositiveInSlice(rasterData->slice(i))
+    << std::endl;
+  }
 
   // for(auto i = 0; i < rasterData[100]->size1(); ++i)
   //   for(auto j = 0; j < rasterData[100][i]->size2(); ++j)
