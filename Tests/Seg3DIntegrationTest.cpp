@@ -71,7 +71,7 @@ protected:
   bool compute2DConvexHull_ {false}, invertSeedOrder_ {false};
   //TODO: loop over kernels
   //enum Kernel { Gaussian, ThinPlate, MultiQuadratic };
-  Kernel kernel_ {ThinPlate};
+  Kernel kernel_ {Gaussian};
 
   std::vector<vec3> modelPointData = {
     {329.27408562074709, -3.1975149796730840, 477.29595999999998 }
@@ -119,28 +119,50 @@ TEST_F(Seg3DIntegrationTest, ImplicitModel)
   EXPECT_EQ(rasterData->size2(), 232);
   EXPECT_EQ(rasterData->size3(), 160);
 
-  EXPECT_NEAR(rasterData->get(0,0,0), -2701.018664769188, 1.0e-7);
-  EXPECT_NEAR(rasterData->get(3,12,80), -1880.7781485604355, 1.0e-7);
-  EXPECT_NEAR(rasterData->get(7,31,92), -1491.0771375730401, 1.0e-7);
-  EXPECT_NEAR(rasterData->get(39,57,39), -604.78687230695505, 1.0e-7);
-  EXPECT_NEAR(rasterData->get(79,115,79), -14.501352507455977, 1.0e-7);
-  EXPECT_NEAR(rasterData->get(119,173,119), -631.7780323674524, 1.0e-7);
-  EXPECT_NEAR(rasterData->get(159,231,159), -2885.3566775373765, 1.0e-7);
+  std::cout << "[0][0][0]: " << std::setprecision(16) << rasterData->get(0,0,0) << std::endl;
+  std::cout << "[3][12][80]: " << rasterData->get(3,12,80) << std::endl;
+  std::cout << "[7][31][92]: " << rasterData->get(7,31,92) << std::endl;
+  std::cout << "[39][57][39]: " << rasterData->get(39,57,39) << std::endl;
+  std::cout << "[79][115][79]: " << rasterData->get(79,115,79) << std::endl;
+  std::cout << "[119][173][119]: " << rasterData->get(119,173,119) << std::endl;
+  std::cout << "[159][231][159]: " << rasterData->get(159,231,159) << std::endl;
 
-  auto numPositiveInSlice = [](const DataStorage::Slice& slice)
-  {
-    return std::count_if(
-        slice.first, slice.second,
-        [](double x) {return x > 0;});
-  };
+  //--------------------------------------------------
+  //Gaussian
+  EXPECT_NEAR(rasterData->get(0,0,0), -6.088228683562647, 1.0e-7);
+  EXPECT_NEAR(rasterData->get(3,12,80), -7.841450767712104, 1.0e-7);
+  EXPECT_NEAR(rasterData->get(7,31,92), -8.845107364439173, 1.0e-7);
+  EXPECT_NEAR(rasterData->get(39,57,39), -11.672241228659, 1.0e-7);
+  EXPECT_NEAR(rasterData->get(79,115,79), -43.54634065142454, 1.0e-7);
+  EXPECT_NEAR(rasterData->get(119,173,119), -18.83816267389648, 1.0e-7);
+  EXPECT_NEAR(rasterData->get(159,231,159), -7.980820627281901, 1.0e-7);
+  //--------------------------------------------------
 
-  EXPECT_EQ(0, numPositiveInSlice(rasterData->slice(3)));
-  EXPECT_EQ(0, numPositiveInSlice(rasterData->slice(80)));
-  EXPECT_EQ(954, numPositiveInSlice(rasterData->slice(90)));
-  EXPECT_EQ(297, numPositiveInSlice(rasterData->slice(100)));
-  EXPECT_EQ(0, numPositiveInSlice(rasterData->slice(159)));
-
-  EXPECT_NEAR(rasterData->get(90, 112, 80), 1.297055274867603, 1.0e-7);
+  //--------------------------------------------------
+  //Thin Plate
+  // EXPECT_NEAR(rasterData->get(0,0,0), -2701.018664769188, 1.0e-7);
+  // EXPECT_NEAR(rasterData->get(3,12,80), -1880.7781485604355, 1.0e-7);
+  // EXPECT_NEAR(rasterData->get(7,31,92), -1491.0771375730401, 1.0e-7);
+  // EXPECT_NEAR(rasterData->get(39,57,39), -604.78687230695505, 1.0e-7);
+  // EXPECT_NEAR(rasterData->get(79,115,79), -14.501352507455977, 1.0e-7);
+  // EXPECT_NEAR(rasterData->get(119,173,119), -631.7780323674524, 1.0e-7);
+  // EXPECT_NEAR(rasterData->get(159,231,159), -2885.3566775373765, 1.0e-7);
+  //
+  // auto numPositiveInSlice = [](const DataStorage::Slice& slice)
+  // {
+  //   return std::count_if(
+  //       slice.first, slice.second,
+  //       [](double x) {return x > 0;});
+  // };
+  //
+  // EXPECT_EQ(0, numPositiveInSlice(rasterData->slice(3)));
+  // EXPECT_EQ(0, numPositiveInSlice(rasterData->slice(80)));
+  // EXPECT_EQ(954, numPositiveInSlice(rasterData->slice(90)));
+  // EXPECT_EQ(297, numPositiveInSlice(rasterData->slice(100)));
+  // EXPECT_EQ(0, numPositiveInSlice(rasterData->slice(159)));
+  //
+  // EXPECT_NEAR(rasterData->get(90, 112, 80), 1.297055274867603, 1.0e-7);
+  //--------------------------------------------------
 
   // for (auto i = 0; i < rasterData.size(); ++i)
   // {
