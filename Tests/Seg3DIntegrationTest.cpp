@@ -119,14 +119,14 @@ TEST_F(Seg3DIntegrationTest, ImplicitModel)
   EXPECT_EQ(rasterData->size2(), 232);
   EXPECT_EQ(rasterData->size3(), 160);
 
-  std::cout << "[0][0][0]: " << std::setprecision(16) << rasterData->get(0,0,0) << std::endl;
-  std::cout << "[3][12][80]: " << rasterData->get(3,12,80) << std::endl;
-  std::cout << "[7][31][92]: " << rasterData->get(7,31,92) << std::endl;
-  std::cout << "[39][57][39]: " << rasterData->get(39,57,39) << std::endl;
-  std::cout << "[79][115][79]: " << rasterData->get(79,115,79) << std::endl;
-  std::cout << "[119][173][119]: " << rasterData->get(119,173,119) << std::endl;
-  std::cout << "[159][231][159]: " << rasterData->get(159,231,159) << std::endl;
-  std::cout << "[90][112][80]: " << rasterData->get(90, 112, 80) << std::endl;
+  // std::cout << "[0][0][0]: " << std::setprecision(16) << rasterData->get(0,0,0) << std::endl;
+  // std::cout << "[3][12][80]: " << rasterData->get(3,12,80) << std::endl;
+  // std::cout << "[7][31][92]: " << rasterData->get(7,31,92) << std::endl;
+  // std::cout << "[39][57][39]: " << rasterData->get(39,57,39) << std::endl;
+  // std::cout << "[79][115][79]: " << rasterData->get(79,115,79) << std::endl;
+  // std::cout << "[119][173][119]: " << rasterData->get(119,173,119) << std::endl;
+  // std::cout << "[159][231][159]: " << rasterData->get(159,231,159) << std::endl;
+  // std::cout << "[90][112][80]: " << rasterData->get(90, 112, 80) << std::endl;
 
   auto numPositiveInSlice = [](const DataStorage::Slice& slice)
   {
@@ -192,12 +192,12 @@ TEST_F(Seg3DIntegrationTest, ImplicitModel)
   // EXPECT_NEAR(rasterData->get(90, 112, 80), 1.297055274867603, 1.0e-7);
   //--------------------------------------------------
 
-  for (auto i = 0; i < rasterData->size1(); ++i)
-  {
-    std::cout << "#positive[" << i << "]:" <<
-    numPositiveInSlice(rasterData->slice(i))
-    << std::endl;
-  }
+  // for (auto i = 0; i < rasterData->size1(); ++i)
+  // {
+  //   std::cout << "#positive[" << i << "]:" <<
+  //   numPositiveInSlice(rasterData->slice(i))
+  //   << std::endl;
+  // }
 
   // for(auto i = 0; i < rasterData[100]->size1(); ++i)
   //   for(auto j = 0; j < rasterData[100][i]->size2(); ++j)
