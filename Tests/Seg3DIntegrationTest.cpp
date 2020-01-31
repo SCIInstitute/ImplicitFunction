@@ -151,7 +151,7 @@ TEST_F(Seg3DIntegrationTest, ImplicitModel)
   EXPECT_EQ(2796, numPositiveInSlice(rasterData->slice(114)));
   EXPECT_EQ(0, numPositiveInSlice(rasterData->slice(159)));
 
-  EXPECT_NEAR(rasterData->get(100,112,80), 158.3325831263064, 1.0e-7);
+  EXPECT_NEAR(rasterData->get(100,112,80), 158.3325831263064, 1.0e-6);
   //--------------------------------------------------
 
   //--------------------------------------------------
