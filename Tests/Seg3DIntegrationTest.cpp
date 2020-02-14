@@ -70,7 +70,7 @@ protected:
   //TODO: loop over these bools
   bool compute2DConvexHull_ {false}, invertSeedOrder_ {false};
   //TODO: loop over kernels
-  //enum Kernel { Gaussian, ThinPlate, MultiQuadratic };
+  //enum Kernel { Gaussian, ThinPlate, MultiQuadratic, InverseMultiQuadratic };
   Kernel kernel_ {ThinPlate};
 
   std::vector<vec3> modelPointData = {
