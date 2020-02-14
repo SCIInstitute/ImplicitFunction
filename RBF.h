@@ -39,7 +39,7 @@
 #include <memory>
 #include <iostream>
 
-enum Kernel { Gaussian, ThinPlate, MultiQuadratic };
+enum Kernel { Gaussian, ThinPlate, MultiQuadratic, InverseMultiQuadratic };
 enum Acceleration { None, FastMultipole };
 enum DataReduction { All, Random };
 
