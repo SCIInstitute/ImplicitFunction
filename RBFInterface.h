@@ -67,7 +67,7 @@ public:
                const bool invertSeedOrder=false, Kernel kernel=ThinPlate);
 
 	double getThresholdValue() const { return thresholdValue_; }
-  const DataStorage* getRasterData() const { return rasterData_.get(); }
+  const DataStorage getRasterData() const { return rasterData_.get(); }
   const ScatteredData* getSurfaceData() const { return this->surfaceData_.get(); }
 
 private:
