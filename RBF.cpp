@@ -264,23 +264,28 @@ double RBF::computeSumOfAllKernels(const vec3& b) const
 
 double RBF::computeRadialFunctionOnSquaredDistance(double r2) const
 {
-  //TODO: optimize this function
-  static constexpr double C = 0.1;
-  static constexpr double C2 = C*C;
+  // static constexpr double C = 0.1;
+  // static constexpr double C2 = C*C;
+  //
+  // static constexpr double SCALE = 0.01;
+  // static constexpr double SCALE2 = SCALE*SCALE;
 
-  static constexpr double SCALE = 0.01;
-  static constexpr double SCALE2 = SCALE*SCALE;
+  //TODO: have a user parameter come into this function for each kernel
+  //kernel width
 
   switch(kernel_)
   {
-    case Gaussian:
-      return 1.0/sqrt(r2 * SCALE2 + C2);
-      break;
     case ThinPlate:
-      return r2 * log(sqrt(r2) + C);
+      return r2 * log(sqrt(r2));
+      break;
+    case Gaussian:
+      return exp(-r2);
+      break;
+    case InverseMultiQuadratic:
+      return 1.0/sqrt(1 + r2);
       break;
     case MultiQuadratic:
-      return sqrt(r2 + C2);
+      return sqrt(1 + r2);
     default:
       return sqrt(r2);
       break;
