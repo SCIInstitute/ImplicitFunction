@@ -264,11 +264,10 @@ double RBF::computeSumOfAllKernels(const vec3& b) const
 
 double RBF::computeRadialFunctionOnSquaredDistance(double r2) const
 {
-  // static constexpr double C = 0.1;
-  // static constexpr double C2 = C*C;
-  //
-  // static constexpr double SCALE = 0.01;
-   static constexpr double SCALE2 = SCALE*SCALE;
+  static constexpr double C = 0.1;
+  static constexpr double C2 = C*C;
+  static constexpr double SCALE = 0.01;
+  static constexpr double SCALE2 = SCALE*SCALE;
 
   //TODO: have a user parameter come into this function for each kernel
   //kernel width
