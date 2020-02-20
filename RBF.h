@@ -43,22 +43,6 @@ enum Kernel { Gaussian, ThinPlate, MultiQuadratic, InverseMultiQuadratic };
 enum Acceleration { None, FastMultipole };
 enum DataReduction { All, Random };
 
-// struct ScopedTimer
-// {
-// 	explicit ScopedTimer(const char* message) : message_(message)
-// 	{
-// 		start = std::chrono::high_resolution_clock::now();
-// 	}
-// 	~ScopedTimer()
-// 	{
-// 		auto end = std::chrono::high_resolution_clock::now();
-// 		std::cout << message_ << " took " << std::chrono::duration_cast<std::chrono::milliseconds>( end - start ).count() << " ms." << std::endl;
-// 	}
-// private:
-// 	std::string message_;
-// 	std::chrono::high_resolution_clock::time_point start;
-// };
-
 class RBF
 {
 public:

@@ -277,18 +277,14 @@ double RBF::computeRadialFunctionOnSquaredDistance(double r2) const
   {
     case ThinPlate:
       return r2 * log(sqrt(r2));
-      break;
     case Gaussian:
       return exp(-r2);
-      break;
     case InverseMultiQuadratic:
       return 1.0/sqrt(1 + r2);
-      break;
     case MultiQuadratic:
       return sqrt(1 + r2);
     default:
       return sqrt(r2);
-      break;
   }
   return 0;
 }
