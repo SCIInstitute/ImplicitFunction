@@ -268,7 +268,7 @@ double RBF::computeRadialFunctionOnSquaredDistance(double r2) const
   // static constexpr double C2 = C*C;
   //
   // static constexpr double SCALE = 0.01;
-  // static constexpr double SCALE2 = SCALE*SCALE;
+   static constexpr double SCALE2 = SCALE*SCALE;
 
   //TODO: have a user parameter come into this function for each kernel
   //kernel width
@@ -278,7 +278,7 @@ double RBF::computeRadialFunctionOnSquaredDistance(double r2) const
     case ThinPlate:
       return r2 * log(sqrt(r2));
     case Gaussian:
-      return exp(-r2);
+      return exp(-r2 * SCALE2);
     case InverseMultiQuadratic:
       return 1.0/sqrt(1 + r2);
     case MultiQuadratic:
