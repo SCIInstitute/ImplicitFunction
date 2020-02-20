@@ -275,9 +275,9 @@ double RBF::computeRadialFunctionOnSquaredDistance(double r2) const
   switch(kernel_)
   {
     case ThinPlate:
-      return r2 * log(sqrt(r2));
+      return r2 * log(sqrt(r2) + C);
     case Gaussian:
-      return exp(-r2 * 2);
+      return exp(-r2 * 20);
     case InverseMultiQuadratic:
       return 1.0/sqrt(1 + r2);
     case MultiQuadratic:
