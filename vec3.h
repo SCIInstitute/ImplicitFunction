@@ -62,6 +62,8 @@ public:
   vec3& operator*=(double c);
   vec3& operator/=(double c);
 
+  const double* getPtr() const { return data_; }
+
   double& operator[](const size_t);
   double  operator[](const size_t) const;
 

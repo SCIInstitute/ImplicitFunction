@@ -40,6 +40,7 @@
 #include <utility>
 #include <algorithm>
 #include <iostream>
+#include <numeric>
 
 using std::vector;
 using std::pair;
@@ -108,7 +109,6 @@ void RBF::computeFunction()
         this->data_.surfacePoints_[1].push_back(this->completeData_->surfacePoints_[1][j]);
         this->data_.surfacePoints_[2].push_back(this->completeData_->surfacePoints_[2][j]);
         this->data_.fnc_.push_back(this->completeData_->fnc_[j]);
-        //printf("%d %lf %lf %lf %lf\n", j, this->completeData_->surfacePoints_[0][j],this->completeData_->surfacePoints_[1][j],this->completeData_->surfacePoints_[2][j],this->completeData_->fnc_[j]);
       }
 
       vector<pair<double, int> > error;
@@ -128,11 +128,9 @@ void RBF::computeFunction()
         }
         for (int k = 0; k < 5; k++)
         {
-          //printf("Error %d: %lf\n", k, error[k].first);
           if (error[k].first > EPSILON || error[k].first != error[k].first)
           {
             int j = error[k].second;
-            //printf("Adding data point %d\n", j);
             added[j] = true;
             this->data_.surfacePoints_[0].push_back(this->completeData_->surfacePoints_[0][j]);
             this->data_.surfacePoints_[1].push_back(this->completeData_->surfacePoints_[1][j]);
@@ -141,10 +139,9 @@ void RBF::computeFunction()
           }
         }
       }
-      //printf("Total no. of data_ point: %d\n",  this->data_->fnc_.size()); fflush(stdout);
       break;
   }
-  //data_.updateSurfacePointsList();
+  data_.updateSurfacePointsList();
 }
 
 void RBF::computeFunctionForData()
@@ -159,28 +156,23 @@ void RBF::computeFunctionForData()
       // TODO: move to function
       const int N = static_cast<int>( this->data_.fnc_.size() );
 
+      //std::copy(this->data_.fnc_.begin(), this->data_.fnc_.end(), std::ostream_iterator<double>(std::cout, " "));
+
 #ifndef NDEBUG
       printf("Solving linear equations: \n"); fflush(stdout);
 #endif
 
       Eigen::VectorXd b = Eigen::VectorXd::Map(&this->data_.fnc_[0], N);
       Eigen::VectorXd x(N);
-      //Eigen::SparseMatrix< double > A(N, N);
       Eigen::MatrixXd A(N, N);
       for (int i = 0; i < N; i++)
       {
         for (int j = 0; j < N; j++)
         {
           double val = computeKernel(i, j);
-//#ifndef NDEBUG
-//            printf("%d %d ", i,j); fflush(stdout);
-//            printf("%lf\n", val); fflush(stdout);
-//#endif
-          //A.insert(i, j) = val;
           A(i, j) = val;
         }
       }
-      //Eigen::BiCGSTAB< Eigen::SparseMatrix<double> > solver;
       Eigen::BiCGSTAB< Eigen::MatrixXd > solver;
       solver.setTolerance(1.0e-10);
       solver.setMaxIterations(5000);
@@ -194,13 +186,18 @@ void RBF::computeFunctionForData()
 
       this->coeff_.resize(x.size());
       Eigen::VectorXd::Map(&this->coeff_[0], x.size()) = x;
-      printf("Done\n"); fflush(stdout);
+      printf("Done\n");
+      //std::cout << "coeff_ size: " << coeff_.size() << std::endl;
+      kernelBufferSize_ = coeff_.size();
+      coeffPtr_ = &coeff_[0];
+      //std::copy(coeff_.begin(), coeff_.end(), std::ostream_iterator<double>(std::cout, " "));
+      fflush(stdout);
 
       break;
   }
 }
 
-double RBF::computeValue(const vec3& x)
+double RBF::computeValue(const vec3& x) const
 {
   switch(this->acceleration_)
   {
@@ -208,11 +205,7 @@ double RBF::computeValue(const vec3& x)
       return fmmComputeValue(x);
     case None:
     default:
-      // TODO: move to function
-      double sum = 0;
-      for(int i = 0; i < this->coeff_.size(); i++)
-        sum += this->coeff_[i]*computeKernel(i, x);
-      return sum;
+      return computeSumOfAllKernels(x);
   }
 }
 
@@ -230,7 +223,7 @@ void RBF::computeErrorForData(vector<pair<double, int> > &error)
   }
 }
 
-double RBF::computeKernel(int i, int j)
+double RBF::computeKernel(int i, int j) const
 {
   double r2 = (this->data_.surfacePoints_[0][i] - this->data_.surfacePoints_[0][j]) *
                    (this->data_.surfacePoints_[0][i] - this->data_.surfacePoints_[0][j]) +  // x
@@ -242,22 +235,34 @@ double RBF::computeKernel(int i, int j)
   return computeRadialFunctionOnSquaredDistance(r2);
 }
 
-double RBF::computeKernel(int i, const vec3& b)
+double RBF::computeKernel(int i, const vec3& b) const
 {
-  //auto point = data_.surfacePoint2(i);
-  auto pointX = this->data_.surfacePoints_[0][i];
-  auto pointY = this->data_.surfacePoints_[1][i];
-  auto pointZ = this->data_.surfacePoints_[2][i];
-
-  auto xDiff = pointX - b[0];
-  auto yDiff = pointY - b[1];
-  auto zDiff = pointZ - b[2];
-  double r2 = xDiff * xDiff + yDiff * yDiff + zDiff * zDiff;
-
-  return computeRadialFunctionOnSquaredDistance(r2);
+  return computeRadialFunctionOnSquaredDistance(data_.squaredDistanceFrom(i, b));
 }
 
-double RBF::computeRadialFunctionOnSquaredDistance(double r2)
+double RBF::computeSumOfAllKernels(const vec3& b) const
+{
+  const auto bPtr = b.getPtr();
+  const auto fromX = bPtr[0];
+  const auto fromY = bPtr[1];
+  const auto fromZ = bPtr[2];
+
+  double sum = 0;
+
+  for (size_t i = 0; i < kernelBufferSize_; ++i)
+  {
+    const auto baseIndex = 3*i;
+
+    const auto xDiff = data_.surfacePointsFlattenedPtr_[baseIndex] - fromX;
+    const auto yDiff = data_.surfacePointsFlattenedPtr_[baseIndex + 1] - fromY;
+    const auto zDiff = data_.surfacePointsFlattenedPtr_[baseIndex + 2] - fromZ;
+
+    sum += coeffPtr_[i] * computeRadialFunctionOnSquaredDistance(xDiff * xDiff + yDiff * yDiff + zDiff * zDiff);
+  }
+  return sum;
+}
+
+double RBF::computeRadialFunctionOnSquaredDistance(double r2) const
 {
   //TODO: optimize this function
   static constexpr double C = 0.1;
@@ -270,15 +275,12 @@ double RBF::computeRadialFunctionOnSquaredDistance(double r2)
   {
     case Gaussian:
       return 1.0/sqrt(r2 * SCALE2 + C2);
-      break;
     case ThinPlate:
       return r2 * log(sqrt(r2) + C);
-      break;
     case MultiQuadratic:
       return sqrt(r2 + C2);
     default:
       return sqrt(r2);
-      break;
   }
   return 0;
 }
@@ -412,14 +414,14 @@ void RBF::fmmBuildTree(vector<int> &myPoints, BHNode *myNode)
   }
 }
 
-double RBF::fmmComputeValue(const vec3& x)
+double RBF::fmmComputeValue(const vec3& x) const
 {
   double val = fmmComputeValueRecurse(x, fmm_->tree);
   return val;
 }
 
 
-double RBF::fmmComputeValueRecurse(const vec3& x, BHNode *myNode)
+double RBF::fmmComputeValueRecurse(const vec3& x, BHNode *myNode) const
 {
   double val = 0;
 
@@ -449,7 +451,7 @@ double RBF::fmmComputeValueRecurse(const vec3& x, BHNode *myNode)
   return val;
 }
 
-double RBF::fmmComputeKernel(const vec3& b, BHNode *myNode)
+double RBF::fmmComputeKernel(const vec3& b, BHNode *myNode) const
 {
   double r = length(myNode->center_ - b);
 

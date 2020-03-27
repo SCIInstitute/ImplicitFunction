@@ -131,7 +131,7 @@ TEST_F(ConvexHull3DTest, PrismBasicInterfaceTest)
   double threshold = rbfInterface.getThresholdValue();
   ASSERT_EQ( threshold, 0 ); // default
 
-  const DataStorage rasterData = rbfInterface.getRasterData();
+    const auto rasterData = rbfInterface.getRasterData();
 
 //  std::string filename("testPrism.nrrd");
 //  std::cout << "Writing file '" << filename << "'" << std::endl;
@@ -252,7 +252,7 @@ TEST_F(ConvexHull3DTest, PrismWithInternalPointBasicInterfaceTest)
   double threshold = rbfInterface.getThresholdValue();
   ASSERT_EQ( threshold, 0 ); // default
 
-  const DataStorage rasterData = rbfInterface.getRasterData();
+  const auto rasterData = rbfInterface.getRasterData();
 
 //  std::string filename("testPrismWithInternalPoint.nrrd");
 //  std::cout << "Writing file '" << filename << "'" << std::endl;

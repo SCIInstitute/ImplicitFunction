@@ -33,7 +33,27 @@
 #include "vec3.h"
 #include "RBF.h"
 
-typedef std::vector< std::vector< std::vector<double> > > DataStorage;
+class DataStorage
+{
+public:
+	DataStorage(size_t xDim, size_t yDim, size_t zDim);
+	void set(size_t i, size_t j, size_t k, double val);
+	double get(size_t i, size_t j, size_t k) const;
+	size_t size1() const { return xDim_; }
+	size_t size2() const { return yDim_; }
+	size_t size3() const { return zDim_; }
+	size_t totalSize() const { return size1() * size2() * size3(); }
+
+	double* beginRawPtr() { return &data_[0]; }
+
+	using Slice = std::pair<std::vector<double>::const_iterator, std::vector<double>::const_iterator>;
+
+	Slice slice(size_t i) const;
+private:
+	size_t xDim_, yDim_, zDim_;
+	std::vector<double> data_;
+};
+
 typedef std::vector<size_t> IndexList;
 typedef std::vector<axis_t> AxisList;
 
@@ -47,7 +67,7 @@ public:
                const bool invertSeedOrder=false, Kernel kernel=ThinPlate);
 
 	double getThresholdValue() const { return thresholdValue_; }
-  const DataStorage getRasterData() const { return rasterData_; }
+  const DataStorage* getRasterData() { return rasterData_.get(); }
   const ScatteredData* getSurfaceData() const { return this->surfaceData_.get(); }
 
 private:
@@ -59,7 +79,7 @@ private:
   void createRasterizedSurface();
 
   std::unique_ptr<ScatteredData> surfaceData_;
-  DataStorage rasterData_;
+  std::unique_ptr<DataStorage> rasterData_;
 
   const double thresholdValue_;
   const vec3 origin_;

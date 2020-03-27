@@ -36,7 +36,6 @@
 
 using std::vector;
 
-//int ScatteredData::myAxis = 2;
 ScatteredData::ScatteredData() :
   origSize_(0)
 {
@@ -60,70 +59,8 @@ void ScatteredData::setData(const std::vector<double>& points_x,
                             const std::vector<double>& func)
 {
   this->surfacePoints_[X] = points_x; this->surfacePoints_[Y] = points_y; this->surfacePoints_[Z] = points_z; this->fnc_ = func;
-
-  //for(int i=0; i<a.size(); i++)
-  //{
-  //	printf("%d %d\n", this->surfacePoints_[0][i], a[i]); fflush(stdout);
-  //}
   this->origSize_ = points_x.size();
-
-// centroid only used for finding spherical normal (code not used)
-//  vec3 temp(0,0,0);
-//  for (int i = 0; i < this->origSize_; i++)
-//  {
-//    for(int j = 0; j < 3; j++)
-//    {
-//      temp[j] += this->surfacePoints_[j][i];
-//    }
-//  }
-//  for (int j = 0; j < 3; j++)
-//    this->centroid_[j] = temp[j] / this->origSize_;
 }
-
-//void ScatteredData::computeOrdering()
-//{
-//  SDmultisort();
-//  //printf("Sorted\n");
-//  //for(int i=0; i<inputData_.size(); i++)
-//  //	printf("%d %lf %lf %lf\n", i, inputData_[i][0], inputData_[i][0], inputData_[i][2]);
-//
-//  int count = 0;
-//  //printf("%d %d\n", inputData_.size(), this->surfacePoints_[0].size()); fflush(stdout);
-//  while(count != this->surfacePoints_[0].size())
-//  {
-//    int start = count;
-//    //printf("%lf %d\n", inputData_[count][myAxis], this->surfacePoints_[0].size());
-//    while(count != this->surfacePoints_[0].size())
-//    {
-//      //printf("%lf %lf %lf\n", inputData_[count][myAxis], inputData_[start][myAxis],fabs(inputData_[count][myAxis]-inputData_[start][myAxis]));
-//      count++;
-//      axis_t sortingAxis = this->axisInformation_[start];
-//      if(this->axisInformation_[count]!=this->axisInformation_[start])
-//        break;
-//      if(fabs(inputData_[count][sortingAxis]-inputData_[start][sortingAxis]) > 1e-6)
-//        break;
-//    }
-//    int end = count-1;
-//    printf("BCD Start: %d End %d\n", start, end);
-//    int myAxis;
-//    switch(this->axisInformation_[start])
-//    {
-//      case X: myAxis = 0; break;
-//      case Y: myAxis = 1; break;
-//      case Z: myAxis = 2; break;
-//
-//    }
-//    ETSP reorder(inputData_, start, end, myAxis);
-//    for(int i=start; i<=end; i++)
-//    {
-//      inputData_[i][0] = this->surfacePoints_[0][i]=reorder.data[reorder.order[i-start]][0];
-//      inputData_[i][1] = this->surfacePoints_[1][i]=reorder.data[reorder.order[i-start]][1];
-//      inputData_[i][2] = this->surfacePoints_[2][i]=reorder.data[reorder.order[i-start]][2];
-//    }
-//  }
-//  //for(int i=0; i<inputData_.size(); i++)
-//  //	printf("%lf %lf %lf\n", inputData_[i][0], inputData_[i][0], inputData_[i][2]);
-//}
 
 void ScatteredData::SDsort()
 {
@@ -264,10 +201,6 @@ void ScatteredData::compute2DHull()
   //rewrite everything
   std::vector<double> newx[3], tmp[3], newfnc;
 
-  //std::vector<vec3> myNewData;
-  //std::vector<axis_t> newAxisInformation;
-  //printf("Rewriting everything\n");
-
   this->updatedAxisInformation_.clear();
 
   for(int i = 0; i < reorderedData.size(); i++)
@@ -328,14 +261,9 @@ void ScatteredData::compute2DHull()
   for(int i = 0; i < this->surfacePoints_[0].size(); i++)
   	printf("%d %lf %lf %lf\n", i, this->surfacePoints_[0][i], this->surfacePoints_[1][i], this->surfacePoints_[2][i]);
 
-//  for (int i = 0; i < this->convexHullData_.size(); i++)
-//    printf("%d %lf %lf %lf\n", i, this->convexHullData_[i][0], this->convexHullData_[i][1], this->convexHullData_[i][2]);
-
   printf("Points inside convex hull\n");
   for (int i = 0; i < this->leftovers_[0].size(); i++)
     printf("%d %lf %lf %lf\n", i, this->leftovers_[0][i], this->leftovers_[1][i], this->leftovers_[2][i]);
-
-//  this->origSize_ = this->inputData_.size();
 
   // TODO: this gets overwritten in RBFInterface???
   this->origSize_ = this->convexHullData_.size();
@@ -346,17 +274,27 @@ vec3 ScatteredData::surfacePoint(size_t i) const
   return { surfacePoints_[X][i], surfacePoints_[Y][i], surfacePoints_[Z][i] };
 }
 
-vec3 ScatteredData::surfacePoint2(size_t i) const
-{
-  return surfacePointsCombined_[i];
-}
-
 void ScatteredData::updateSurfacePointsList()
 {
-  surfacePointsCombined_.clear();
-  surfacePointsCombined_.reserve(surfacePoints_[X].size());
+  surfacePointsFlattened_.reserve(surfacePoints_[X].size() * 3);
   for (size_t i = 0; i < surfacePoints_[X].size(); ++i)
   {
-    surfacePointsCombined_.emplace_back(surfacePoints_[X][i], surfacePoints_[Y][i], surfacePoints_[Z][i]);
+    surfacePointsFlattened_.push_back(surfacePoints_[X][i]);
+    surfacePointsFlattened_.push_back(surfacePoints_[Y][i]);
+    surfacePointsFlattened_.push_back(surfacePoints_[Z][i]);
   }
+  surfacePointsFlattenedPtr_ = &surfacePointsFlattened_[0];
+}
+
+double ScatteredData::squaredDistanceFrom(size_t i, const vec3& from) const
+{
+  const auto baseIndex = 3*i;
+  const auto pointX = surfacePointsFlattened_[baseIndex];
+  const auto pointY = surfacePointsFlattened_[baseIndex + 1];
+  const auto pointZ = surfacePointsFlattened_[baseIndex + 2];
+
+  auto xDiff = pointX - from[0];
+  auto yDiff = pointY - from[1];
+  auto zDiff = pointZ - from[2];
+  return xDiff * xDiff + yDiff * yDiff + zDiff * zDiff;
 }

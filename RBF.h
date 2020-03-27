@@ -37,6 +37,7 @@
 #include <utility>
 #include <chrono>
 #include <memory>
+#include <iostream>
 
 enum Kernel { Gaussian, ThinPlate, MultiQuadratic };
 enum Acceleration { None, FastMultipole };
@@ -51,7 +52,7 @@ public:
 	void setDataReduction(DataReduction myDataReduction);
 
 	void computeFunction();
-	double computeValue(const vec3& x);
+	double computeValue(const vec3& x) const;
 
 private:
 	const ScatteredData* completeData_;
@@ -66,16 +67,20 @@ private:
 	void computeFunctionForData(); // throws std::runtime_error
 	void computeErrorForData(std::vector<std::pair<double, int> > &error);
 
-	double computeKernel(int i, int j);
-	double computeKernel(int i, const vec3& b);
-	double computeRadialFunctionOnSquaredDistance(double r2);
+	double computeKernel(int i, int j) const;
+	double computeKernel(int i, const vec3& b) const;
+	double computeRadialFunctionOnSquaredDistance(double r2) const;
+	double computeSumOfAllKernels(const vec3& b) const;
+
+	mutable double* coeffPtr_;
+	mutable size_t kernelBufferSize_;
 
 	void fmmBuildTree();
 	void fmmPrintTree(BHNode* myNode, int stack);
 	void fmmBuildTree(std::vector<int> &myPoints, BHNode *myNode);
-	double fmmComputeValue(const vec3& x);
-	double fmmComputeValueRecurse(const vec3& x, BHNode *myNode);
-	double fmmComputeKernel(const vec3& b, BHNode *myNode);
+	double fmmComputeValue(const vec3& x) const;
+	double fmmComputeValueRecurse(const vec3& x, BHNode *myNode) const;
+	double fmmComputeKernel(const vec3& b, BHNode *myNode) const;
 
   static const double EPSILON;
 };
