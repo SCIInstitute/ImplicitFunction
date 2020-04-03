@@ -269,15 +269,18 @@ double RBF::computeRadialFunctionOnSquaredDistance(double r2) const
   static constexpr double SCALE = 0.01;
   static constexpr double SCALE2 = SCALE*SCALE;
 
-  //TODO: have a user parameter come into this function for each kernel
-  //kernel width
-
   switch(kernel_)
   {
     case ThinPlate:
       return r2 * log(sqrt(r2) + C);
     case Gaussian:
-      return 1.0/std::exp(r2 * 20);
+    //set sigma to be some fraction of the minimum distance between the points - start with 1
+    //truncate: three standard deviations, epsilon = 1/sigma^2
+    //if (r2 > sigma^2*9)
+    //then return 0;
+    //else
+    //try e to the - instead of 1 over
+      return 1.0/std::exp(r2);
     case InverseMultiQuadratic:
       return 1.0/sqrt(1 + r2);
     case MultiQuadratic:
