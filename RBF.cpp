@@ -264,10 +264,10 @@ double RBF::computeSumOfAllKernels(const vec3& b) const
 
 double RBF::computeRadialFunctionOnSquaredDistance(double r2) const
 {
-  static constexpr double C = 0.1;
+  /*static constexpr double C = 0.1;
   static constexpr double C2 = C*C;
   static constexpr double SCALE = 0.01;
-  static constexpr double SCALE2 = SCALE*SCALE;
+  static constexpr double SCALE2 = SCALE*SCALE;*/
 
   switch(kernel_)
   {
@@ -280,7 +280,8 @@ double RBF::computeRadialFunctionOnSquaredDistance(double r2) const
     //then return 0;
     //else
     //try e to the - instead of 1 over
-      return 1.0/std::exp(r2);
+      //return 1.0/exp(r2);
+      return exp(-r2);
     case InverseMultiQuadratic:
       return 1.0/sqrt(1 + r2);
     case MultiQuadratic:
