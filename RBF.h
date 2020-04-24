@@ -46,7 +46,7 @@ enum DataReduction { All, Random };
 class RBF
 {
 public:
-	RBF(const ScatteredData *myData, Kernel myKernel);
+	RBF(const ScatteredData *myData, Kernel myKernel, double myMinDist);
 
 	void setAcceleration(Acceleration myAcceleration);
 	void setDataReduction(DataReduction myDataReduction);
