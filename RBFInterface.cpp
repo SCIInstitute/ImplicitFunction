@@ -51,7 +51,7 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
   compute2DConvexHull_(compute2DConvexHull),
   invertSeedOrder_(invertSeedOrder),
   kernel_(kernel),
-  minimumSeedPointDistance_(0);
+  minimumSeedPointDistance_(0)
 {
   if ( this->invertSeedOrder_ )
   {
