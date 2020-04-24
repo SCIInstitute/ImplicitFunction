@@ -266,14 +266,16 @@ double RBF::computeSumOfAllKernels(const vec3& b) const
 double RBF::computeRadialFunctionOnSquaredDistance(double r2) const
 {
   static constexpr double C = 0.1;
+  double sigma;
+  double epsilon;
 
   switch(kernel_)
   {
     case ThinPlate:
       return r2 * log(sqrt(r2) + C);
     case Gaussian:
-      double sigma = minimumSeedPointDistance_;
-      double epsilon = 1/pow(sigma, 2);
+      sigma = minimumSeedPointDistance_;
+      epsilon = 1/pow(sigma, 2);
       
       if (r2 > pow(sigma, 2) * 9)
       {
