@@ -97,11 +97,11 @@ void RBFInterface::calculateMinimumSeedPointDistance()
       if (i == 0 && j == 1)
       {
         //make setter and getter?
-        minimumSeedPointDistance_ = tempDistance;
+        this->minimumSeedPointDistance_ = tempDistance;
       }
       else if (tempDistance < minimumSeedPointDistance_)
       {
-        minimumSeedPointDistance_ = tempDistance;
+        this->minimumSeedPointDistance_ = tempDistance;
       }
     }
   }
