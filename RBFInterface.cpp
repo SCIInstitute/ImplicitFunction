@@ -50,7 +50,8 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
   axisList_(myAxis),
   compute2DConvexHull_(compute2DConvexHull),
   invertSeedOrder_(invertSeedOrder),
-  kernel_(kernel)
+  kernel_(kernel),
+  minimumSeedPointDistance_(0);
 {
   if ( this->invertSeedOrder_ )
   {
@@ -67,6 +68,7 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
     this->points_z_.push_back(myData[i][2]); // Z component
     this->threshold_.push_back(this->thresholdValue_);
   }
+  calculateMinimumSeedPointDistance();
 
   // TODO: error reporting???
   // TODO: would it be better to break this out, or have constructor throw exception???
@@ -77,6 +79,31 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
   else
   {
     create2DSurface();
+  }
+}
+
+void calculateMinimumSeedPointDistance()
+{
+  int pointsNum = this->points_x_.size();
+  double tempDistance;
+  for (int i = 0; i < pointsNum; i++)
+  {
+    for (int j = i+1; j < pointsNum; j++)
+    {
+      tempDistance = sqrt(pow( this->points_x_[j] - this->points_x_[i], 2 ) +
+                          pow( this->points_y_[j] - this->points_y_[i], 2 ) +
+                          pow( this->points_z_[j] - this->points_z_[i], 2 ) );
+
+      if (i == 0 && j == 1)
+      {
+        //make setter and getter?
+        minimumSeedPointDistance_ = tempDistance;
+      }
+      else if (tempDistance < minimumSeedPointDistance_)
+      {
+        minimumSeedPointDistance_ = tempDistance;
+      }
+    }
   }
 }
 

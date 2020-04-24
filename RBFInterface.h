@@ -77,6 +77,7 @@ private:
   void augmentNormalData();
   vec3 findNormalAxis(const int n);
   void createRasterizedSurface();
+  void calculateMinimumSeedPointDistance();
 
   std::unique_ptr<ScatteredData> surfaceData_;
   std::unique_ptr<DataStorage> rasterData_;
@@ -91,6 +92,7 @@ private:
   const bool invertSeedOrder_;
   const Kernel kernel_;
   std::vector<double> points_x_, points_y_ , points_z_, threshold_;
+  const double minimumSeedPointDistance_;
 
   // change to inside or outside
   std::vector<vec3> inNormals, outNormals;
