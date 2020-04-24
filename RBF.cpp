@@ -275,9 +275,9 @@ double RBF::computeRadialFunctionOnSquaredDistance(double r2) const
       return r2 * log(sqrt(r2) + C);
     case Gaussian:
       sigma = minimumSeedPointDistance_;
-      epsilon = 1/pow(sigma, 2);
+      epsilon = 1/(sigma*sigma*sigma*sigma);
 
-      if (r2 > pow(sigma, 2) * 9)
+      if (r2 > (4/epsilon)
       {
         return 0;
       }
