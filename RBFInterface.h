@@ -92,7 +92,7 @@ private:
   const bool invertSeedOrder_;
   const Kernel kernel_;
   std::vector<double> points_x_, points_y_ , points_z_, threshold_;
-  const double minimumSeedPointDistance_;
+  double minimumSeedPointDistance_;
 
   // change to inside or outside
   std::vector<vec3> inNormals, outNormals;
