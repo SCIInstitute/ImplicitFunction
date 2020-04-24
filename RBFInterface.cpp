@@ -82,7 +82,7 @@ RBFInterface::RBFInterface(std::vector<vec3> myData,
   }
 }
 
-void calculateMinimumSeedPointDistance()
+void RBFInterface::calculateMinimumSeedPointDistance()
 {
   int pointsNum = this->points_x_.size();
   double tempDistance;
