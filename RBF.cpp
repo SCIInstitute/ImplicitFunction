@@ -274,7 +274,7 @@ double RBF::computeRadialFunctionOnSquaredDistance(double r2) const
     case ThinPlate:
       return r2 * log(sqrt(r2) + C);
     case Gaussian:
-      sigma = minimumSeedPointDistance_ * 0.1;
+      sigma = minimumSeedPointDistance_ * 1.5;
       epsilon = 1/(sigma*sigma);
 
       if (r2 > (9/epsilon))
