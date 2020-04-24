@@ -61,6 +61,7 @@ private:
 	std::vector<double> coeff_;
 	Acceleration acceleration_;
 	DataReduction dataReduction_;
+  double minimumSeedPointDistance_;
 
 	std::unique_ptr<FMM> fmm_;
 

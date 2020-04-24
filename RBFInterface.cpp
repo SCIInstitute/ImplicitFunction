@@ -96,11 +96,11 @@ void RBFInterface::calculateMinimumSeedPointDistance()
 
       if (i == 0 && j == 1)
       {
-        this->minimumSeedPointDistance_ = tempDistance;
+        minimumSeedPointDistance_ = tempDistance;
       }
       else if (tempDistance < minimumSeedPointDistance_)
       {
-        this->minimumSeedPointDistance_ = tempDistance;
+        minimumSeedPointDistance_ = tempDistance;
       }
     }
   }
@@ -369,7 +369,7 @@ public:
 
 void RBFInterface::createRasterizedSurface()
 {
-  RBF rbf(getSurfaceData(), kernel_);
+  RBF rbf(getSurfaceData(), kernel_, minimumSeedPointDistance_);
   rbf.setDataReduction(All);
 
   // Construct RBFs

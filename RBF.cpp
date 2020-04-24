@@ -48,11 +48,12 @@ using std::pair;
 const double RBF::EPSILON = 1.0e-2;
 
 
-RBF::RBF(const ScatteredData *myData, Kernel myKernel) :
+RBF::RBF(const ScatteredData *myData, Kernel myKernel, double myMinDist) :
   completeData_(myData),
   kernel_(myKernel),
   acceleration_(None),
-  dataReduction_(All)
+  dataReduction_(All),
+  minimumSeedPointDistance_(myMinDist)
 {
 }
 
@@ -271,14 +272,18 @@ double RBF::computeRadialFunctionOnSquaredDistance(double r2) const
     case ThinPlate:
       return r2 * log(sqrt(r2) + C);
     case Gaussian:
-    //set sigma to be some fraction of the minimum distance between the points - start with 1
-    //truncate: three standard deviations, epsilon = 1/sigma^2
-    //if (r2 > sigma^2*9)
-    //then return 0;
-    //else
-    //try e to the - instead of 1 over
-      //return 1.0/exp(r2);
-      return exp(-r2);
+      double sigma = minimumSeedPointDistance_;
+      double epsilon = 1/pow(sigma, 2);
+      
+      if (r2 > pow(sigma, 2) * 9)
+      {
+        return 0;
+      }
+      else
+      {
+        return exp(-r2*epsilon)
+        //return 1.0/exp(r2*epsilon);
+      }
     case InverseMultiQuadratic:
       return 1.0/sqrt(1 + r2);
     case MultiQuadratic:
