@@ -276,14 +276,14 @@ double RBF::computeRadialFunctionOnSquaredDistance(double r2) const
     case Gaussian:
       sigma = minimumSeedPointDistance_;
       epsilon = 1/pow(sigma, 2);
-      
+
       if (r2 > pow(sigma, 2) * 9)
       {
         return 0;
       }
       else
       {
-        return exp(-r2*epsilon)
+        return exp(-r2*epsilon);
         //return 1.0/exp(r2*epsilon);
       }
     case InverseMultiQuadratic:
