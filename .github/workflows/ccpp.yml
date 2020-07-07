@@ -6,9 +6,9 @@ jobs:
   build:
 
     runs-on: [ubuntu-latest, macOS-latest]
-    
+
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Prepare
       run: mkdir bin
     - name: configure
@@ -17,4 +17,3 @@ jobs:
       run: make
     - name: make test
       run: make test
-
