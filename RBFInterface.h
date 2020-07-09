@@ -28,6 +28,7 @@
 #define _RBFInterface_H_
 
 #include <vector>
+#include <functional>
 
 #include "ScatteredData.h"
 #include "vec3.h"
